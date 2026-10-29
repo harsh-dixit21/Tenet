@@ -24,6 +24,8 @@ export type LycorisLink = { label: string; href?: string }
 
 export type LycorisSpecimenProps = {
   heroOnly?: boolean
+  /** Keep the branded hero content while restoring the original scroll timeline. */
+  scrollDriven?: boolean
   heroOverlay?: React.ReactNode
   /** The typeface name. The cover word, the specimen labels, every caption. */
   name?: string
@@ -610,6 +612,7 @@ const sc = (scene: number, fx: Fx = "rise", delay = 0) => ({
 
 export default function LycorisSpecimen({
   heroOnly = false,
+  scrollDriven = false,
   heroOverlay,
   name = "Lycoris",
   studio = "Kedhareswer",
@@ -843,7 +846,7 @@ export default function LycorisSpecimen({
       if (moving) time += dt
 
       const r = root.getBoundingClientRect()
-      const p = heroOnly ? 0 : progressFrom(r.top, r.height, H)
+      const p = heroOnly && !scrollDriven ? 0 : progressFrom(r.top, r.height, H)
       prog01 = prog01 < 0 || L.reduced ? p : prog01 + (p - prog01) * (1 - Math.exp(-dt * 9))
       const coord = sceneCoord(prog01, SCENES, HOLD)
       const scene = Math.round(coord)
@@ -854,7 +857,7 @@ export default function LycorisSpecimen({
 
       // camera
       const tall = H > W * 1.05
-      const k = keyAt(coord, tall)
+      const k = keyAt(L.reduced ? Math.round(coord) : coord, tall)
       pointer.x += (pointer.tx - pointer.x) * (1 - Math.exp(-dt * 4))
       pointer.y += (pointer.ty - pointer.y) * (1 - Math.exp(-dt * 4))
       if (moving) {
@@ -977,7 +980,7 @@ export default function LycorisSpecimen({
           const dx = (tx - n0.x) * m
           const dy = (cy1 - n0.y) * m - out * 60
           const o = coord < 1 ? 1 : 1 - smoothstep(0.1, 0.45, out)
-          c.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px)"
+          c.style.transform = still ? "" : "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px)"
           c.style.opacity = String(o)
           c.style.filter = still || out < 0.05 ? "" : "blur(" + (out * 14).toFixed(1) + "px)"
         } else {
@@ -1032,7 +1035,7 @@ export default function LycorisSpecimen({
         g.deleteProgram(prog)
       }
     }
-  }, [name, firstIdx, lastIdx, heroOnly])
+  }, [name, firstIdx, lastIdx, heroOnly, scrollDriven])
 
   const jump = (i: number) => {
     const root = rootRef.current
@@ -1087,7 +1090,7 @@ export default function LycorisSpecimen({
     <section
       ref={rootRef}
       className={"relative w-full " + className}
-      style={{ height: heroOnly ? height : "calc(" + height + " * " + (1 + (SCENES - 1) * sceneScroll).toFixed(3) + ")", background: ink }}
+      style={{ height: heroOnly && !scrollDriven ? height : "calc(" + height + " * " + (1 + (SCENES - 1) * sceneScroll).toFixed(3) + ")", background: ink }}
       aria-label={heroOnly ? name : name + " typeface specimen"}
     >
       <style>{CSS}</style>

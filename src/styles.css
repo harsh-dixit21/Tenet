@@ -25,6 +25,28 @@ button:focus-visible, a:focus-visible, [contenteditable]:focus-visible { outline
 .hero-description { font-size: clamp(15px, 1.4vw, 20px); line-height: 1.55; letter-spacing: -.02em; margin: 0; }
 .hero-description span { color: #989898; }
 .hero-footnote { position: absolute; bottom: 4%; left: 5%; font-size: 9px; color: #888; letter-spacing: .12em; }
+.tenet-scroll-scene { position: absolute; z-index: 5; max-width: 520px; pointer-events: none; }
+.tenet-scroll-scene h2 { font-size: clamp(30px, 4.6vw, 66px); font-weight: 300; letter-spacing: -.045em; line-height: 1.08; margin: 0; text-wrap: balance; }
+.scroll-scene-label { color: #a1a1a1; font-size: 10px; letter-spacing: .14em; margin: 0 0 20px; }
+.scroll-scene-description { color: #aaa; font-size: 14px; line-height: 1.7; max-width: 340px; margin: 22px 0 0; }
+.scene-1 { top: 16%; left: 5%; max-width: 38%; }
+.scene-2 { top: 42%; left: 7%; max-width: 33%; }
+.scene-3 { top: 17%; left: 15%; right: 15%; max-width: none; text-align: center; }
+.scene-3 .scroll-scene-description, .scene-5 .scroll-scene-description { margin-inline: auto; }
+.scene-4 { top: 33%; left: 7%; max-width: 38%; }
+.scene-5 { top: 46%; left: 15%; right: 15%; max-width: none; text-align: center; }
+@media (max-width: 760px) {
+ .tenet-scroll-scene { left: 7%; right: 7%; width: auto; max-width: none; margin-left: 0; text-align: left; }
+ .tenet-scroll-scene h2 { font-size: clamp(29px, 8vw, 48px); max-width: 330px; }
+ .scroll-scene-label { font-size: 9px; margin-bottom: 14px; }
+ .scroll-scene-description { font-size: 12px; line-height: 1.7; max-width: 300px; margin-top: 16px; }
+ .scene-1 { top: 16%; }
+ .scene-2 { top: 49%; }
+ .scene-3 { top: 18%; }
+ .scene-4 { top: 53%; }
+ .scene-5 { top: 47%; }
+ .scene-3 .scroll-scene-description, .scene-5 .scroll-scene-description { margin-inline: 0; }
+}
 .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 28px; padding: 15px 22px; min-height: 48px; background: #e3e1dd; color: #151515; text-decoration: none; border: 0; border-radius: 50px; font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; transition: background 200ms, transform 200ms; }
 .primary-button:hover { background: #fff; transform: translateY(-2px); }
 .dashboard-shell { min-height: 100svh; display: flex; background: #0a0a0a; font-size: 13px; }

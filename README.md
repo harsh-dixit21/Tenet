@@ -1,6 +1,6 @@
 # Tenet
 
-A React + TypeScript prototype for security deposit and FDR management. Black and off-white visual system, self-hosted Manrope Variable, an animated silver flower hero, and a floating navigation dock. The hero's animations begin on mount and respect reduced-motion preferences.
+A React + TypeScript prototype for security deposit and FDR management. Black and off-white visual system, self-hosted Manrope Variable, an animated silver flower hero, and a floating navigation dock. Entrance animations begin on mount. Scrolling drives a sticky six-scene timeline: the title separates, the flower rotates, the camera moves, and FDR workflow content reveals in sequence. Scrolling back reverses the sequence. Reduced-motion preferences disable idle movement and smooth camera interpolation.
 
 ## Run
 

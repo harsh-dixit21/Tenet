@@ -1,2 +1,37 @@
 <!doctype html>
-<html lang="en" class="dark"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#050505"/><meta name="description" content="Tenet — security deposit and FDR management. Institution-wise records, verification, maturity monitoring and release workflows."/><title>Tenet — Security Deposit & FDR Management</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tenet — Security Deposit & FDR Management</title>
+  <meta name="description" content="Track security deposits and FDRs from submission and review through renewal and authorized release.">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos" rel="stylesheet">
+  <link rel="stylesheet" href="/landing/styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><video class="bg-video" autoplay muted loop playsinline preload="auto"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4" type="video/mp4"></video></div>
+  <div class="page">
+    <header class="header">
+      <a class="home-mark" href="#home" aria-label="Tenet home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m4 10 8-6 8 6v10h-6v-6h-4v6H4Z"/></svg></a>
+      <nav class="nav" aria-label="Main navigation"><a class="active" href="#home" aria-current="page">Home</a><a href="#product" data-copy="product">Product</a><a href="#workflow" data-copy="workflow">Workflow</a><a href="#roles" data-copy="roles">Roles</a></nav>
+      <a class="sign-in" href="/portal/#auth">Sign in</a>
+      <button class="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </header>
+    <main class="hero" id="home">
+      <div class="trust anim" style="--d:.05s"><span class="avatar"><span>I</span></span><span class="avatar"><span>R</span></span><span class="avatar"><span>A</span></span><span class="trust-pill">Institutions. Reviewers. Approvers.</span></div>
+      <h1 class="wordmark"><span class="fallback">Tenet</span><span class="tech-text" aria-hidden="true"><canvas></canvas></span></h1>
+      <p class="subhead anim" style="--d:.28s">Every deposit. Every deadline. One record.<br>Manage security deposits and FDRs from submission to authorized release.</p>
+      <a class="cta anim" style="--d:.4s" href="/portal/#auth">Get Started</a>
+    </main>
+    <footer class="stats" aria-label="Tenet workflow">
+      <div class="stat anim" style="--d:.5s"><span class="symbol">+</span><span class="value">Submit</span><span class="label">Details & documents</span></div>
+      <div class="stat anim" style="--d:.58s"><span class="symbol">#</span><span class="value">Review</span><span class="label">Scrutiny & verification</span></div>
+      <div class="stat anim" style="--d:.66s"><span class="symbol">*</span><span class="value">Renew</span><span class="label">Maturity & replacement</span></div>
+      <div class="stat anim" style="--d:.74s"><span class="symbol">&gt;</span><span class="value">Release</span><span class="label">Requests & approvals</span></div>
+    </footer>
+  </div>
+  <div class="menu-overlay" hidden></div>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation" hidden><a href="#home">Home</a><a href="#product" data-copy="product">Product</a><a href="#workflow" data-copy="workflow">Workflow</a><a href="#roles" data-copy="roles">Roles</a><a href="/portal/#auth">Sign in</a></nav>
+  <script type="module" src="/landing/main.js"></script>
+</body></html>

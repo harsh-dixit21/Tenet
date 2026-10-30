@@ -11,7 +11,7 @@ const sampleRecords: RecordItem[] = [
   { id: 'FDR-2026-004', institution: 'Eastwood Institute of Management', bank: 'Sample Bank C', amount: 2000000, maturity: '2027-03-15', status: 'Verified', submitted: '2026-08-02', note: 'Sample verification recorded. Renewal linked to FDR-2025-014.', history: ['02 Aug 2026 · Renewal submitted for FDR-2025-014.', '06 Aug 2026 · Sample verification completed.'] },
   { id: 'FDR-2026-005', institution: 'Hillcrest Technical College', bank: 'Sample Bank B', amount: 1000000, maturity: '2026-10-20', status: 'Release requested', submitted: '2026-07-08', note: 'Release request is pending review by an approving authority. No financial release has occurred.', history: ['08 Jul 2026 · Institution submitted instrument details.', '21 Oct 2026 · Institution requested release after maturity.'] },
 ];
-const referenceDate = Date.UTC(2026, 9, 29);
+const referenceDate = Date.UTC(2026, 9, 30);
 const daysUntil = (date: string) => Math.ceil((Date.parse(date) - referenceDate) / 86400000);
 const formatDate = (date: string) => new Date(date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 const money = (value: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
@@ -48,23 +48,23 @@ export default function Dashboard({ initialTab }: { initialTab: string }) {
   const addRecord = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
-    const record: RecordItem = { id: `FDR-2026-${String(records.length + 1).padStart(3, '0')}`, institution: String(values.get('institution')).trim(), bank: String(values.get('bank')).trim(), amount: Number(values.get('amount')), maturity: String(values.get('maturity')), submitted: '2026-10-29', status: 'Awaiting verification', note: 'Institution-submitted details. Bank confirmation has not been recorded.', history: ['29 Oct 2026 · Demo submission created.'] };
+    const record: RecordItem = { id: `FDR-2026-${String(records.length + 1).padStart(3, '0')}`, institution: String(values.get('institution')).trim(), bank: String(values.get('bank')).trim(), amount: Number(values.get('amount')), maturity: String(values.get('maturity')), submitted: '2026-10-30', status: 'Awaiting verification', note: 'Institution-submitted details. Bank confirmation has not been recorded.', history: ['30 Oct 2026 · Demo submission created.'] };
     if (!record.institution || !record.bank || !Number.isFinite(record.amount) || record.amount <= 0) return;
     setRecords(current => [record, ...current]); setCreating(false); setTab('Records'); setQuery(''); setStatus('All statuses'); setNotice(`${record.id} added to this demo session.`); event.currentTarget.reset();
   };
   return <div className="dashboard-shell">
     <aside className={`sidebar ${sidebar ? 'is-open' : ''}`}>
-      <a href="#home" className="wordmark">tenet</a>
+      <a href="/" className="wordmark">tenet</a>
       <p className="sidebar-caption">WORKSPACE</p>
-      <nav aria-label="Dashboard navigation">{tabs.map(({ label, icon: Icon }) => <button type="button" key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => { setTab(label); setStatus('All statuses'); setQuery(''); setSidebar(false); }}><Icon size={18} strokeWidth={1.5} />{label}</button>)}</nav>
+      <nav aria-label="Dashboard navigation">{tabs.map(({ label, icon: Icon }) => <button type="button" key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => { if(label === 'Overview'){location.hash='dashboard';return;} setTab(label); setStatus('All statuses'); setQuery(''); setSidebar(false); }}><Icon size={18} strokeWidth={1.5} />{label}</button>)}</nav>
       <div className="sidebar-bottom"><span className="avatar">TO</span><div><strong>Reviewing official</strong><small>Demo workspace</small></div></div>
-      <a className="back-home" href="#home"><ArrowLeft size={16} /> Back to home</a>
+      <a className="back-home" href="/"><ArrowLeft size={16} /> Back to home</a>
     </aside>
     {sidebar && <button className="sidebar-scrim" aria-label="Close navigation" onClick={() => setSidebar(false)} />}
     <div className="dashboard-body"><header className="dashboard-header"><button className="icon-button sidebar-toggle" aria-label={sidebar ? 'Close navigation' : 'Open navigation'} onClick={() => setSidebar(!sidebar)}>{sidebar ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}</button><span>Workspace <ChevronRight size={12} /> <strong>{tab}</strong></span><span className="demo-label">Prototype · sample data</span></header>
       <main id="main" tabIndex={-1} className="dashboard-main">
         <div className="page-heading"><div><p className="eyebrow">SECURITY DEPOSITS / FDR</p><h1>{tab === 'Overview' ? 'Deposit overview' : tab}</h1><p>Institution-wise records, verification and pending actions.</p></div><button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> New record</button></div>
-        <div className="demo-note">Demo as of 29 October 2026. Records are synthetic; changes last for this session. Bank verification and approvals are not connected.</div>
+        <div className="demo-note">Demo as of 30 October 2026. Records are synthetic; changes last for this session. Bank verification and approvals are not connected.</div>
         <p className="status-message" role="status">{notice}</p>
         {tab === 'Overview' && <AnimatedGroup className="stats-grid" preset="slide">
           {[{ label: 'Total deposits', value: money(records.reduce((sum, r) => sum + r.amount, 0)), note: `${records.length} instruments on record` }, { label: 'Awaiting verification', value: String(records.filter(r => r.status === 'Awaiting verification').length).padStart(2, '0'), note: 'Submitted, not bank-confirmed' }, { label: 'Maturing in 30 days', value: String(dueSoon.length).padStart(2, '0'), note: 'Review renewal requirements' }, { label: 'Pending requests', value: String(records.filter(r => r.status === 'Discrepancy' || r.status === 'Release requested').length).padStart(2, '0'), note: 'Corrections and release review' }].map(item => <section className="stat-card" key={item.label}><p>{item.label}</p><strong>{item.value}</strong><small>{item.note}</small></section>)}

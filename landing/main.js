@@ -1,3 +1,4 @@
+import { startEndlessVideo } from './video-loop.js';
 import { mountTechText } from './tech-text.js';
 const wordmark = document.querySelector('.wordmark');
 try {
@@ -14,11 +15,4 @@ const copy={home:'Every deposit. Every deadline. One record.<br>Manage security 
 function showCopy(){const key=location.hash.slice(1)||'home';document.querySelector('.subhead').innerHTML=copy[key]||copy.home;document.querySelectorAll('.nav a').forEach(a=>{const active=a.hash==='#'+key;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});}
 document.querySelectorAll('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>setMenu(false,true)));
 window.addEventListener('hashchange',showCopy);showCopy();
-const video=document.querySelector('video');
-// Background motion explicitly requested by the user, including reduced-motion systems.
-video.muted=true; video.defaultMuted=true;
-function syncVideo(){if(document.hidden)video.pause();else video.play().catch(()=>{document.addEventListener('pointerdown',()=>video.play().catch(()=>{}),{once:true})});}
-document.addEventListener('visibilitychange',syncVideo);syncVideo();
-
-video.addEventListener('loadeddata',syncVideo);
-window.addEventListener('pageshow',syncVideo);
+startEndlessVideo(document.querySelector('.bg'));

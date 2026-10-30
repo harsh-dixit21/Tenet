@@ -12,3 +12,11 @@
 @keyframes tenet-depth{0%,100%{transform:perspective(900px) rotateX(7deg) rotateY(-9deg) translate3d(-1%,0,0)}50%{transform:perspective(900px) rotateX(-5deg) rotateY(9deg) translate3d(1%,-1%,35px)}}
 
 .auth-live-motion .auth-path-field,.auth-live-motion .tenet-floating-path{animation-play-state:var(--path-play-state,running)!important}
+
+.workspace-select{min-height:40px;max-width:100%;border:1px solid var(--border);border-radius:6px;background:var(--background);padding:8px 12px;font-size:14px}
+.workspace-textarea{min-height:100px;width:100%;resize:vertical;border:1px solid var(--border);border-radius:6px;background:var(--background);padding:10px 12px;font-size:14px}
+.workspace-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}
+.workspace-table th{padding:12px;color:var(--muted-foreground);font-weight:400;font-size:12px;white-space:nowrap}
+.workspace-table td{padding:16px 12px;border-top:1px solid var(--border);vertical-align:middle}
+.workspace-table small{display:block;margin-top:6px;color:var(--muted-foreground);font-size:12px}
+.workspace-table td:first-child{min-width:240px}.workspace-table td:not(:first-child){white-space:nowrap}

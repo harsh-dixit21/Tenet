@@ -1,5 +1,17 @@
 # Tenet — supplied component integration
 
+## Complete demo workspace
+
+The active portal now uses one shared, versioned browser-storage model in `src/components/workspace/store.tsx`. The previous standalone register is retained in source, but its route now opens the shared register. The App1 dashboard uses the same instruments, pending requests, document counts and activity events as all other screens.
+
+Features include drafts and submissions; searchable/filterable/sortable records; institution directories; instrument details; versioned document uploads/downloads; separate verification evidence; discrepancy correction and resubmission; linked renewals/replacements; release/refund/discharge requests with approval/rejection; maturity/overdue alerts and read state; configurable reminder/escalation thresholds; status/institution reports; CSV exports; and timestamped audit history. Demo role selection controls available actions. The dashboard chart is derived from saved events. Closed/superseded instruments do not double-count active deposit totals.
+
+Records, small attachments and settings persist in localStorage on the same browser/origin. Each upload is limited to 1 MB (PDF, PNG, JPEG or text); storage failures are reported without accepting an unsaved mutation. Documents are downloadable demo attachments, with prior category versions retained. There is no bank, payment, email or SMS integration, server authentication, cross-device persistence or production authorization. The role switcher explicitly identifies this as a demo. Settings offers a confirmation before restoring the synthetic samples.
+
+The landing page, local video, TechText and live sign-up design are preserved. Per the user's later explicit motion request, the two background animations run even under reduced-motion settings, while other motion behavior remains separate.
+
+`qa-workspace.mjs` exercises submissions, file uploads, correction/resubmission, verification evidence, release approval, renewal linking, persistence, settings, alert state, screen navigation and responsive layout. Older notes below describe the initial prototype and are superseded by this section.
+
 The landing page follows the user's full-viewport video reference. Its static HTML entry uses `landing/styles.css`, `landing/main.js`, and a vanilla JavaScript adaptation of the supplied React Bits TechText canvas renderer. It preserves idle sweep, outline reveal, click kick, and draggable spring-return letters. The exact supplied CloudFront video loops in the background. Content has been adapted to security deposits and FDRs; there are no invented customer endorsements or uptime claims.
 
 The portal uses the existing React 19, TypeScript, Vite and Tailwind 4 setup. `components.json` already defines `@/components/ui` as `src/components/ui`; there is no need to initialize another shadcn project or create a duplicate root components directory. New shared components live in that folder. Portal tokens/styles are in `src/portal-styles.css`. Motion imports use the existing `motion/react` package (the same Motion API), avoiding a duplicate animation package.

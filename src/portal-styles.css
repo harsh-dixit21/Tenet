@@ -5,3 +5,10 @@
 .tenet-floating-path{animation:tenet-flow 24s linear infinite;stroke-dasharray:.3 1;opacity:.6}
 @keyframes tenet-flow{0%{stroke-dasharray:.3 1;stroke-dashoffset:0;opacity:.3}50%{stroke-dasharray:1 1;stroke-dashoffset:-1;opacity:.6}100%{stroke-dasharray:.3 1;stroke-dashoffset:-2;opacity:.3}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.tenet-floating-path{animation:none!important;stroke-dasharray:none;opacity:.3}}
+
+/* Only the explicitly requested live sign-up background overrides reduced motion. */
+.auth-live-motion .auth-path-field{transform-origin:center;animation:tenet-depth 16s ease-in-out infinite!important;animation-duration:16s!important;animation-iteration-count:infinite!important;will-change:transform}
+.auth-live-motion .tenet-floating-path{animation:tenet-flow var(--path-duration,24s) linear infinite!important;animation-duration:var(--path-duration,24s)!important;animation-iteration-count:infinite!important}
+@keyframes tenet-depth{0%,100%{transform:perspective(900px) rotateX(7deg) rotateY(-9deg) translate3d(-1%,0,0)}50%{transform:perspective(900px) rotateX(-5deg) rotateY(9deg) translate3d(1%,-1%,35px)}}
+
+.auth-live-motion .auth-path-field,.auth-live-motion .tenet-floating-path{animation-play-state:var(--path-play-state,running)!important}

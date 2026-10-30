@@ -2,16 +2,13 @@
 @theme inline {--color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--foreground);--color-popover:var(--card);--color-popover-foreground:var(--foreground);--color-primary:var(--primary);--color-primary-foreground:#141414;--color-secondary:#262626;--color-secondary-foreground:#ededed;--color-muted:#202020;--color-muted-foreground:var(--muted-foreground);--color-accent:#242424;--color-accent-foreground:#fff;--color-border:var(--border);--color-input:#363636;--color-ring:#dedede;--color-destructive:#b93838;--font-sans:'Inter','Segoe UI',system-ui,sans-serif}
 :root{--background:#101010;--foreground:#f1f1f1;--card:#171717;--primary:#e6e6e6;--muted-foreground:#a0a0a0;--border:#2b2b2b;color-scheme:dark;font-family:var(--font-sans);background:var(--background);color:var(--foreground);font-synthesis:none;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box;border-color:var(--border)}body{margin:0;min-width:320px}button,a,input,select{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}button:not(:disabled),select{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #d8d8d8;outline-offset:3px}.recharts-wrapper:focus-visible{outline:2px solid #aaa}.recharts-text{font-family:var(--font-sans)}
-.tenet-floating-path{animation:tenet-flow 24s linear infinite;stroke-dasharray:.3 1;opacity:.6}
-@keyframes tenet-flow{0%{stroke-dasharray:.3 1;stroke-dashoffset:0;opacity:.3}50%{stroke-dasharray:1 1;stroke-dashoffset:-1;opacity:.6}100%{stroke-dasharray:.3 1;stroke-dashoffset:-2;opacity:.3}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.tenet-floating-path{animation:none!important;stroke-dasharray:none;opacity:.3}}
-
-/* Only the explicitly requested live sign-up background overrides reduced motion. */
-.auth-live-motion .auth-path-field{transform-origin:center;animation:tenet-depth 16s ease-in-out infinite!important;animation-duration:16s!important;animation-iteration-count:infinite!important;will-change:transform}
-.auth-live-motion .tenet-floating-path{animation:tenet-flow var(--path-duration,24s) linear infinite!important;animation-duration:var(--path-duration,24s)!important;animation-iteration-count:infinite!important}
-@keyframes tenet-depth{0%,100%{transform:perspective(900px) rotateX(7deg) rotateY(-9deg) translate3d(-1%,0,0)}50%{transform:perspective(900px) rotateX(-5deg) rotateY(9deg) translate3d(1%,-1%,35px)}}
-
-.auth-live-motion .auth-path-field,.auth-live-motion .tenet-floating-path{animation-play-state:var(--path-play-state,running)!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* Explicit, non-negative layers keep animated art out of the form paint surface. */
+.auth-background-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;z-index:0}
+.auth-art-scrim{z-index:1;background:linear-gradient(to top,var(--background),transparent)}
+.auth-form-panel{background:var(--background)}
+.auth-mobile-background{z-index:0;opacity:.25}
+.auth-form-content{background:transparent}
 
 .workspace-select{min-height:40px;max-width:100%;border:1px solid var(--border);border-radius:6px;background:var(--background);padding:8px 12px;font-size:14px}
 .workspace-textarea{min-height:100px;width:100%;resize:vertical;border:1px solid var(--border);border-radius:6px;background:var(--background);padding:10px 12px;font-size:14px}

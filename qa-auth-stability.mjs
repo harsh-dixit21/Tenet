@@ -1,0 +1,18 @@
+import {Browser,sleep} from 'file:///C:/Users/HARSH%20DIXIT/.agents/skills/design-taste-frontend/scripts/lib/cdp.mjs';
+import {createServer} from 'node:http';import {readFileSync,writeFileSync} from 'node:fs';import {resolve,extname} from 'node:path';
+const root=resolve('dist');const server=createServer((req,res)=>{try{let p=new URL(req.url,'http://x').pathname;if(p.endsWith('/'))p+='index.html';const file=resolve(root,'.'+p);if(!file.startsWith(root))throw Error();res.setHeader('Content-Type',({'.js':'text/javascript','.html':'text/html','.css':'text/css'})[extname(file)]||'application/octet-stream');res.end(readFileSync(file))}catch{res.writeHead(404);res.end()}});await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${server.address().port}`;const browser=await Browser.launch();const result={};
+try {
+const checks=[];const check=(ok,label)=>{checks.push({label,passed:!!ok});if(!ok)throw Error(label)};
+const p=await browser.newPage({width:1920,height:1080});await p.goto(origin+'/portal/#auth');
+const fields=await p.eval(()=>{const form=document.querySelector('form');const r=form.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}});
+await p.screenshot({path:'qa/auth-form-before.png',format:'png',clip:fields});
+const sample=()=>p.eval(()=>[...document.querySelectorAll('.auth-background-canvas')].filter(c=>c.getBoundingClientRect().width>0).map(c=>c.toDataURL()).join('|'));
+const a=await sample();await sleep(1000);check(a!==await sample(),'Depth background remains animated');
+const points=await p.eval(()=>[...document.querySelectorAll('input,select,button,a')].filter(el=>el.getBoundingClientRect().width>0).map(el=>{const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}}));
+for(let round=0;round<4;round++){for(const pos of points){await p.send('Input.dispatchMouseEvent',{type:'mouseMoved',...pos});await sleep(35)}await p.screenshot({path:'qa/auth-form-hover-'+round+'.png',format:'png',clip:fields});check(await p.eval(()=>{const form=document.querySelector('form');return form.getBoundingClientRect().height>100&&[...form.querySelectorAll('input,select,button')].every(el=>getComputedStyle(el).visibility==='visible'&&getComputedStyle(el).display!=='none')}),'Form stays visible after hover sweep '+round)}
+await p.eval(()=>document.querySelector('#email').focus());await p.send('Input.insertText',{text:'hover-test@example.edu'});check(await p.eval(()=>document.querySelector('#email').value==='hover-test@example.edu'),'Email accepts typing after repeated hovering');
+await p.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});const b=await sample();await sleep(500);check(b!==await sample(),'Requested continuous motion remains enabled');
+await p.screenshot({path:'qa/auth-fixed-desktop.jpg'});
+await p.setViewport({width:390,height:844,mobile:true});await sleep(300);const c=await sample();await sleep(600);check(c!==await sample(),'Mobile background keeps moving');check(await p.eval(()=>document.documentElement.scrollWidth<=innerWidth+1),'Phone layout fits viewport');await p.screenshot({path:'qa/auth-fixed-mobile.jpg',fullPage:true});
+await p.eval(()=>document.querySelector('button[type=submit]').click());await sleep(700);check(await p.eval(()=>location.hash==='#dashboard'&&document.querySelector('h1')?.textContent==='Deposit overview'),'Demo sign-in still opens dashboard');check(p.consoleErrors.length===0,'No uncaught browser errors');writeFileSync('qa/auth-stability.json',JSON.stringify(checks,null,2));console.log(JSON.stringify(checks));
+} catch(e){console.error(e);process.exitCode=1}finally{await browser.close();server.close()}

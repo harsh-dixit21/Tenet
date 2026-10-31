@@ -25,6 +25,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
     const amount=f.amount;if(typeof amount!=='number'||!Number.isFinite(amount)||amount<=0||amount>1e12||Math.abs(amount*100-Math.round(amount*100))>.001)fail('Enter a positive INR amount with at most two decimal places.','invalid-argument');
     if(issued>day(now)||issued>=maturity)fail('Issue date must be on/before today and earlier than maturity.','invalid-argument');
     if(!['Draft','Awaiting verification'].includes(c.status))fail('Invalid submission status.','invalid-argument');
+    if(c.parent===c.id||r?.parent===r?.id&&r?.parent)fail('An instrument cannot link to itself.','invalid-argument');
     if(c.parent||r?.parent){if(!p)fail('Original instrument not found.');owns(actor,p);if(p.status!=='Verified'||successorExists&&!r)fail('Original instrument is not eligible or already has a successor.');if(!['Renewal','Replacement'].includes(r?.relation||c.relation))fail('Invalid successor type.','invalid-argument');if((r?.relation||c.relation)==='Renewal'&&maturity<=p.maturity)fail('Renewal maturity must extend the original maturity.');}
     r={...(r||{}),id:c.id,institutionId:actor.institutionId,institution:actor.institutionName,bank,number,branch,amountMinor:Math.round(amount*100),amount:Math.round(amount*100)/100,issued,maturity,status:c.status,docs:r?.docs||[],createdBy:r?.createdBy||actor.uid,createdAt:r?.createdAt||now,updatedAt:now,...(p?{parent:p.id,relation:r?.relation||c.relation}:{})};
   }else if(type==='settings'){

@@ -60,3 +60,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 56. Test command fingerprints ignore object property order
 57. Test command fingerprints detect changed values and array order
 58. Test canonical base64 validation rejects malformed padding
+59. Test document checksums cover exact uploaded bytes

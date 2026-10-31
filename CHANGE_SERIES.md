@@ -76,3 +76,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 72. Filter audit history by assigned actor role
 73. Toggle current document versions separately from historical uploads
 74. Add bank exposure and maturity-window management reports
+75. Use integer-paise totals and formula-safe exports throughout the workspace

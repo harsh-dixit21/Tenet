@@ -1,3 +1,4 @@
+import {csvCell} from '@/lib/workspace-utils';
 import {useSession,type CloudWorkspace} from '@/lib/firebase/session';
 import {callBackend} from '@/lib/firebase/client';
 import {createContext,useContext,useState,useRef,useEffect,type ReactNode} from 'react';
@@ -27,4 +28,4 @@ function reset(){if(live){notify('Sample reset is not available for live records
 return <Context.Provider value={{state,role,setRole,notice,notify,commit,event,reset,live,busy,refresh}}>{children}</Context.Provider>}
 export function useWorkspace(){const s=useContext(Context);if(!s)throw new Error('Workspace provider required');return s}
 export function download(name:string,data:string,type='text/csv;charset=utf-8'){const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-export function csv(rows:(string|number)[][]){return rows.map(row=>row.map(v=>'"'+String(v).replace(/^[=+@\-]/,"'$&").replaceAll('"','""')+'"').join(',')).join('\r\n')}
+export function csv(rows:(string|number)[][]){return rows.map(row=>row.map(csvCell).join(',')).join('\r\n')}

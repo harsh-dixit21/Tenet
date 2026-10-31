@@ -1,0 +1,32 @@
+name: Validate Tenet
+on:
+  push:
+    branches: [main, feature/100-incremental-improvements]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+      - run: npm ci
+      - run: npm --prefix functions ci
+      - run: npm run test:utils
+      - run: npm run test:backend
+      - run: npm run build
+      - run: npm run check:dist
+      - run: npm run check:tracked
+      - run: npm run check:size
+      - name: Verify original improvement series
+        if: github.ref == 'refs/heads/feature/100-incremental-improvements'
+        run: npm run check:series

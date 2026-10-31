@@ -66,3 +66,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 62. Add bank filtering and multi-term priority search to the register
 63. Filter the instrument register by inclusive maturity date ranges
 64. Add an active-only register view that excludes closed lifecycle records
+65. Paginate long register lists while preserving complete filtered exports

@@ -83,3 +83,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 79. Add a read-only backend deployment preflight
 80. Detect accidentally tracked environment and credential files
 81. Add a repository asset-size budget check
+82. Verify the substantive 100-commit series without changing history

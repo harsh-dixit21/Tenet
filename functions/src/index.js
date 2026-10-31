@@ -1,3 +1,4 @@
+import {commandFingerprint} from './protocol.js';
 import {generateAlerts} from './alerts.js';
 import {initializeApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -35,7 +36,7 @@ function fileData(payload){
  if(!valid)throw new HttpsError('invalid-argument','The file content does not match its declared type.');return {name,kind,bytes,mime};
 }
 export const executeCommand=callable(async req=>{
- const c=req.data?.command;if(!c||typeof c!=='object')throw new HttpsError('invalid-argument','Workflow command is required.');const commandId=id(req.data.commandId,'command ID'),uid=req.auth.uid;
+ const c=req.data?.command;if(!c||typeof c!=='object')throw new HttpsError('invalid-argument','Workflow command is required.');const commandId=id(req.data.commandId,'command ID'),uid=req.auth.uid,fingerprint=commandFingerprint(c);
  const recordId=c.type==='saveInstrument'?id(c.id):c.type==='settings'?null:id(c.recordId);if(c.type==='request')id(c.requestId);if(c.type==='decide')id(c.requestId);
  const actor=await profile(uid);let uploaded;
  if(c.type==='uploadDocument'){
@@ -44,7 +45,7 @@ export const executeCommand=callable(async req=>{
  }
  try{
  await db.runTransaction(async tx=>{
-   const receipt=db.doc(`users/${uid}/commands/${commandId}`);const [receiptSnap,userSnap]=await Promise.all([tx.get(receipt),tx.get(db.doc(`users/${uid}`))]);if(receiptSnap.exists){if(receiptSnap.data().type!==c.type||receiptSnap.data().recordId!==recordId)throw new HttpsError('already-exists','This command ID was used for another action.');return;}
+   const receipt=db.doc(`users/${uid}/commands/${commandId}`);const [receiptSnap,userSnap]=await Promise.all([tx.get(receipt),tx.get(db.doc(`users/${uid}`))]);if(receiptSnap.exists){if(receiptSnap.data().type!==c.type||receiptSnap.data().recordId!==recordId||receiptSnap.data().fingerprint&&receiptSnap.data().fingerprint!==fingerprint)throw new HttpsError('already-exists','This command ID was used for another action.');return;}
    const user={...userSnap.data(),uid};const recordRef=recordId?db.doc(`instruments/${recordId}`):null,record=recordRef?(await tx.get(recordRef)).data():null;
    const parentId=record?.parent||c.parent,parentRef=parentId?db.doc(`instruments/${id(parentId)}`):null,parent=parentRef?(await tx.get(parentRef)).data():null;
    const requestRef=c.type==='request'||c.type==='decide'?db.doc(`requests/${c.requestId}`):null,request=requestRef?(await tx.get(requestRef)).data():null;if(c.type==='request'&&request)throw new HttpsError('already-exists','Request ID already exists.');
@@ -61,7 +62,7 @@ export const executeCommand=callable(async req=>{
    if(outcome.settings)tx.set(db.doc('system/settings'),outcome.settings);
    if(uniqueRef){tx.set(uniqueRef,{recordId});if(oldUniqueRef)tx.delete(oldUniqueRef);if(parentId)tx.set(successorRef,{recordId});}
    const auditId=randomUUID();tx.create(db.doc(`audit/${auditId}`),{...outcome.event,id:auditId});if(outcome.parent){const parentAudit=randomUUID();tx.create(db.doc(`audit/${parentAudit}`),{...outcome.event,id:parentAudit,recordId:outcome.parent.id,action:`${outcome.parent.status} by ${recordId}`})}
-   tx.create(receipt,{type:c.type,recordId,createdAt:new Date().toISOString()});
+   tx.create(receipt,{type:c.type,recordId,fingerprint,createdAt:new Date().toISOString()});
  });
  }catch(e){if(uploaded)await getStorage().bucket().file(uploaded.path).delete().catch(()=>{});throw e}
  // If a duplicate command uploaded another blob, remove that unattached copy.

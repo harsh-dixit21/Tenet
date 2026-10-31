@@ -6,3 +6,4 @@ export function byteSize(bytes:number){if(!Number.isFinite(bytes)||bytes<0)retur
 export function latestDocuments(docs:DocumentItem[]){return docs.filter(d=>!docs.some(other=>other.kind===d.kind&&other.version>d.version));}
 export function missingDocuments(record:Instrument){return requiredKinds.filter(kind=>!latestDocuments(record.docs).some(d=>d.kind===kind));}
 export function completeness(record:Instrument){return Math.round((requiredKinds.length-missingDocuments(record).length)/requiredKinds.length*100);}
+export function activeDeposits(records:Instrument[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}

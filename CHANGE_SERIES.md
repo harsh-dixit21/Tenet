@@ -20,3 +20,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 16. Filter ISO dates through inclusive ranges
 17. Escape CSV cells including whitespace-prefixed formulas
 18. Parse workspace routes without crashing on bad encodings
+19. Validate document uploads before reading file bytes

@@ -45,3 +45,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 41. Validate and deduplicate per-user alert read markers
 42. Test hidden control-character rejection
 43. Test Unicode normalization across labels and uniqueness keys
+44. Test supported date bounds and leap dates

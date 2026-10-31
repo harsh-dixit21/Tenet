@@ -31,3 +31,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 27. Reject unrecognized account roles before command dispatch
 28. Detect invalid persisted lifecycle statuses
 29. Prevent an instrument from being its own predecessor
+30. Reject verification evidence dated before instrument issuance

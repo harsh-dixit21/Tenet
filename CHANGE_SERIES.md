@@ -96,3 +96,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 92. Add a non-destructive incident and access recovery guide
 93. Specify report totals filters and export semantics
 94. Document local setup and the production activation boundary
+95. Add layered test commands and failure-triage guidance

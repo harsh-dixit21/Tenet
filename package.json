@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test:backend": "npm --prefix functions test",
     "test:integration": "firebase emulators:exec --project demo-tenet --only auth,firestore,storage,functions \"node functions/integration.mjs\"",
-    "emulators": "firebase emulators:start --project demo-tenet --only auth,firestore,storage,functions"
+    "emulators": "firebase emulators:start --project demo-tenet --only auth,firestore,storage,functions",
+    "check:env": "node scripts/check-env.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

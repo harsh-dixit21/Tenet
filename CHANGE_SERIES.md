@@ -65,3 +65,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 61. Test alert read marker validation and deduplication
 62. Add bank filtering and multi-term priority search to the register
 63. Filter the instrument register by inclusive maturity date ranges
+64. Add an active-only register view that excludes closed lifecycle records

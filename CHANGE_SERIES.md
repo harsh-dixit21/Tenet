@@ -90,3 +90,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 86. Create reproducible release hashes for built artifacts
 87. Document server-enforced permissions and separation of duties
 88. Explain private document versions and checksum handling
+89. Map instrument transitions and correction responsibilities

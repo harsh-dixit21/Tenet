@@ -6,3 +6,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 2. Format document sizes consistently
 3. Resolve current document versions by category
 4. Calculate missing verification document categories
+5. Calculate readiness from required documents

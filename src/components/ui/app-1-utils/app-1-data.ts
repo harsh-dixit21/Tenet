@@ -1,5 +1,5 @@
 import type {ChartConfig} from '../chart';
-export type Role='Institution'|'Reviewer'|'Approver';
+export type Role='Institution'|'Reviewer'|'Approver'|'Admin';
 export type FdrRecord={id:string;institution:string;amount:number;bank:string;maturity:string;status:'Verified'|'Awaiting verification'|'Discrepancy'|'Release requested';documents:number;required:number};
 export const records:FdrRecord[]=[
  {id:'FDR-2026-001',institution:'Northfield Institute of Technology',amount:1500000,bank:'Sample Bank A',maturity:'2026-11-12',status:'Verified',documents:5,required:5},
@@ -10,7 +10,7 @@ export const records:FdrRecord[]=[
 ];
 export const referenceDate=Date.UTC(2026,9,30);
 export const daysUntil=(date:string)=>Math.ceil((Date.parse(date)-referenceDate)/86400000);
-export const money=(n:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
+export const money=(n:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 export const formatDate=(date:string)=>new Date(date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 export const app1User={name:'Reviewing official',initials:'RO',avatar:''};
 export const app1Chart=[{week:'11 Sep',opened:4,completed:2},{week:'18 Sep',opened:7,completed:5},{week:'25 Sep',opened:5,completed:6},{week:'2 Oct',opened:9,completed:7},{week:'9 Oct',opened:6,completed:8},{week:'16 Oct',opened:11,completed:8},{week:'23 Oct',opened:8,completed:10},{week:'30 Oct',opened:10,completed:9}];

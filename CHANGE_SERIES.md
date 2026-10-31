@@ -3,3 +3,4 @@
 Each numbered item is an actual source, validation, test, tooling or documentation change. Final checks are recorded after the series. Firebase production activation still requires the owner’s project and billing setup.
 
 1. Record the scope and acceptance criteria for the improvement series
+2. Format document sizes consistently

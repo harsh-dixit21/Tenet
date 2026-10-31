@@ -38,3 +38,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 34. Protect existing successor links from reassignment
 35. Detect stale record edits with optimistic revision checks
 36. Bind idempotency receipts to canonical command payloads
+37. Reject malformed and noncanonical document encodings

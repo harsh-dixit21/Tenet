@@ -41,3 +41,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 37. Reject malformed and noncanonical document encodings
 38. Reject path separators and bidirectional overrides in file names
 39. Persist server-generated checksums for private documents
+40. Bound callable payload sizes before workflow processing

@@ -1,4 +1,4 @@
-import {commandFingerprint,canonicalBase64,documentChecksum} from './protocol.js';
+import {commandFingerprint,canonicalBase64,documentChecksum,assertPayloadSize} from './protocol.js';
 import {generateAlerts} from './alerts.js';
 import {initializeApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -10,7 +10,7 @@ import {DomainError,applyCommand,canRead,text,uniqueKey} from './domain.js';
 initializeApp();const db=getFirestore();
 const initialAdmin=defineString('INITIAL_ADMIN_EMAIL',{default:'harshd21507@gmail.com'});
 const options={region:'asia-south1',maxInstances:10,timeoutSeconds:60,enforceAppCheck:process.env.FUNCTIONS_EMULATOR!=='true'&&process.env.TENET_ENFORCE_APP_CHECK!=='false'};
-function callable(fn){return onCall(options,async req=>{try{if(!req.auth||req.auth.token.firebase?.sign_in_provider!=='google.com'||req.auth.token.email_verified!==true)throw new HttpsError('unauthenticated','Sign in with a verified Google account.');return await fn(req)}catch(e){if(e instanceof HttpsError)throw e;if(e instanceof DomainError)throw new HttpsError(e.code,e.message);console.error('Tenet operation failed',{name:e?.name,code:e?.code});throw new HttpsError('internal','The operation could not be completed. Please retry.')}})}
+function callable(fn){return onCall(options,async req=>{try{if(!req.auth||req.auth.token.firebase?.sign_in_provider!=='google.com'||req.auth.token.email_verified!==true)throw new HttpsError('unauthenticated','Sign in with a verified Google account.');assertPayloadSize(req.data);return await fn(req)}catch(e){if(e instanceof HttpsError)throw e;if(e instanceof DomainError)throw new HttpsError(e.code,e.message);console.error('Tenet operation failed',{name:e?.name,code:e?.code});throw new HttpsError('internal','The operation could not be completed. Please retry.')}})}
 const id=(value,label='ID')=>{if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1,120}$/.test(value))throw new HttpsError('invalid-argument',`Invalid ${label}.`);return value};
 async function profile(uid){const p=(await db.doc(`users/${uid}`).get()).data();if(!p?.active)throw new HttpsError('permission-denied','Account access is disabled or not provisioned.');return {...p,uid}}
 async function bounded(query){const result=await query.limit(501).get();if(result.size>500)throw new HttpsError('resource-exhausted','This workspace exceeds the current 500-item view limit. Contact your administrator to archive/export older cases.');return result.docs.map(d=>d.data())}

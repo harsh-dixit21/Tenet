@@ -77,3 +77,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 73. Toggle current document versions separately from historical uploads
 74. Add bank exposure and maturity-window management reports
 75. Use integer-paise totals and formula-safe exports throughout the workspace
+76. Align dashboard readiness and successor actions with verification requirements

@@ -18,3 +18,4 @@ test('Test Unicode normalization across labels and uniqueness keys',()=>{assert.
 test('Test supported date bounds and leap dates',()=>{denied(()=>date('1899-12-31','Date'));denied(()=>date('2200-01-01','Date'));assert.equal(date('2028-02-29','Date'),'2028-02-29');denied(()=>date('2027-02-29','Date'));});
 test('Test mutation rejection without actor identity',()=>{denied(()=>applyCommand({actor:{...actor,uid:''},command:save,now}));});
 test('Test invalid command container rejection',()=>{for(const command of [null,[],42,'saveInstrument'])denied(()=>applyCommand({actor,command,now}));});
+test('Test unknown account roles cannot mutate records',()=>{denied(()=>applyCommand({actor:{...actor,role:'Owner'},command:save,now}));});

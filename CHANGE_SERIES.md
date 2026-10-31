@@ -48,3 +48,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 44. Test supported date bounds and leap dates
 45. Test mutation rejection without actor identity
 46. Test invalid command container rejection
+47. Test unknown account roles cannot mutate records

@@ -32,3 +32,4 @@ test('Test command fingerprints detect changed values and array order',()=>{asse
 test('Test canonical base64 validation rejects malformed padding',()=>{assert.equal(canonicalBase64('Zg==').toString(),'f');for(const value of ['','Zg','Zh==','=abc','a==='])denied(()=>canonicalBase64(value));});
 test('Test document checksums cover exact uploaded bytes',()=>{assert.equal(documentChecksum(Buffer.from('hello')),'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824');assert.notEqual(documentChecksum(Buffer.from('hello')),documentChecksum(Buffer.from('hello ')));});
 test('Test payload limits count UTF-8 bytes rather than characters',()=>{assert.doesNotThrow(()=>assertPayloadSize({a:'😀'},12));denied(()=>assertPayloadSize({a:'😀'},8));});
+test('Test alert read marker validation and deduplication',()=>{assert.deepEqual(alertIds(['a','a','b']),['a','b']);for(const ids of [null,[''],['   '],[42],Array(2001).fill('a')])denied(()=>alertIds(ids));});

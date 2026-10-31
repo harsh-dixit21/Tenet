@@ -73,3 +73,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 69. Add printable instrument details with a readable paper stylesheet
 70. Export an instrument metadata snapshot without private file payloads
 71. Filter closure requests by type and prioritize the oldest cases
+72. Filter audit history by assigned actor role

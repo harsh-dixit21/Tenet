@@ -43,3 +43,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 39. Persist server-generated checksums for private documents
 40. Bound callable payload sizes before workflow processing
 41. Validate and deduplicate per-user alert read markers
+42. Test hidden control-character rejection

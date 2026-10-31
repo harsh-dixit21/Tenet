@@ -1,0 +1,16 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {applyCommand,DomainError,text,date,uniqueKey} from '../src/domain.js';
+import {commandFingerprint,canonicalBase64,documentChecksum,assertPayloadSize,alertIds} from '../src/protocol.js';
+const now='2026-10-31T12:00:00.000Z';
+const actor={uid:'institution',active:true,role:'Institution',institutionId:'college',institutionName:'College'};
+const reviewer={uid:'reviewer',active:true,role:'Reviewer'};
+const approver={uid:'approver',active:true,role:'Approver'};
+const fields={bank:'Bank A',branch:'Central',number:'A-123',amount:100,issued:'2026-01-01',maturity:'2026-10-01'};
+const save={type:'saveInstrument',id:'FDR-A',fields,status:'Awaiting verification'};
+const create=()=>applyCommand({actor,command:save,now}).record;
+const pending=()=>({...create(),docs:['Instrument copy','Bank letter','Declaration'].map((kind,i)=>({id:String(i),kind,version:1}))});
+const evidence={source:'Bank correspondence',reference:'REF-1',date:'2026-10-31',note:'Evidence checked'};
+const verified=()=>applyCommand({actor:reviewer,command:{type:'verify',evidence},record:pending(),now}).record;
+const denied=fn=>assert.throws(fn,e=>e instanceof DomainError);
+test('Test hidden control-character rejection',()=>{denied(()=>text('bank\u0000name','Bank'));assert.equal(text('Line one\nLine two','Note'),'Line one\nLine two');});

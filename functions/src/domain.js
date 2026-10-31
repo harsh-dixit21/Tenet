@@ -20,6 +20,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
   if(r&&!['Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'].includes(r.status))fail('Instrument has an invalid lifecycle state.');
   if(type==='saveInstrument'){
     requireRole(actor,'Institution');if(!actor.institutionId||!actor.institutionName)fail('Complete institution onboarding first.');
+    if(r&&c.parent&&r.parent&&c.parent!==r.parent)fail('An existing predecessor link cannot be changed.');
     if(r){owns(actor,r);if(!['Draft','Discrepancy'].includes(r.status))fail('Only a draft or returned submission can be edited.');}
     const f=c.fields||{};const bank=text(f.bank,'Bank',100),number=text(f.number,'Instrument number',60),branch=text(f.branch,'Branch',100),issued=date(f.issued,'Issue date'),maturity=date(f.maturity,'Maturity date');
     const amount=f.amount;if(typeof amount!=='number'||!Number.isFinite(amount)||amount<=0||amount>1e12||Math.abs(amount*100-Math.round(amount*100))>.001)fail('Enter a positive INR amount with at most two decimal places.','invalid-argument');

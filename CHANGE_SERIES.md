@@ -35,3 +35,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 31. Prevent officials from returning their own submissions
 32. Check request and instrument institution consistency
 33. Prevent request authors from deciding their own requests
+34. Protect existing successor links from reassignment

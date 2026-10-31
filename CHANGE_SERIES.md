@@ -24,3 +24,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 20. Generate readable initials for assigned account roles
 21. Detect successor conflicts before offering renewal actions
 22. Reject non-printing control characters in workflow text
+23. Normalize Unicode text and duplicate instrument keys

@@ -87,3 +87,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 83. Smoke-check both built entries and the local background video
 84. Cover workspace calculations with boundary and export regression tests
 85. Generate explicitly synthetic instrument fixtures for local QA
+86. Create reproducible release hashes for built artifacts

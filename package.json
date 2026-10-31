@@ -17,7 +17,8 @@
     "check:series": "node scripts/check-series.mjs",
     "check:dist": "node scripts/check-dist.mjs",
     "test:utils": "node --experimental-strip-types --test tests/workspace-utils.test.ts",
-    "fixtures": "node scripts/generate-fixtures.mjs"
+    "fixtures": "node scripts/generate-fixtures.mjs",
+    "release:manifest": "node scripts/release-manifest.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

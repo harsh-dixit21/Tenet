@@ -7,3 +7,4 @@ export function latestDocuments(docs:DocumentItem[]){return docs.filter(d=>!docs
 export function missingDocuments(record:Instrument){return requiredKinds.filter(kind=>!latestDocuments(record.docs).some(d=>d.kind===kind));}
 export function completeness(record:Instrument){return Math.round((requiredKinds.length-missingDocuments(record).length)/requiredKinds.length*100);}
 export function activeDeposits(records:Instrument[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}
+export function amountMinor(record:Pick<Instrument,'amount'|'amountMinor'>){const n=record.amountMinor??Math.round(record.amount*100);return Number.isSafeInteger(n)?n:0;}

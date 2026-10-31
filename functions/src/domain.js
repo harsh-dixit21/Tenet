@@ -17,6 +17,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
   if(!command||typeof command!=='object'||Array.isArray(command))fail('A workflow command object is required.','invalid-argument');
   if(!['Institution','Reviewer','Approver','Admin'].includes(actor.role))fail('Unknown account role.','permission-denied');
   const c=command,type=c.type;let r=record?structuredClone(record):null,p=parent?structuredClone(parent):null,q=request?structuredClone(request):null,settings;
+  if(r&&!['Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'].includes(r.status))fail('Instrument has an invalid lifecycle state.');
   if(type==='saveInstrument'){
     requireRole(actor,'Institution');if(!actor.institutionId||!actor.institutionName)fail('Complete institution onboarding first.');
     if(r){owns(actor,r);if(!['Draft','Discrepancy'].includes(r.status))fail('Only a draft or returned submission can be edited.');}

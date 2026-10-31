@@ -51,3 +51,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 47. Test unknown account roles cannot mutate records
 48. Test corrupted lifecycle state rejection
 49. Test self-referencing successor rejection
+50. Test verification chronology against issue dates

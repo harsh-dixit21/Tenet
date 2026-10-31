@@ -80,3 +80,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 76. Align dashboard readiness and successor actions with verification requirements
 77. Harden deep links and standardize role avatar labels
 78. Add a credential-safe Firebase environment validator
+79. Add a read-only backend deployment preflight

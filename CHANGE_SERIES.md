@@ -92,3 +92,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 88. Explain private document versions and checksum handling
 89. Map instrument transitions and correction responsibilities
 90. Describe renewal links and duplicate-instrument recovery
+91. Add an operational closure-decision checklist

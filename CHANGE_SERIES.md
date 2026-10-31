@@ -64,3 +64,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 60. Test payload limits count UTF-8 bytes rather than characters
 61. Test alert read marker validation and deduplication
 62. Add bank filtering and multi-term priority search to the register
+63. Filter the instrument register by inclusive maturity date ranges

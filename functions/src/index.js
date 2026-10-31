@@ -30,6 +30,7 @@ export const registerInstitution=callable(async req=>{
 });
 function fileData(payload){
  const name=text(payload?.name,'File name',160),kind=text(payload?.kind,'Document category',40);if(!['Instrument copy','Bank letter','Declaration','Approval letter','Other'].includes(kind))throw new HttpsError('invalid-argument','Invalid document category.');
+ if(/[\\/\u202a-\u202e\u2066-\u2069]/u.test(name))throw new HttpsError('invalid-argument','File name contains unsupported path or direction characters.');
  const match=typeof payload.data==='string'&&/^data:(application\/pdf|image\/png|image\/jpeg|text\/plain);base64,([A-Za-z0-9+/=]+)$/.exec(payload.data);if(!match||match[2].length>1400000)throw new HttpsError('invalid-argument','Choose a PDF, PNG, JPEG or text file up to 1 MB.');
  const bytes=canonicalBase64(match[2]),mime=match[1];const extensions={'application/pdf':/\.pdf$/i,'image/png':/\.png$/i,'image/jpeg':/\.jpe?g$/i,'text/plain':/\.txt$/i};if(!extensions[mime].test(name))throw new HttpsError('invalid-argument','File extension must match the document type.');if(!bytes.length||bytes.length>1024*1024)throw new HttpsError('invalid-argument','The file must be between 1 byte and 1 MB.');
  const valid=mime==='application/pdf'?bytes.subarray(0,5).toString()==='%PDF-':mime==='image/png'?bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])):mime==='image/jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:!bytes.includes(0);

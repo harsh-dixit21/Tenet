@@ -4,3 +4,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 
 1. Record the scope and acceptance criteria for the improvement series
 2. Format document sizes consistently
+3. Resolve current document versions by category

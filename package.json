@@ -11,7 +11,8 @@
     "test:integration": "firebase emulators:exec --project demo-tenet --only auth,firestore,storage,functions \"node functions/integration.mjs\"",
     "emulators": "firebase emulators:start --project demo-tenet --only auth,firestore,storage,functions",
     "check:env": "node scripts/check-env.mjs",
-    "check:deploy": "node scripts/preflight.mjs"
+    "check:deploy": "node scripts/preflight.mjs",
+    "check:tracked": "node scripts/check-tracked-files.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

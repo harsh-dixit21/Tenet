@@ -1,0 +1,34 @@
+name: Workflow defect
+description: Report a reproducible Tenet problem without private records.
+title: "[Bug] "
+body:
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Environment
+      options: [Demo, Local Firebase emulators, Live Firebase]
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revision and browser
+      description: Commit hash, browser version and viewport size.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include assigned role and starting lifecycle state. Use synthetic record names.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Error text or redacted screenshot. Never include credentials, personal details or document contents.

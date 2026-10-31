@@ -100,3 +100,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 96. Record current capacity retention and automation limitations
 97. Run build regression and repository checks in GitHub Actions
 98. Provide a manually triggered isolated Firebase emulator workflow
+99. Capture reproducible workflow defects with a structured issue form

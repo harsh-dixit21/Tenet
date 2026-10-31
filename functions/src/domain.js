@@ -2,7 +2,7 @@ import {createHash} from 'node:crypto';
 export class DomainError extends Error {constructor(code,message){super(message);this.code=code}}
 const fail=(message,code='failed-precondition')=>{throw new DomainError(code,message)};
 export const requireRole=(actor,...roles)=>{if(!actor?.active||!roles.includes(actor.role))fail('Your assigned role cannot perform this action.','permission-denied')};
-export const text=(value,label,max=1500)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)fail(`${label} is required (maximum ${max} characters).`,'invalid-argument');return value.trim()};
+export const text=(value,label,max=1500)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)fail(`${label} is required (maximum ${max} characters).`,'invalid-argument');if(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(value))fail(`${label} contains unsupported control characters.`,'invalid-argument');return value.trim()};
 export function date(value,label){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)||(!Number.isFinite(Date.parse(value+'T00:00:00Z'))||new Date(value+'T00:00:00Z').toISOString().slice(0,10)!==value))fail(`${label} must be a valid date.`,'invalid-argument');return value}
 export const day=now=>new Date(now).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
 export const closed=r=>['Released','Refunded','Discharged','Renewed','Replaced'].includes(r.status);

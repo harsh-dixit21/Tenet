@@ -52,3 +52,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 48. Test corrupted lifecycle state rejection
 49. Test self-referencing successor rejection
 50. Test verification chronology against issue dates
+51. Test self-review rejection on correction requests

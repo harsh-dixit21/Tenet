@@ -22,3 +22,4 @@ test('Test unknown account roles cannot mutate records',()=>{denied(()=>applyCom
 test('Test corrupted lifecycle state rejection',()=>{denied(()=>applyCommand({actor:reviewer,record:{...pending(),status:'Corrupt'},command:{type:'verify',evidence},now}));});
 test('Test self-referencing successor rejection',()=>{denied(()=>applyCommand({actor,command:{...save,parent:save.id,relation:'Renewal'},parent:verified(),now}));});
 test('Test verification chronology against issue dates',()=>{denied(()=>applyCommand({actor:reviewer,record:pending(),command:{type:'verify',evidence:{...evidence,date:'2025-12-31'}},now}));});
+test('Test self-review rejection on correction requests',()=>{denied(()=>applyCommand({actor:{...reviewer,uid:actor.uid},record:pending(),command:{type:'correct',note:'Change date'},now}));});

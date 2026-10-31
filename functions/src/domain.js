@@ -40,7 +40,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
       const e=c.evidence||{};const verifiedDate=date(e.date,'Verification date');if(verifiedDate<r.issued)fail('Verification date cannot precede issue date.');if(verifiedDate>day(now))fail('Verification date cannot be in the future.');r.evidence={source:text(e.source,'Verification source',200),reference:text(e.reference,'Evidence reference',200),note:text(e.note,'Review note'),date:verifiedDate};r.status='Verified';r.verifiedBy=actor.uid;r.verifiedAt=now;delete r.correction;
       if(r.parent){if(!p||p.status!=='Verified'||p.institutionId!==r.institutionId)fail('Original instrument is no longer eligible.');p.status=r.relation==='Replacement'?'Replaced':'Renewed';p.updatedAt=now;}
     }else if(type==='correct'){
-      requireRole(actor,'Reviewer','Admin');if(r.status!=='Awaiting verification')fail('Only submitted instruments can be returned.');r.correction=text(c.note,'Correction note');r.status='Discrepancy';
+      requireRole(actor,'Reviewer','Admin');if(r.createdBy===actor.uid)fail('You cannot review your own submission.','permission-denied');if(r.status!=='Awaiting verification')fail('Only submitted instruments can be returned.');r.correction=text(c.note,'Correction note');r.status='Discrepancy';
     }else if(type==='resubmit'){
       requireRole(actor,'Institution');if(r.status!=='Discrepancy'||!complete(r))fail('A returned record with all required documents is needed.');r.status='Awaiting verification';
     }else if(type==='request'){

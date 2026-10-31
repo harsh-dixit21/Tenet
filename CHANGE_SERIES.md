@@ -32,3 +32,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 28. Detect invalid persisted lifecycle statuses
 29. Prevent an instrument from being its own predecessor
 30. Reject verification evidence dated before instrument issuance
+31. Prevent officials from returning their own submissions

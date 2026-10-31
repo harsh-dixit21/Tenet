@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"audit","queryScope":"COLLECTION","fields":[{"fieldPath":"institutionId","order":"ASCENDING"},{"fieldPath":"date","order":"DESCENDING"}]}],"fieldOverrides":[]}

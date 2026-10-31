@@ -1,0 +1,6 @@
+{
+  "name": "tenet-functions", "private": true, "type": "module", "main": "src/index.js",
+  "engines": {"node": "22"},
+  "scripts": {"test": "node --test", "check": "node --check src/index.js && node --check src/domain.js"},
+  "dependencies": {"firebase-admin": "^13.0.0", "firebase-functions": "^6.0.0"}
+}

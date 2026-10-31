@@ -3,4 +3,10 @@ dist/
 *.tsbuildinfo
 .local/
 .env*
+!.env.example
+!functions/.env.example
+*-debug.log
+.firebase/
+service-account*.json
+*-adminsdk-*.json
 qa/

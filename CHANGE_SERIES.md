@@ -56,3 +56,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 52. Test cross-institution request consistency checks
 53. Test request authors cannot later approve their own request
 54. Test existing predecessor links cannot be reassigned
+55. Test stale revision rejection and matching revision acceptance

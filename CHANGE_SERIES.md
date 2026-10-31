@@ -12,3 +12,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 8. Sum deposits without floating-point drift
 9. Build status reports from a shared aggregation
 10. Aggregate bank-wise deposit exposure
+11. Aggregate maturity windows for active instruments

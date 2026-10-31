@@ -1,4 +1,4 @@
-import {commandFingerprint,canonicalBase64} from './protocol.js';
+import {commandFingerprint,canonicalBase64,documentChecksum} from './protocol.js';
 import {generateAlerts} from './alerts.js';
 import {initializeApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
@@ -42,7 +42,7 @@ export const executeCommand=callable(async req=>{
  const actor=await profile(uid);let uploaded;
  if(c.type==='uploadDocument'){
    const file=fileData(c.document);const r=(await db.doc(`instruments/${recordId}`).get()).data();canRead(actor,r);if(actor.role!=='Institution'||!['Draft','Awaiting verification','Discrepancy'].includes(r.status))throw new HttpsError('permission-denied','Document upload is not permitted.');
-   const documentId=randomUUID(),path=`instruments/${recordId}/${documentId}`;await getStorage().bucket().file(path).save(file.bytes,{resumable:false,metadata:{contentType:file.mime,metadata:{sha256:createHash('sha256').update(file.bytes).digest('hex')}}});uploaded={id:documentId,path,name:file.name,kind:file.kind,size:file.bytes.length,mime:file.mime,data:''};
+   const documentId=randomUUID(),path=`instruments/${recordId}/${documentId}`;await getStorage().bucket().file(path).save(file.bytes,{resumable:false,metadata:{contentType:file.mime,metadata:{sha256:documentChecksum(file.bytes)}}});uploaded={id:documentId,path,name:file.name,kind:file.kind,size:file.bytes.length,mime:file.mime,sha256:documentChecksum(file.bytes),data:''};
  }
  try{
  await db.runTransaction(async tx=>{

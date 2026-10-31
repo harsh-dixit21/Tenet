@@ -3,7 +3,7 @@ import {callBackend} from '@/lib/firebase/client';
 import {createContext,useContext,useState,useRef,useEffect,type ReactNode} from 'react';
 import {records as samples,readDemoUser,type Role} from '../ui/app-1-utils/app-1-data';
 export type Status='Draft'|'Awaiting verification'|'Discrepancy'|'Verified'|'Release requested'|'Released'|'Refunded'|'Discharged'|'Renewed'|'Replaced';
-export type DocumentItem={id:string;name:string;kind:string;version:number;date:string;data:string;size:number;path?:string;mime?:string};
+export type DocumentItem={id:string;name:string;kind:string;version:number;date:string;data:string;size:number;path?:string;mime?:string;sha256?:string};
 export type Instrument={institutionId?:string;createdBy?:string;verifiedBy?:string;updatedAt?:string;amountMinor?:number;id:string;institution:string;bank:string;branch:string;number:string;amount:number;issued:string;maturity:string;status:Status;docs:DocumentItem[];evidence?:{source:string;reference:string;date:string;note:string};correction?:string;parent?:string;relation?:'Renewal'|'Replacement'};
 export type RequestItem={id:string;recordId:string;type:'Release'|'Refund'|'Discharge';reason:string;status:'Pending'|'Approved'|'Rejected';date:string;decision?:string};
 export type EventItem={id:string;recordId:string;action:string;actor:Role;date:string;details?:Record<string,unknown>};

@@ -17,3 +17,4 @@ export function ageDays(date:string,today=currentDay()){const difference=Math.fl
 export function pendingRequests(requests:RequestItem[]){return requests.filter(r=>r.status==='Pending');}
 export function riskRank(record:Instrument,today=currentDay()){if(terminalStatuses.has(record.status)||record.status==='Draft')return 0;const days=Math.ceil((Date.parse(record.maturity)-Date.parse(today))/86400000);return (record.status==='Discrepancy'?300:0)+(days<0?200:days<=7?100:days<=30?50:0)+(record.status==='Awaiting verification'?20:0);}
 export function dateMatches(date:string,from='',to=''){if(from&&to&&from>to)return false;return (!from||date>=from)&&(!to||date<=to);}
+export function csvCell(value:string|number){let text=String(value);if(typeof value==='string'&&/^[\s\uFEFF]*[=+@-]/u.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';}

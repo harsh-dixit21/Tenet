@@ -15,3 +15,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 11. Aggregate maturity windows for active instruments
 12. Support accent-insensitive multi-term record searches
 13. Calculate pending-case age with a future-date guard
+14. Centralize pending request filtering

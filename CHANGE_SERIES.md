@@ -88,3 +88,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 84. Cover workspace calculations with boundary and export regression tests
 85. Generate explicitly synthetic instrument fixtures for local QA
 86. Create reproducible release hashes for built artifacts
+87. Document server-enforced permissions and separation of duties

@@ -97,3 +97,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 93. Specify report totals filters and export semantics
 94. Document local setup and the production activation boundary
 95. Add layered test commands and failure-triage guidance
+96. Record current capacity retention and automation limitations

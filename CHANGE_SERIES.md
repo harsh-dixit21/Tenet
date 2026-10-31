@@ -34,3 +34,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 30. Reject verification evidence dated before instrument issuance
 31. Prevent officials from returning their own submissions
 32. Check request and instrument institution consistency
+33. Prevent request authors from deciding their own requests

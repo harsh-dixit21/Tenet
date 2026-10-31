@@ -28,3 +28,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 24. Bound supported instrument dates to prevent year-entry errors
 25. Require a trusted actor identity for every mutation
 26. Reject malformed workflow command containers
+27. Reject unrecognized account roles before command dispatch

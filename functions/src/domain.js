@@ -15,6 +15,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
   if(typeof actor?.uid!=='string'||!actor.uid.trim())fail('A trusted actor identity is required.','permission-denied');
   if(!actor?.active)fail('Account access is disabled.','permission-denied');
   if(!command||typeof command!=='object'||Array.isArray(command))fail('A workflow command object is required.','invalid-argument');
+  if(!['Institution','Reviewer','Approver','Admin'].includes(actor.role))fail('Unknown account role.','permission-denied');
   const c=command,type=c.type;let r=record?structuredClone(record):null,p=parent?structuredClone(parent):null,q=request?structuredClone(request):null,settings;
   if(type==='saveInstrument'){
     requireRole(actor,'Institution');if(!actor.institutionId||!actor.institutionName)fail('Complete institution onboarding first.');

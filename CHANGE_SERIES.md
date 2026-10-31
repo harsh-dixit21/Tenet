@@ -46,3 +46,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 42. Test hidden control-character rejection
 43. Test Unicode normalization across labels and uniqueness keys
 44. Test supported date bounds and leap dates
+45. Test mutation rejection without actor identity

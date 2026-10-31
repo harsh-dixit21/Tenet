@@ -16,3 +16,4 @@ const denied=fn=>assert.throws(fn,e=>e instanceof DomainError);
 test('Test hidden control-character rejection',()=>{denied(()=>text('bank\u0000name','Bank'));assert.equal(text('Line one\nLine two','Note'),'Line one\nLine two');});
 test('Test Unicode normalization across labels and uniqueness keys',()=>{assert.equal(text('Cafe\u0301','Label'),'Café');assert.equal(uniqueKey('ＢＡＮＫ A','１２３'),uniqueKey('BANK A','123'));});
 test('Test supported date bounds and leap dates',()=>{denied(()=>date('1899-12-31','Date'));denied(()=>date('2200-01-01','Date'));assert.equal(date('2028-02-29','Date'),'2028-02-29');denied(()=>date('2027-02-29','Date'));});
+test('Test mutation rejection without actor identity',()=>{denied(()=>applyCommand({actor:{...actor,uid:''},command:save,now}));});

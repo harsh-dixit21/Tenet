@@ -14,3 +14,4 @@ const evidence={source:'Bank correspondence',reference:'REF-1',date:'2026-10-31'
 const verified=()=>applyCommand({actor:reviewer,command:{type:'verify',evidence},record:pending(),now}).record;
 const denied=fn=>assert.throws(fn,e=>e instanceof DomainError);
 test('Test hidden control-character rejection',()=>{denied(()=>text('bank\u0000name','Bank'));assert.equal(text('Line one\nLine two','Note'),'Line one\nLine two');});
+test('Test Unicode normalization across labels and uniqueness keys',()=>{assert.equal(text('Cafe\u0301','Label'),'Café');assert.equal(uniqueKey('ＢＡＮＫ A','１２３'),uniqueKey('BANK A','123'));});

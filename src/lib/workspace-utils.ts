@@ -9,3 +9,4 @@ export function completeness(record:Instrument){return Math.round((requiredKinds
 export function activeDeposits(records:Instrument[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}
 export function amountMinor(record:Pick<Instrument,'amount'|'amountMinor'>){const n=record.amountMinor??Math.round(record.amount*100);return Number.isSafeInteger(n)?n:0;}
 export function sumDeposits(records:Instrument[]){return records.reduce((total,r)=>total+amountMinor(r),0);}
+export function statusSummary(records:Instrument[]){return ['Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'].map(label=>{const rows=records.filter(r=>r.status===label);return {label,count:rows.length,amountMinor:sumDeposits(rows)};});}

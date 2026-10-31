@@ -10,3 +10,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 6. Centralize the active-deposit lifecycle definition
 7. Normalize deposit values to integer paise
 8. Sum deposits without floating-point drift
+9. Build status reports from a shared aggregation

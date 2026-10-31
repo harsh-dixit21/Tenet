@@ -16,3 +16,4 @@ export function searchMatches(value:string,query:string){const normalize=(s:stri
 export function ageDays(date:string,today=currentDay()){const difference=Math.floor((Date.parse(today)-Date.parse(date.slice(0,10)))/86400000);return Number.isFinite(difference)?Math.max(0,difference):0;}
 export function pendingRequests(requests:RequestItem[]){return requests.filter(r=>r.status==='Pending');}
 export function riskRank(record:Instrument,today=currentDay()){if(terminalStatuses.has(record.status)||record.status==='Draft')return 0;const days=Math.ceil((Date.parse(record.maturity)-Date.parse(today))/86400000);return (record.status==='Discrepancy'?300:0)+(days<0?200:days<=7?100:days<=30?50:0)+(record.status==='Awaiting verification'?20:0);}
+export function dateMatches(date:string,from='',to=''){if(from&&to&&from>to)return false;return (!from||date>=from)&&(!to||date<=to);}

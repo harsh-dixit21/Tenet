@@ -17,3 +17,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 13. Calculate pending-case age with a future-date guard
 14. Centralize pending request filtering
 15. Rank cases by correction and maturity urgency
+16. Filter ISO dates through inclusive ranges

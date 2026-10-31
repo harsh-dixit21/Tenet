@@ -94,3 +94,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 90. Describe renewal links and duplicate-instrument recovery
 91. Add an operational closure-decision checklist
 92. Add a non-destructive incident and access recovery guide
+93. Specify report totals filters and export semantics

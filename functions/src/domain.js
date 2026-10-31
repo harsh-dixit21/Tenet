@@ -12,6 +12,7 @@ export const uniqueKey=(bank,number)=>createHash('sha256').update(bank.normalize
 export function owns(actor,record){if(!record)fail('Instrument not found.','not-found');if(actor.role==='Institution'&&actor.institutionId!==record.institutionId)fail('This instrument belongs to another institution.','permission-denied')}
 export function canRead(actor,record){owns(actor,record);requireRole(actor,'Institution','Reviewer','Approver','Admin')}
 export function applyCommand({actor,command,record,parent,request,now=new Date().toISOString(),document,successorExists=false}){
+  if(typeof actor?.uid!=='string'||!actor.uid.trim())fail('A trusted actor identity is required.','permission-denied');
   if(!actor?.active)fail('Account access is disabled.','permission-denied');
   const c=command,type=c.type;let r=record?structuredClone(record):null,p=parent?structuredClone(parent):null,q=request?structuredClone(request):null,settings;
   if(type==='saveInstrument'){

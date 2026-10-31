@@ -26,3 +26,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 22. Reject non-printing control characters in workflow text
 23. Normalize Unicode text and duplicate instrument keys
 24. Bound supported instrument dates to prevent year-entry errors
+25. Require a trusted actor identity for every mutation

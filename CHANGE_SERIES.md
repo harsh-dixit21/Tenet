@@ -82,3 +82,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 78. Add a credential-safe Firebase environment validator
 79. Add a read-only backend deployment preflight
 80. Detect accidentally tracked environment and credential files
+81. Add a repository asset-size budget check

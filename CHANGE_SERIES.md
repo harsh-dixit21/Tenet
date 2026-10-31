@@ -93,3 +93,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 89. Map instrument transitions and correction responsibilities
 90. Describe renewal links and duplicate-instrument recovery
 91. Add an operational closure-decision checklist
+92. Add a non-destructive incident and access recovery guide

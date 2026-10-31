@@ -8,3 +8,4 @@ export function missingDocuments(record:Instrument){return requiredKinds.filter(
 export function completeness(record:Instrument){return Math.round((requiredKinds.length-missingDocuments(record).length)/requiredKinds.length*100);}
 export function activeDeposits(records:Instrument[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}
 export function amountMinor(record:Pick<Instrument,'amount'|'amountMinor'>){const n=record.amountMinor??Math.round(record.amount*100);return Number.isSafeInteger(n)?n:0;}
+export function sumDeposits(records:Instrument[]){return records.reduce((total,r)=>total+amountMinor(r),0);}

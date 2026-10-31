@@ -9,3 +9,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 5. Calculate readiness from required documents
 6. Centralize the active-deposit lifecycle definition
 7. Normalize deposit values to integer paise
+8. Sum deposits without floating-point drift

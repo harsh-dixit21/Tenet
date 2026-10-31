@@ -71,3 +71,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 67. Show a required-document checklist on each instrument
 68. Validate upload extensions and expose readable sizes and integrity checksums
 69. Add printable instrument details with a readable paper stylesheet
+70. Export an instrument metadata snapshot without private file payloads

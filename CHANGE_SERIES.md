@@ -86,3 +86,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 82. Verify the substantive 100-commit series without changing history
 83. Smoke-check both built entries and the local background video
 84. Cover workspace calculations with boundary and export regression tests
+85. Generate explicitly synthetic instrument fixtures for local QA

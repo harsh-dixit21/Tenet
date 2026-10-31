@@ -19,3 +19,4 @@ test('Test supported date bounds and leap dates',()=>{denied(()=>date('1899-12-3
 test('Test mutation rejection without actor identity',()=>{denied(()=>applyCommand({actor:{...actor,uid:''},command:save,now}));});
 test('Test invalid command container rejection',()=>{for(const command of [null,[],42,'saveInstrument'])denied(()=>applyCommand({actor,command,now}));});
 test('Test unknown account roles cannot mutate records',()=>{denied(()=>applyCommand({actor:{...actor,role:'Owner'},command:save,now}));});
+test('Test corrupted lifecycle state rejection',()=>{denied(()=>applyCommand({actor:reviewer,record:{...pending(),status:'Corrupt'},command:{type:'verify',evidence},now}));});

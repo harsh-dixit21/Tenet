@@ -99,3 +99,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 95. Add layered test commands and failure-triage guidance
 96. Record current capacity retention and automation limitations
 97. Run build regression and repository checks in GitHub Actions
+98. Provide a manually triggered isolated Firebase emulator workflow

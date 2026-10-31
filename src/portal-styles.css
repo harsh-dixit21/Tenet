@@ -17,3 +17,5 @@
 .workspace-table td{padding:16px 12px;border-top:1px solid var(--border);vertical-align:middle}
 .workspace-table small{display:block;margin-top:6px;color:var(--muted-foreground);font-size:12px}
 .workspace-table td:first-child{min-width:240px}.workspace-table td:not(:first-child){white-space:nowrap}
+
+@media print{body{background:#fff!important;color:#111!important}aside,header,nav,button,[role=status]{display:none!important}main{padding:0!important}main *{color:#111!important;background:transparent!important;box-shadow:none!important}a{text-decoration:none!important}main .border{border-color:#ccc!important}}

@@ -21,3 +21,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 17. Escape CSV cells including whitespace-prefixed formulas
 18. Parse workspace routes without crashing on bad encodings
 19. Validate document uploads before reading file bytes
+20. Generate readable initials for assigned account roles

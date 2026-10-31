@@ -54,3 +54,4 @@ Each numbered item is an actual source, validation, test, tooling or documentati
 50. Test verification chronology against issue dates
 51. Test self-review rejection on correction requests
 52. Test cross-institution request consistency checks
+53. Test request authors cannot later approve their own request

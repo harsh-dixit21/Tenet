@@ -2,6 +2,11 @@ export type RegisterFilters = {
   query: string; status: string; sort: string; bank: string;
   from: string; to: string; activeOnly: boolean; pageSize: number;
 };
+export const defaultRegisterFilters: RegisterFilters = {
+  query: '', status: 'All', sort: 'maturity', bank: 'All',
+  from: '', to: '', activeOnly: false, pageSize: 10,
+};
+
 export type SavedView = {name: string; filters: RegisterFilters};
 export const SAVED_VIEW_LIMIT = 5;
 const statuses = ['All','Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'];

@@ -10,4 +10,6 @@ Views stay in this browser's local storage, separately for each signed-in accoun
 
 If the browser blocks storage or its quota is full, Tenet displays an error and keeps your current filters usable. Avoid including sensitive information in view names or searches on a shared device. Unknown or malformed stored preferences are ignored safely.
 
-Validation for this release: production build, 20 utility tests, and seven browser checks covering save/apply, persistence after reload, duplicate names, deletion, phone layout and uncaught exceptions. The feature adds no dependencies or backend schema changes.
+Use **Copy filter link** next to the register filters to share the current view, or use the same action beside a saved view to share that preset. The link carries the filter values and any institution scope in the current URL. Opening it restores the filters on the same screen, starting on page one. Recipients see the records available to their account. Search text and bank names travel in the URL, so review the filters before sharing. If clipboard access is blocked, select and copy the displayed link.
+
+Validation for the original saved-view release: production build, 20 utility tests, and seven browser checks covering save/apply, persistence after reload, duplicate names, deletion, phone layout and uncaught exceptions. The feature adds no dependencies or backend schema changes.

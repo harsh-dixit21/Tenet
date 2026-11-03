@@ -1,5 +1,6 @@
 import {useState, type FormEvent} from 'react';
 import {decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
+import {CopyRegisterLink} from './copy-register-link';
 import {Button} from '../ui/button';
 import {Input} from '../ui/input';
 
@@ -43,8 +44,9 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
     {views.length > 0 && <ul className="mt-3 flex flex-col gap-2">
       {views.map(view => <li key={view.name} className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
         <span className="min-w-0 break-all text-sm">{view.name}</span>
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" aria-label={`Apply ${view.name}`} onClick={() => {onApply({...view.filters}); setError(''); setMessage(`Applied “${view.name}”.`);}}>Apply</Button>
+          <CopyRegisterLink filters={view.filters} name={view.name}/>
           <Button type="button" variant="ghost" size="sm" aria-label={`Delete ${view.name}`} onClick={() => remove(view.name)}>Delete</Button>
         </div>
       </li>)}

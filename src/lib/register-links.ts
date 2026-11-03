@@ -36,3 +36,9 @@ export function registerLink(href: string, filters: RegisterFilters): string {
   url.hash = route + '?' + params.toString();
   return url.href;
 }
+
+export function isRegisterLink(hash: string): boolean {
+  const [route, query] = hash.slice(1).split('?', 2);
+  return ['records', 'review', 'maturity'].includes(route) &&
+    readRegisterLink(new URLSearchParams(query)) !== null;
+}

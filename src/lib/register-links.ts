@@ -1,4 +1,4 @@
-import {defaultRegisterFilters, validFilters, type RegisterFilters} from './saved-views';
+import {defaultRegisterFilters, validFilters, type RegisterFilters} from './saved-views.ts';
 
 export function readRegisterLink(params: URLSearchParams): RegisterFilters | null {
   if (params.get('filters') !== '1') return null;

@@ -1,0 +1,13 @@
+# Saved register views
+
+On the Instrument register, Review queue or Maturity schedule, set the filters you use regularly. Enter a name under **Save current filters**, then select **Save view**. Each screen can keep up to five named views.
+
+**Apply** restores the search, status, bank, sort order, maturity date range, active-only setting and rows per page. It returns the table to page one. The results and CSV export use the restored filters against the currently available records; saving a view does not freeze the records or their amounts.
+
+**Delete** removes that saved view while keeping the current filters. To change a saved view, delete it and save the new filters under the same name. Names must contain 1–40 characters and are unique within a screen regardless of case. Invalid or reversed date ranges cannot be saved.
+
+Views stay in this browser's local storage, separately for each signed-in account and screen. Demo views use a separate account scope. They do not sync to Firebase or another device. Clearing browser storage removes them. Institution-specific links remain governed by the current URL; those links are not part of a saved view. Saved filters never grant access to records outside the signed-in account's permissions.
+
+If the browser blocks storage or its quota is full, Tenet displays an error and keeps your current filters usable. Avoid including sensitive information in view names or searches on a shared device. Unknown or malformed stored preferences are ignored safely.
+
+Validation for this release: production build, 20 utility tests, and seven browser checks covering save/apply, persistence after reload, duplicate names, deletion, phone layout and uncaught exceptions. The feature adds no dependencies or backend schema changes.

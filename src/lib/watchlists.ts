@@ -15,3 +15,15 @@ export function readWatchlists(raw: string | null): Watchlist[] {
     }).slice(0, 5).map((list: Watchlist) => ({...list, ids: [...new Set(list.ids)]}));
   } catch { return []; }
 }
+function checkedName(lists: Watchlist[], name: string, previous?: string) {
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length > 40) throw new Error('Use a name from 1 to 40 characters.');
+  if (lists.some(list => list.name !== previous && list.name.toLowerCase() === trimmed.toLowerCase()))
+    throw new Error('That watchlist name already exists.');
+  return trimmed;
+}
+export function createWatchlist(lists: Watchlist[], name: string): Watchlist[] {
+  const trimmed = checkedName(lists, name);
+  if (lists.length >= 5) throw new Error('You can keep five watchlists. Delete one to make room.');
+  return [...lists, {name: trimmed, ids: []}];
+}

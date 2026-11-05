@@ -37,3 +37,8 @@ export function toggleWatched(lists: Watchlist[], name: string, id: string): Wat
     return {...list, ids: [...list.ids, id]};
   });
 }
+export function renameWatchlist(lists: Watchlist[], previous: string, name: string): Watchlist[] {
+  if (!lists.some(list => list.name === previous)) throw new Error('This watchlist was removed.');
+  const trimmed = checkedName(lists, name, previous);
+  return lists.map(list => list.name === previous ? {...list, name: trimmed} : list);
+}

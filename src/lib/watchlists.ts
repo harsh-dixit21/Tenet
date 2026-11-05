@@ -27,3 +27,13 @@ export function createWatchlist(lists: Watchlist[], name: string): Watchlist[] {
   if (lists.length >= 5) throw new Error('You can keep five watchlists. Delete one to make room.');
   return [...lists, {name: trimmed, ids: []}];
 }
+export function toggleWatched(lists: Watchlist[], name: string, id: string): Watchlist[] {
+  if (!/^[A-Za-z0-9_-]{1,120}$/.test(id)) throw new Error('Invalid instrument ID.');
+  if (!lists.some(list => list.name === name)) throw new Error('Select an existing watchlist.');
+  return lists.map(list => {
+    if (list.name !== name) return list;
+    if (list.ids.includes(id)) return {...list, ids: list.ids.filter(value => value !== id)};
+    if (list.ids.length >= 500) throw new Error('This watchlist has reached 500 instruments.');
+    return {...list, ids: [...list.ids, id]};
+  });
+}

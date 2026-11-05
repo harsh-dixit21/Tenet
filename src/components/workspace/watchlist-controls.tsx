@@ -1,6 +1,7 @@
 import {useState, type FormEvent} from 'react';
 import {createWatchlist, deleteWatchlist, renameWatchlist, type Watchlist} from '@/lib/watchlists';
 import {Button} from '../ui/button';
+import {download, csv} from './store';
 import {Input} from '../ui/input';
 type Props = {
   lists: Watchlist[]; selected: string; onSelect: (name: string) => void;
@@ -38,6 +39,10 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
       <Button type="button" variant="ghost" disabled={!selected} onClick={() => {
         if (update(current => deleteWatchlist(current, selected), 'Watchlist deleted.')) onSelect('');
       }}>Delete watchlist</Button>
+      <Button type="button" variant="outline" disabled={!selected} onClick={() => {
+        const list = lists.find(item => item.name === selected);
+        if (list) download('tenet-watchlist.csv', csv([['Watchlist', 'Instrument ID'], ...list.ids.map(id => [list.name, id])]));
+      }}>Export watchlist IDs</Button>
     </div>
   </section>;
 }

@@ -42,3 +42,6 @@ export function renameWatchlist(lists: Watchlist[], previous: string, name: stri
   const trimmed = checkedName(lists, name, previous);
   return lists.map(list => list.name === previous ? {...list, name: trimmed} : list);
 }
+export function deleteWatchlist(lists: Watchlist[], name: string): Watchlist[] {
+  return lists.filter(list => list.name !== name);
+}

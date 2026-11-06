@@ -43,3 +43,11 @@ test('reject absolute traversal directory and missing configuration paths', t =>
     assert.throws(() => validateDeployment(root, 'tenet-live'), /checkout|Missing/);
   }
 });
+
+test('reject empty and whitespace-only deployment rules', t => {
+  const {root, put} = setup(t);
+  for (const value of ['', ' \r\n\t']) {
+    put('storage.rules', value);
+    assert.throws(() => validateDeployment(root, 'tenet-live'), /Empty deployment file: storage.rules/);
+  }
+});

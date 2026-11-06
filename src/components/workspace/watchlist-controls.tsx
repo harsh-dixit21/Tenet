@@ -23,7 +23,7 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
       <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm">Watchlist name
         <Input value={name} onChange={event => setName(event.target.value)} maxLength={40} required/>
       </label>
-      <Button type="submit" variant="outline">Create watchlist</Button>
+      <Button type="submit" variant="outline" disabled={lists.length>=5}>Create watchlist</Button>
     </form>
     <div className="flex flex-wrap items-end gap-3">
       <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm">Current watchlist

@@ -63,7 +63,7 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
       <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm">Save current filters
         <Input value={name} onChange={e => setName(e.target.value)} maxLength={40} required placeholder="e.g. Verified deposits" />
       </label>
-      <Button variant="outline" type="submit">Save view</Button>
+      <Button variant="outline" type="submit" disabled={views.length>=5}>Save view</Button>
     </form>
     <p className="mt-2 text-xs text-muted-foreground">{views.length}/5 saved on this screen · Stored in this browser only.</p>
     {views.length > 0 && <ul className="mt-3 flex flex-col gap-2">

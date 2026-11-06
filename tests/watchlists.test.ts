@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readWatchlists, createWatchlist, toggleWatched, renameWatchlist, deleteWatchlist, watchlistKey} from '../src/lib/watchlists.ts';
+import {duplicateWatchlist, addWatched, readWatchlists, createWatchlist, toggleWatched, renameWatchlist, deleteWatchlist, watchlistKey} from '../src/lib/watchlists.ts';
 
 test('watchlist lifecycle preserves membership and input immutability', () => {
   const empty = createWatchlist([], '  Important  ');
@@ -31,4 +31,15 @@ test('watchlists round trip and enforce capacity boundaries', () => {
   assert.throws(() => toggleWatched(full,'Full','FDR-501'), /500/);
   assert.equal(toggleWatched(full,'Full','FDR-0')[0].ids.length,499);
   assert.notEqual(watchlistKey('a'),watchlistKey('b'));
+});
+
+test('duplicate and merge produce independent membership and enforce limits', () => {
+  const source = [{name:'Source', ids:['FDR-1']}];
+  const copied = duplicateWatchlist(source, 'Source', 'Copy');
+  assert.deepEqual(copied[1].ids, ['FDR-1']);
+  assert.notEqual(copied[1].ids, source[0].ids);
+  assert.deepEqual(addWatched(copied, 'Copy', ['FDR-1','FDR-2'])[1].ids, ['FDR-1','FDR-2']);
+  assert.throws(() => addWatched(copied, 'Copy', ['../invalid']), /Invalid/);
+  assert.throws(() => duplicateWatchlist(source, 'missing', 'Copy'), /existing/);
+  assert.throws(() => addWatched(copied, 'Copy', Array.from({length:501}, (_,i) => 'ID-'+i)), /500/);
 });

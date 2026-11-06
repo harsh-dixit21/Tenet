@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {decodeViews, saveView, validFilters, viewsKey, type RegisterFilters} from '../src/lib/saved-views.ts';
+import {renameSavedView, decodeViews, saveView, validFilters, viewsKey, type RegisterFilters} from '../src/lib/saved-views.ts';
 const filters: RegisterFilters = {query:'Bank',status:'Verified',sort:'priority',bank:'All',from:'2026-01-01',to:'2027-01-01',activeOnly:true,pageSize:25};
 test('saved views survive a versioned JSON round trip and copy the filters', () => {
   const input = {...filters}; const views = saveView([], '  Verified deposits  ', input);
@@ -37,4 +37,11 @@ test('account and screen keys cannot collide across delimiters', () => {
 });
 test('duplicate stored view names are ignored', () => {
   assert.equal(decodeViews(JSON.stringify({version:1,views:[{name:'One',filters},{name:' one ',filters}]})).length,1);
+});
+
+test('renaming keeps preset order and rejects collisions', () => {
+  const views = saveView(saveView([], 'One', filters), 'Two', filters);
+  assert.deepEqual(renameSavedView(views, 'One', 'New').map(view => view.name), ['New','Two']);
+  assert.throws(() => renameSavedView(views, 'One', 'two'), /already exists/);
+  assert.equal(views[0].name, 'One');
 });

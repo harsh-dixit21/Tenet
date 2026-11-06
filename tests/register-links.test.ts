@@ -20,3 +20,8 @@ test('invalid links fall back and unrelated routes cannot redirect sign-in', () 
   assert.equal(isRegisterLink('#instrument?filters=1'), false);
   assert.throws(() => registerLink('https://example.test/portal/#records', {...defaultRegisterFilters, pageSize:100}));
 });
+
+test('ambiguous link flags and duplicate parameters are rejected', () => {
+  for (const query of ['filters=1&active=maybe','filters=1&rows=10&rows=50','filters=1&q=a&q=b'])
+    assert.equal(readRegisterLink(new URLSearchParams(query)), null);
+});

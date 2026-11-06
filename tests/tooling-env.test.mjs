@@ -44,3 +44,8 @@ test('validate Firebase project ID boundaries', () => {
   for (const value of ['abc', 'Uppercase-id', 'project_', '-project', 'project-', 'a'.repeat(31)]) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_PROJECT_ID: value}).some(error => error.includes('valid project ID')));
   assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_PROJECT_ID: 'demo-tenet', VITE_FIREBASE_USE_EMULATORS: 'true', VITE_FIREBASE_APPCHECK_SITE_KEY: ''}), []);
 });
+
+test('accept custom auth domains and reject URLs or malformed hosts', () => {
+  assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_AUTH_DOMAIN: 'auth.example.org'}), []);
+  for (const value of ['https://auth.example.org', 'auth.example.org/path', 'auth..org', '-auth.example.org']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_AUTH_DOMAIN: value}).some(error => error.includes('must be a hostname')));
+});

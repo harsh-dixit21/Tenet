@@ -30,5 +30,6 @@ export function validateFirebaseEnv(entries) {
   }
   if (entries.VITE_FIREBASE_USE_EMULATORS !== undefined && !['true', 'false'].includes(entries.VITE_FIREBASE_USE_EMULATORS)) errors.push('VITE_FIREBASE_USE_EMULATORS must be true or false');
   if (entries.VITE_FIREBASE_PROJECT_ID && !/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(entries.VITE_FIREBASE_PROJECT_ID)) errors.push('VITE_FIREBASE_PROJECT_ID must be a valid project ID');
+  if (entries.VITE_FIREBASE_AUTH_DOMAIN && !/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(entries.VITE_FIREBASE_AUTH_DOMAIN)) errors.push('VITE_FIREBASE_AUTH_DOMAIN must be a hostname without a scheme or path');
   return errors;
 }

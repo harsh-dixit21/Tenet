@@ -33,3 +33,9 @@ test('reject copied placeholder configuration', () => {
     assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_API_KEY: value}).includes('VITE_FIREBASE_API_KEY contains a placeholder'));
   }
 });
+
+test('reject mistyped emulator switches and allow the production default', () => {
+  for (const value of ['', 'TRUE', '1', 'yes']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_USE_EMULATORS: value}).some(error => error.includes('must be true or false')));
+  const entries = valid(); delete entries.VITE_FIREBASE_USE_EMULATORS;
+  assert.deepEqual(validateFirebaseEnv(entries), []);
+});

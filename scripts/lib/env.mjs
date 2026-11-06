@@ -28,5 +28,6 @@ export function validateFirebaseEnv(entries) {
   for (const key of [...required, 'VITE_FIREBASE_APPCHECK_SITE_KEY']) {
     if (/^(?:your[-_ ].*|replace[-_ ].*|change[-_ ]?me|<.*>)$/i.test(entries[key] || '')) errors.push(`${key} contains a placeholder`);
   }
+  if (entries.VITE_FIREBASE_USE_EMULATORS !== undefined && !['true', 'false'].includes(entries.VITE_FIREBASE_USE_EMULATORS)) errors.push('VITE_FIREBASE_USE_EMULATORS must be true or false');
   return errors;
 }

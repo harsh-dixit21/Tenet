@@ -16,3 +16,10 @@ test('stream exact file hashes in deterministic portable path order', async t =>
   assert.equal(manifest.files[2].sha256, createHash('sha256').update(bytes).digest('hex'));
   assert.deepEqual(await buildManifest(root, 'test-commit'), manifest);
 });
+
+test('reject linked release directories instead of following external content', async t => {
+  const {root} = sandbox(t, {'index.html': 'Tenet'});
+  const outside = sandbox(t, {'private.txt': 'synthetic'});
+  symlinkSync(outside.root, join(root, 'linked'), 'junction');
+  await assert.rejects(buildManifest(root, 'test'), /Unsupported release entry: linked/);
+});

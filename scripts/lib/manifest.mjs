@@ -6,6 +6,7 @@ export async function buildManifest(root, commit) {
   function walk(dir, prefix = '') {
     return readdirSync(dir, {withFileTypes: true}).flatMap(entry => {
       const path = prefix + entry.name;
+      if (entry.isSymbolicLink() || (!entry.isDirectory() && !entry.isFile())) throw new Error(`Unsupported release entry: ${path}`);
       return entry.isDirectory() ? walk(join(dir, entry.name), path + '/') : [path];
     }).sort();
   }

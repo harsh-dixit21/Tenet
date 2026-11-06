@@ -42,6 +42,10 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
           onSelect(name.trim()); setName('');
         }
       }}>Duplicate using name</Button>
+      <Button type="button" variant="outline" disabled={!selected} onClick={() => {
+        if (window.confirm('Remove all instruments from this watchlist?'))
+          update(current => current.map(list => list.name === selected ? {...list, ids: []} : list), 'Watchlist cleared.');
+      }}>Clear membership</Button>
       <Button type="button" variant="ghost" disabled={!selected} onClick={() => {
         if (update(current => deleteWatchlist(current, selected), 'Watchlist deleted.')) onSelect('');
       }}>Delete watchlist</Button>

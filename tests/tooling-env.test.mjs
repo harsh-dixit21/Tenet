@@ -54,3 +54,7 @@ test('require numeric sender IDs without converting their precision', () => {
   assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_MESSAGING_SENDER_ID: '12345678901234567890'}), []);
   for (const value of ['123abc', '1e10', '12 34']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_MESSAGING_SENDER_ID: value}).some(error => error.includes('only digits')));
 });
+
+test('reject mobile application IDs in browser configuration', () => {
+  for (const value of ['1:123:android:abc123', '1:123:ios:abc123', 'tenet-live']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_APP_ID: value}).some(error => error.includes('web app ID')));
+});

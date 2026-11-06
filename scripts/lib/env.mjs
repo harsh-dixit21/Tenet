@@ -32,5 +32,6 @@ export function validateFirebaseEnv(entries) {
   if (entries.VITE_FIREBASE_PROJECT_ID && !/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(entries.VITE_FIREBASE_PROJECT_ID)) errors.push('VITE_FIREBASE_PROJECT_ID must be a valid project ID');
   if (entries.VITE_FIREBASE_AUTH_DOMAIN && !/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(entries.VITE_FIREBASE_AUTH_DOMAIN)) errors.push('VITE_FIREBASE_AUTH_DOMAIN must be a hostname without a scheme or path');
   if (entries.VITE_FIREBASE_MESSAGING_SENDER_ID && !/^\d+$/.test(entries.VITE_FIREBASE_MESSAGING_SENDER_ID)) errors.push('VITE_FIREBASE_MESSAGING_SENDER_ID must contain only digits');
+  if (entries.VITE_FIREBASE_APP_ID && !/^1:\d+:web:[a-f0-9]+$/i.test(entries.VITE_FIREBASE_APP_ID)) errors.push('VITE_FIREBASE_APP_ID must be a Firebase web app ID');
   return errors;
 }

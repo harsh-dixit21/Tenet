@@ -21,6 +21,7 @@ jobs:
             functions/package-lock.json
       - run: npm ci
       - run: npm --prefix functions ci
+      - run: npm run test:tooling
       - run: npm run test:utils
       - run: npm run test:backend
       - run: npm run build

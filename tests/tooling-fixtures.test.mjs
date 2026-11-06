@@ -14,3 +14,18 @@ test('accept decimal fixture counts only within the supported bounds', () => {
   assert.ok(fixture.records.every(record => record.amountMinor === record.amount * 100));
   assert.deepEqual(generateFixtures('12'), generateFixtures('12'));
 });
+
+test('fixture CLI separates help JSON and errors without writing data', () => {
+  const cli = fileURLToPath(new URL('../scripts/generate-fixtures.mjs', import.meta.url));
+  const run = (...args) => spawnSync(process.execPath, [cli, ...args], {encoding: 'utf8'});
+  assert.match(run('--help').stdout, /No database is contacted/);
+  const result = run('2');
+  assert.equal(result.status, 0);
+  assert.equal(JSON.parse(result.stdout).records.length, 2);
+  for (const args of [['2', '3'], ['invalid']]) {
+    const result = run(...args);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.ok(result.stderr.length > 0);
+  }
+});

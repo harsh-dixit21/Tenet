@@ -39,3 +39,8 @@ test('reject mistyped emulator switches and allow the production default', () =>
   const entries = valid(); delete entries.VITE_FIREBASE_USE_EMULATORS;
   assert.deepEqual(validateFirebaseEnv(entries), []);
 });
+
+test('validate Firebase project ID boundaries', () => {
+  for (const value of ['abc', 'Uppercase-id', 'project_', '-project', 'project-', 'a'.repeat(31)]) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_PROJECT_ID: value}).some(error => error.includes('valid project ID')));
+  assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_PROJECT_ID: 'demo-tenet', VITE_FIREBASE_USE_EMULATORS: 'true', VITE_FIREBASE_APPCHECK_SITE_KEY: ''}), []);
+});

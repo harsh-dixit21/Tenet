@@ -29,5 +29,6 @@ export function validateFirebaseEnv(entries) {
     if (/^(?:your[-_ ].*|replace[-_ ].*|change[-_ ]?me|<.*>)$/i.test(entries[key] || '')) errors.push(`${key} contains a placeholder`);
   }
   if (entries.VITE_FIREBASE_USE_EMULATORS !== undefined && !['true', 'false'].includes(entries.VITE_FIREBASE_USE_EMULATORS)) errors.push('VITE_FIREBASE_USE_EMULATORS must be true or false');
+  if (entries.VITE_FIREBASE_PROJECT_ID && !/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(entries.VITE_FIREBASE_PROJECT_ID)) errors.push('VITE_FIREBASE_PROJECT_ID must be a valid project ID');
   return errors;
 }

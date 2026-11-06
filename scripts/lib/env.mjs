@@ -4,7 +4,7 @@ const required = ['API_KEY', 'AUTH_DOMAIN', 'PROJECT_ID', 'STORAGE_BUCKET', 'MES
 export function parseEnv(source) {
   const entries = Object.create(null);
   for (const [index, raw] of source.split(/\r?\n/).entries()) {
-    const line = raw.trim();
+    const line = raw.trim().replace(/^export\s+/, '');
     if (!line || line.startsWith('#')) continue;
     const match = /^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
     if (!match) throw new Error(`Invalid environment assignment on line ${index + 1}`);

@@ -10,3 +10,8 @@ test('reject malformed assignments with line numbers and no values', () => {
   assert.equal(parseEnv('TOKEN=a=b').TOKEN, 'a=b');
   assert.deepEqual(validateFirebaseEnv(valid()), []);
 });
+
+test('accept BOM CRLF and exported assignments', () => {
+  assert.equal(parseEnv('\uFEFFexport KEY=value\r\nOTHER=two\r\n').KEY, 'value');
+  assert.equal(parseEnv('exported=value').exported, 'value');
+});

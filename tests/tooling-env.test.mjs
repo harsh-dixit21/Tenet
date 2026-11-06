@@ -15,3 +15,10 @@ test('accept BOM CRLF and exported assignments', () => {
   assert.equal(parseEnv('\uFEFFexport KEY=value\r\nOTHER=two\r\n').KEY, 'value');
   assert.equal(parseEnv('exported=value').exported, 'value');
 });
+
+test('parse comments without truncating quoted hashes or equals', () => {
+  assert.equal(parseEnv('KEY=value # comment').KEY, 'value');
+  assert.equal(parseEnv('KEY="a # b=c" # comment').KEY, 'a # b=c');
+  assert.equal(parseEnv("KEY='literal#value'").KEY, 'literal#value');
+  assert.throws(() => parseEnv('KEY="secret'), /Invalid quoted value on line 1/);
+});

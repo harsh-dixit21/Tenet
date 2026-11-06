@@ -9,7 +9,13 @@ export function parseEnv(source) {
     const match = /^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
     if (!match) throw new Error(`Invalid environment assignment on line ${index + 1}`);
     const [, key, value] = match;
-    entries[key] = value.replace(/^(["'])(.*)\1$/, '$2');
+    if (value.startsWith('"') || value.startsWith("'")) {
+      const quoted = /^(["'])(.*?)\1\s*(?:#.*)?$/.exec(value);
+      if (!quoted) throw new Error(`Invalid quoted value on line ${index + 1}`);
+      entries[key] = quoted[2];
+    } else {
+      entries[key] = value.replace(/\s+#.*$/, '').trim();
+    }
   }
   return entries;
 }

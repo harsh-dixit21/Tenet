@@ -28,3 +28,12 @@ test('reject encoded traversal and accept encoded filenames inside dist', t => {
   put('assets/my app.js', 'export {};');
   assert.doesNotThrow(() => validateBuild(root));
 });
+
+test('reject empty assets and directory references', t => {
+  const {root, put} = setup(t);
+  put('index.html', '<title>Tenet</title><script src="/assets/app.js"></script>');
+  put('assets/app.js', '');
+  assert.throws(() => validateBuild(root), /nonempty file/);
+  put('index.html', '<title>Tenet</title><script src="/assets/"></script>');
+  assert.throws(() => validateBuild(root), /nonempty file/);
+});

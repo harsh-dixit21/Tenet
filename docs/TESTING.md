@@ -3,6 +3,7 @@
 Run these commands from the repository root with Node.js 22:
 
 ```powershell
+npm run test:tooling
 npm run test:utils
 npm run test:backend
 npm run build
@@ -11,6 +12,8 @@ npm run check:tracked
 npm run check:size
 npm run check:series
 ```
+
+Operational script behavior and limitations are documented in [TOOLING.md](TOOLING.md). The tooling suite uses isolated temporary files and never production credentials.
 
 The utility suite covers money precision, search, inclusive maturity boundaries, version selection, CSV escaping, malformed routes and renewal eligibility. Backend unit tests exercise both accepted transitions and permission, integrity, chronology and protocol rejections. check:series intentionally applies to the completed 100-commit branch and needs full Git history.
 

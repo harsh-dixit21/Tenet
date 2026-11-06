@@ -9,10 +9,12 @@ A React + TypeScript prototype for security deposit and FDR management. Black an
 ## Run
 
 ```powershell
-cd C:\SIH\lycoris
+cd C:\SIH\tenet-source
 npm install
 npm run dev
 ```
+
+See [docs/TOOLING.md](docs/TOOLING.md) for environment validation, production preflight, build checks and release manifests.
 
 `npm run build` checks TypeScript and creates the production build in `dist/`.
 

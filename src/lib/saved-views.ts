@@ -41,3 +41,10 @@ export function saveView(views: SavedView[], name: string, filters: RegisterFilt
   return [...views, {name: trimmed, filters: {...filters}}];
 }
 export const viewsKey = (account: string, screen: string) => `tenet-saved-views-v1:${encodeURIComponent(account)}:${encodeURIComponent(screen)}`;
+export function renameSavedView(views: SavedView[], previous: string, name: string): SavedView[] {
+  const existing = views.find(view => view.name === previous);
+  if (!existing) throw new Error('This saved view was removed.');
+  const others = views.filter(view => view.name !== previous);
+  const renamed = saveView(others, name, existing.filters).at(-1)!;
+  return views.map(view => view.name === previous ? renamed : view);
+}

@@ -1,5 +1,5 @@
 import {useState, type FormEvent} from 'react';
-import {decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
+import {renameSavedView, decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
 import {CopyRegisterLink} from './copy-register-link';
 import {Button} from '../ui/button';
 import {Input} from '../ui/input';
@@ -26,6 +26,13 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
       setError(e instanceof Error && e.name !== 'QuotaExceededError' && e.name !== 'SecurityError' ? e.message : 'Browser storage is unavailable. Your filters are still active.');
     }
   }
+  function rename(previous: string) {
+    setError(''); setMessage('');
+    try {
+      persist(renameSavedView(decodeViews(localStorage.getItem(storageKey)), previous, name));
+      setName(''); setMessage('Saved view renamed.');
+    } catch (error) { setError(error instanceof Error ? error.message : 'Unable to rename saved view.'); }
+  }
   function remove(name: string) {
     setError(''); setMessage('');
     try {
@@ -46,6 +53,7 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
         <span className="min-w-0 break-all text-sm">{view.name}</span>
         <div className="flex min-w-0 flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" aria-label={`Apply ${view.name}`} onClick={() => {onApply({...view.filters}); setError(''); setMessage(`Applied “${view.name}”.`);}}>Apply</Button>
+          <Button type="button" variant="ghost" size="sm" disabled={!name.trim()} aria-label={`Rename ${view.name}`} onClick={() => rename(view.name)}>Rename using name</Button>
           <CopyRegisterLink filters={view.filters} name={view.name}/>
           <Button type="button" variant="ghost" size="sm" aria-label={`Delete ${view.name}`} onClick={() => remove(view.name)}>Delete</Button>
         </div>

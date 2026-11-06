@@ -27,3 +27,9 @@ test('reject duplicate keys instead of silently overriding configuration', () =>
   assert.throws(() => parseEnv('KEY=first\nKEY=second'), /Duplicate environment key KEY on line 2/);
   assert.equal(parseEnv('__proto__=literal').__proto__, 'literal');
 });
+
+test('reject copied placeholder configuration', () => {
+  for (const value of ['your-api-key', 'REPLACE_ME', '<project-id>', 'changeme']) {
+    assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_API_KEY: value}).includes('VITE_FIREBASE_API_KEY contains a placeholder'));
+  }
+});

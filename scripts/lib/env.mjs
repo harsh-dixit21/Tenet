@@ -25,5 +25,8 @@ export function validateFirebaseEnv(entries) {
   const errors = required.filter(key => !entries[key]).map(key => `${key} is required`);
   if (entries.VITE_FIREBASE_PROJECT_ID?.startsWith('demo-') && entries.VITE_FIREBASE_USE_EMULATORS !== 'true') errors.push('Demo projects require emulator mode');
   if (entries.VITE_FIREBASE_USE_EMULATORS !== 'true' && !entries.VITE_FIREBASE_APPCHECK_SITE_KEY) errors.push('Production requires the App Check site key');
+  for (const key of [...required, 'VITE_FIREBASE_APPCHECK_SITE_KEY']) {
+    if (/^(?:your[-_ ].*|replace[-_ ].*|change[-_ ]?me|<.*>)$/i.test(entries[key] || '')) errors.push(`${key} contains a placeholder`);
+  }
   return errors;
 }

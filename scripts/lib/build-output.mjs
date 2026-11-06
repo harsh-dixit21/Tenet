@@ -1,5 +1,5 @@
 import {readFileSync, existsSync, statSync, realpathSync} from 'node:fs';
-import {resolve, relative, isAbsolute} from 'node:path';
+import {resolve, relative, isAbsolute, dirname} from 'node:path';
 
 function assertInside(root, target) {
   const rel = relative(realpathSync(root), target);
@@ -12,9 +12,16 @@ export function validateBuild(root = 'dist') {
     if (!existsSync(entryPath)) throw new Error(`Missing build entry: ${entry}. Run npm run build first.`);
     const html = readFileSync(entryPath, 'utf8');
     if (!html.includes('Tenet')) throw new Error(`Missing title in ${entry}`);
-    for (const match of html.matchAll(/(?:src|href)\s*=\s*(["'])(\/assets\/[^"']*)\1/gi)) {
-      const reference = decodeURIComponent(match[2].split(/[?#]/)[0]);
-      const path = resolve(root, '.' + reference);
+    // Inspect resource tags only: navigation links and external URLs are not build artifacts.
+    const resources = [...html.matchAll(/<(script|link|img|source|video|audio)\b[^>]*>/gi)].flatMap(([tag, kind]) => {
+      if (kind.toLowerCase() === 'link' && !/\brel\s*=\s*(["'])(?:stylesheet|icon|preload|modulepreload)\1/i.test(tag)) return [];
+      return [...tag.matchAll(/\b(?:src|href|poster)\s*=\s*(["'])([^"']+)\1/gi)].map(match => match[2]);
+    });
+    for (const resource of resources) {
+      if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(resource)) continue;
+      const reference = decodeURIComponent(resource.split(/[?#]/)[0]);
+      if (!reference) continue;
+      const path = reference.startsWith('/') ? resolve(root, '.' + reference) : resolve(dirname(entryPath), reference);
       assertInside(root, path);
       if (!existsSync(path)) throw new Error(`Missing built asset: ${reference}`);
       assertInside(root, realpathSync(path));

@@ -37,3 +37,15 @@ test('reject empty assets and directory references', t => {
   put('index.html', '<title>Tenet</title><script src="/assets/"></script>');
   assert.throws(() => validateBuild(root), /nonempty file/);
 });
+
+test('verify landing styles relative portal scripts and video posters', t => {
+  const {root, put} = setup(t);
+  put('index.html', '<title>Tenet</title><link rel="stylesheet" href="/landing/styles.css"><a href="/not-a-build-file">Navigate</a><script src="https://example.org/app.js"></script>');
+  assert.throws(() => validateBuild(root), /landing\/styles.css/);
+  put('landing/styles.css', 'body {}');
+  put('portal/index.html', '<title>Tenet</title><script src="../assets/app.js"></script><video poster="../assets/poster.jpg"></video>');
+  put('assets/app.js', 'export {};');
+  assert.throws(() => validateBuild(root), /poster.jpg/);
+  put('assets/poster.jpg', 'synthetic-image');
+  assert.doesNotThrow(() => validateBuild(root));
+});

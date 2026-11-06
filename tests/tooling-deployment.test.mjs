@@ -25,3 +25,13 @@ test('require explicit production App Check enforcement', t => {
   }
   assert.throws(() => validateDeployment(root, 'demo-tenet'), /real Firebase project/);
 });
+
+test('parse quoted administrator settings and reject malformed mailboxes', t => {
+  const {root, put} = setup(t);
+  put('functions/.env', 'export INITIAL_ADMIN_EMAIL="admin@example.org" # owner\nTENET_ENFORCE_APP_CHECK="true"');
+  assert.doesNotThrow(() => validateDeployment(root, 'tenet-live'));
+  for (const value of ['admin@@example.org', 'admin@example', 'admin example@org.test']) {
+    put('functions/.env', `INITIAL_ADMIN_EMAIL=${value}\nTENET_ENFORCE_APP_CHECK=true`);
+    assert.throws(() => validateDeployment(root, 'tenet-live'), /Set INITIAL_ADMIN_EMAIL/);
+  }
+});

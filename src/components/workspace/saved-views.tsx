@@ -1,5 +1,5 @@
 import {useState, type FormEvent} from 'react';
-import {renameSavedView, decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
+import {renameSavedView, validFilters, decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
 import {CopyRegisterLink} from './copy-register-link';
 import {Button} from '../ui/button';
 import {Input} from '../ui/input';
@@ -33,6 +33,16 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
       setName(''); setMessage('Saved view renamed.');
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to rename saved view.'); }
   }
+  function replaceFilters(name: string) {
+    setError(''); setMessage('');
+    try {
+      if (!validFilters(filters)) throw new Error('Check the current filters before updating.');
+      const current = decodeViews(localStorage.getItem(storageKey));
+      if (!current.some(view => view.name === name)) throw new Error('This saved view was removed.');
+      persist(current.map(view => view.name === name ? {...view, filters: {...filters}} : view));
+      setMessage('Saved view updated with current filters.');
+    } catch (error) { setError(error instanceof Error ? error.message : 'Unable to update saved view.'); }
+  }
   function remove(name: string) {
     setError(''); setMessage('');
     try {
@@ -54,6 +64,7 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
         <div className="flex min-w-0 flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" aria-label={`Apply ${view.name}`} onClick={() => {onApply({...view.filters}); setError(''); setMessage(`Applied “${view.name}”.`);}}>Apply</Button>
           <Button type="button" variant="ghost" size="sm" disabled={!name.trim()} aria-label={`Rename ${view.name}`} onClick={() => rename(view.name)}>Rename using name</Button>
+          <Button type="button" variant="ghost" size="sm" aria-label={`Update ${view.name}`} onClick={() => replaceFilters(view.name)}>Update filters</Button>
           <CopyRegisterLink filters={view.filters} name={view.name}/>
           <Button type="button" variant="ghost" size="sm" aria-label={`Delete ${view.name}`} onClick={() => remove(view.name)}>Delete</Button>
         </div>

@@ -70,3 +70,16 @@ test('detect runtime drift between Firebase and the functions package', t => {
   put('firebase.json', JSON.stringify({...config, functions: [{source: 'functions', codebase: 'tenet', runtime: 'nodejs20'}]}));
   assert.throws(() => validateDeployment(root, 'tenet-live'), /nodejs22 runtime/);
 });
+
+test('bind production preflight to the validated frontend project', t => {
+  const {root, put} = setup(t);
+  assert.throws(() => validateDeployment(root, 'other-live'), /does not match/);
+  put('.env.local', 'VITE_FIREBASE_PROJECT_ID=tenet-live');
+  assert.throws(() => validateDeployment(root, 'tenet-live'), /VITE_FIREBASE_API_KEY is required/);
+});
+test('refuse emulator-enabled frontend configurations for production', t => {
+  const {root, put} = setup(t);
+  const {readFileSync} = process.getBuiltinModule('node:fs');
+  put('.env.local', readFileSync(root + '/.env.local', 'utf8').replace('EMULATORS=false', 'EMULATORS=true'));
+  assert.throws(() => validateDeployment(root, 'tenet-live'), /Disable frontend emulators/);
+});

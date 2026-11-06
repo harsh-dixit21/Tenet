@@ -35,3 +35,11 @@ test('parse quoted administrator settings and reject malformed mailboxes', t => 
     assert.throws(() => validateDeployment(root, 'tenet-live'), /Set INITIAL_ADMIN_EMAIL/);
   }
 });
+
+test('reject absolute traversal directory and missing configuration paths', t => {
+  const {root, put} = setup(t);
+  for (const path of ['../outside.rules', root, 'functions', '', 'missing.rules']) {
+    put('firebase.json', JSON.stringify({...config, storage: {rules: path}}));
+    assert.throws(() => validateDeployment(root, 'tenet-live'), /checkout|Missing/);
+  }
+});

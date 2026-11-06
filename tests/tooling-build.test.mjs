@@ -19,3 +19,12 @@ test('verify single quoted uppercase and cache-busted asset references', t => {
   put('assets/app.js', 'export {};');
   assert.doesNotThrow(() => validateBuild(root));
 });
+
+test('reject encoded traversal and accept encoded filenames inside dist', t => {
+  const {root, put} = setup(t);
+  put('index.html', '<title>Tenet</title><script src="/assets/%2e%2e/%2e%2e/outside.js"></script>');
+  assert.throws(() => validateBuild(root), /escapes the dist/);
+  put('index.html', '<title>Tenet</title><script src="/assets/my%20app.js"></script>');
+  put('assets/my app.js', 'export {};');
+  assert.doesNotThrow(() => validateBuild(root));
+});

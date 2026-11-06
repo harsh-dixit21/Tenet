@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {parseEnv, validateFirebaseEnv} from '../scripts/lib/env.mjs';
+
+const valid = () => ({VITE_FIREBASE_API_KEY: 'configured-key', VITE_FIREBASE_AUTH_DOMAIN: 'tenet-live.firebaseapp.com', VITE_FIREBASE_PROJECT_ID: 'tenet-live', VITE_FIREBASE_STORAGE_BUCKET: 'tenet-live.firebasestorage.app', VITE_FIREBASE_MESSAGING_SENDER_ID: '123456789', VITE_FIREBASE_APP_ID: '1:123456789:web:abc123', VITE_FIREBASE_APPCHECK_SITE_KEY: 'configured-site-key', VITE_FIREBASE_USE_EMULATORS: 'false'});
+test('reject malformed assignments with line numbers and no values', () => {
+  for (const line of ['SECRET_VALUE', '=SECRET_VALUE', 'BAD KEY=SECRET_VALUE']) {
+    assert.throws(() => parseEnv('# comment\n' + line), error => error.message === 'Invalid environment assignment on line 2');
+  }
+  assert.equal(parseEnv('TOKEN=a=b').TOKEN, 'a=b');
+  assert.deepEqual(validateFirebaseEnv(valid()), []);
+});

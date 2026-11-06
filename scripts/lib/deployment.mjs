@@ -18,6 +18,8 @@ export function validateDeployment(root, project) {
   for (const file of [config.firestore.rules, config.firestore.indexes, config.storage.rules, 'functions/.env']) {
     if (!readFileSync(localFile(root, file), 'utf8').trim()) throw new Error(`Empty deployment file: ${file}`);
   }
+  const indexes = JSON.parse(readFileSync(localFile(root, config.firestore.indexes), 'utf8'));
+  if (!indexes || !Array.isArray(indexes.indexes) || (indexes.fieldOverrides !== undefined && !Array.isArray(indexes.fieldOverrides))) throw new Error('Firestore indexes must contain an indexes array and optional fieldOverrides array');
   const backend = parseEnv(readFileSync(resolve(root, 'functions/.env'), 'utf8'));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backend.INITIAL_ADMIN_EMAIL || '')) throw new Error('Set INITIAL_ADMIN_EMAIL in functions/.env');
   if (backend.TENET_ENFORCE_APP_CHECK !== 'true') throw new Error('Set TENET_ENFORCE_APP_CHECK=true for production');

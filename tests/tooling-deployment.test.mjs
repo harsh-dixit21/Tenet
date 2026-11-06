@@ -51,3 +51,13 @@ test('reject empty and whitespace-only deployment rules', t => {
     assert.throws(() => validateDeployment(root, 'tenet-live'), /Empty deployment file: storage.rules/);
   }
 });
+
+test('verify Firestore index document shape', t => {
+  const {root, put} = setup(t);
+  for (const value of ['null', '{}', '{"indexes":{}}', '{"indexes":[],"fieldOverrides":{}}']) {
+    put('firestore.indexes.json', value);
+    assert.throws(() => validateDeployment(root, 'tenet-live'), /indexes array/);
+  }
+  put('firestore.indexes.json', '{"indexes":[]}');
+  assert.doesNotThrow(() => validateDeployment(root, 'tenet-live'));
+});

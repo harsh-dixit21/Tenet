@@ -68,7 +68,7 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
     <p className="mt-2 text-xs text-muted-foreground">{views.length}/5 saved on this screen · Stored in this browser only.</p>
     {views.length > 0 && <ul className="mt-3 flex flex-col gap-2">
       {views.map(view => <li key={view.name} className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
-        <span className="min-w-0 break-all text-sm">{view.name}</span>
+        <span className="min-w-0 break-all text-sm">{view.name}<small className="mt-1 block text-xs text-muted-foreground">{view.filters.status} · {view.filters.bank} · {view.filters.activeOnly?'Active only':'All lifecycles'}</small></span>
         <div className="flex min-w-0 flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" aria-label={`Apply ${view.name}`} onClick={() => {onApply({...view.filters}); setError(''); setMessage(`Applied “${view.name}”.`);}}>Apply</Button>
           <Button type="button" variant="ghost" size="sm" disabled={!name.trim()} aria-label={`Rename ${view.name}`} onClick={() => rename(view.name)}>Rename using name</Button>

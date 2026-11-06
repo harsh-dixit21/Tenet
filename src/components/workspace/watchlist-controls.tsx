@@ -47,7 +47,7 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
           update(current => current.map(list => list.name === selected ? {...list, ids: []} : list), 'Watchlist cleared.');
       }}>Clear membership</Button>
       <Button type="button" variant="ghost" disabled={!selected} onClick={() => {
-        if (update(current => deleteWatchlist(current, selected), 'Watchlist deleted.')) onSelect('');
+        if (window.confirm('Delete this watchlist and its membership?') && update(current => deleteWatchlist(current, selected), 'Watchlist deleted.')) onSelect('');
       }}>Delete watchlist</Button>
       <Button type="button" variant="outline" disabled={!selected} onClick={() => {
         const list = lists.find(item => item.name === selected);

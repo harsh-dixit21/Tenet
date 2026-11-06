@@ -2,6 +2,9 @@ import {defaultRegisterFilters, validFilters, type RegisterFilters} from './save
 
 export function readRegisterLink(params: URLSearchParams): RegisterFilters | null {
   if (params.get('filters') !== '1') return null;
+  for (const key of ['filters','q','status','sort','bank','from','to','active','rows']) {
+    if (params.getAll(key).length > 1) return null;
+  }
   if (params.has('active') && !['', '0', '1'].includes(params.get('active')!)) return null;
   const filters = {
     query: params.get('q') ?? defaultRegisterFilters.query,

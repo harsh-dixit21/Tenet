@@ -1,5 +1,5 @@
 import {useState, type FormEvent} from 'react';
-import {createWatchlist, deleteWatchlist, renameWatchlist, type Watchlist} from '@/lib/watchlists';
+import {duplicateWatchlist, createWatchlist, deleteWatchlist, renameWatchlist, type Watchlist} from '@/lib/watchlists';
 import {Button} from '../ui/button';
 import {download, csv} from './store';
 import {Input} from '../ui/input';
@@ -36,6 +36,11 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
           onSelect(name.trim()); setName('');
         }
       }}>Rename using name</Button>
+      <Button type="button" variant="outline" disabled={!selected || !name.trim()} onClick={() => {
+        if (update(current => duplicateWatchlist(current, selected, name), 'Watchlist duplicated.')) {
+          onSelect(name.trim()); setName('');
+        }
+      }}>Duplicate using name</Button>
       <Button type="button" variant="ghost" disabled={!selected} onClick={() => {
         if (update(current => deleteWatchlist(current, selected), 'Watchlist deleted.')) onSelect('');
       }}>Delete watchlist</Button>

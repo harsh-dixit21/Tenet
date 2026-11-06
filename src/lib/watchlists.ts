@@ -45,3 +45,9 @@ export function renameWatchlist(lists: Watchlist[], previous: string, name: stri
 export function deleteWatchlist(lists: Watchlist[], name: string): Watchlist[] {
   return lists.filter(list => list.name !== name);
 }
+export function duplicateWatchlist(lists: Watchlist[], source: string, name: string): Watchlist[] {
+  const original = lists.find(list => list.name === source);
+  if (!original) throw new Error('Select an existing watchlist.');
+  const next = createWatchlist(lists, name);
+  return next.map(list => list.name === name.trim() ? {...list, ids: [...original.ids]} : list);
+}

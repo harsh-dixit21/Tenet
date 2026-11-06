@@ -1,5 +1,5 @@
 import {useState, type FormEvent} from 'react';
-import {duplicateWatchlist, createWatchlist, deleteWatchlist, renameWatchlist, type Watchlist} from '@/lib/watchlists';
+import {addWatched, duplicateWatchlist, createWatchlist, deleteWatchlist, renameWatchlist, type Watchlist} from '@/lib/watchlists';
 import {Button} from '../ui/button';
 import {download, csv} from './store';
 import {Input} from '../ui/input';
@@ -9,6 +9,7 @@ type Props = {
 };
 export function WatchlistControls({lists, selected, onSelect, update}: Props) {
   const [name, setName] = useState('');
+  const [source, setSource] = useState('');
   function create(event: FormEvent) {
     event.preventDefault();
     if (update(current => createWatchlist(current, name), 'Watchlist created.')) {
@@ -48,6 +49,21 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
         const list = lists.find(item => item.name === selected);
         if (list) download('tenet-watchlist.csv', csv([['Watchlist', 'Instrument ID'], ...list.ids.map(id => [list.name, id])]));
       }}>Export watchlist IDs</Button>
+    </div>
+    <div className="flex flex-wrap items-end gap-3">
+      <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm">Merge from watchlist
+        <select className="workspace-select max-w-full" value={source} onChange={event => setSource(event.target.value)}>
+          <option value="">Select source</option>
+          {lists.filter(list => list.name !== selected).map(list => <option key={list.name}>{list.name}</option>)}
+        </select>
+      </label>
+      <Button type="button" variant="outline" disabled={!selected || !source || source === selected} onClick={() => {
+        update(current => {
+          const original = current.find(list => list.name === source);
+          if (!original) throw new Error('The source watchlist was removed.');
+          return addWatched(current, selected, original.ids);
+        }, 'Watchlists merged.');
+      }}>Merge into current</Button>
     </div>
   </section>;
 }

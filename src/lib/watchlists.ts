@@ -51,3 +51,13 @@ export function duplicateWatchlist(lists: Watchlist[], source: string, name: str
   const next = createWatchlist(lists, name);
   return next.map(list => list.name === name.trim() ? {...list, ids: [...original.ids]} : list);
 }
+export function addWatched(lists: Watchlist[], name: string, ids: string[]): Watchlist[] {
+  if (!lists.some(list => list.name === name)) throw new Error('Select an existing watchlist.');
+  if (!ids.every(id => /^[A-Za-z0-9_-]{1,120}$/.test(id))) throw new Error('Invalid instrument ID.');
+  return lists.map(list => {
+    if (list.name !== name) return list;
+    const combined = [...new Set([...list.ids, ...ids])];
+    if (combined.length > 500) throw new Error('The combined list exceeds 500 instruments.');
+    return {...list, ids: combined};
+  });
+}

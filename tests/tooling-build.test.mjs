@@ -49,3 +49,11 @@ test('verify landing styles relative portal scripts and video posters', t => {
   put('assets/poster.jpg', 'synthetic-image');
   assert.doesNotThrow(() => validateBuild(root));
 });
+
+test('require a Tenet title element rather than incidental body text', t => {
+  const {root, put} = setup(t);
+  for (const html of ['<title></title><p>Tenet</p>', '<title>Other</title><p>Tenet</p>', '<h1>Tenet</h1>']) {
+    put('index.html', html);
+    assert.throws(() => validateBuild(root), /Missing Tenet page title/);
+  }
+});

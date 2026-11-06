@@ -11,7 +11,7 @@ export function validateBuild(root = 'dist') {
     const entryPath = resolve(root, entry);
     if (!existsSync(entryPath)) throw new Error(`Missing build entry: ${entry}. Run npm run build first.`);
     const html = readFileSync(entryPath, 'utf8');
-    if (!html.includes('Tenet')) throw new Error(`Missing title in ${entry}`);
+    if (!/<title\b[^>]*>[^<]*\bTenet\b[^<]*<\/title\s*>/i.test(html)) throw new Error(`Missing Tenet page title in ${entry}`);
     // Inspect resource tags only: navigation links and external URLs are not build artifacts.
     const resources = [...html.matchAll(/<(script|link|img|source|video|audio)\b[^>]*>/gi)].flatMap(([tag, kind]) => {
       if (kind.toLowerCase() === 'link' && !/\brel\s*=\s*(["'])(?:stylesheet|icon|preload|modulepreload)\1/i.test(tag)) return [];

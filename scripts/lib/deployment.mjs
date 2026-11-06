@@ -20,6 +20,11 @@ export function validateDeployment(root, project) {
   }
   const indexes = JSON.parse(readFileSync(localFile(root, config.firestore.indexes), 'utf8'));
   if (!indexes || !Array.isArray(indexes.indexes) || (indexes.fieldOverrides !== undefined && !Array.isArray(indexes.fieldOverrides))) throw new Error('Firestore indexes must contain an indexes array and optional fieldOverrides array');
+  const functions = Array.isArray(config.functions) ? config.functions : [config.functions];
+  const backendConfig = functions.find(entry => entry?.codebase === 'tenet');
+  if (!backendConfig || backendConfig.source !== 'functions' || backendConfig.runtime !== 'nodejs22') throw new Error('Tenet functions must use the functions source and nodejs22 runtime');
+  const pkg = JSON.parse(readFileSync(localFile(root, 'functions/package.json'), 'utf8'));
+  if (pkg.engines?.node !== '22') throw new Error('Functions package must declare Node.js 22');
   const backend = parseEnv(readFileSync(resolve(root, 'functions/.env'), 'utf8'));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backend.INITIAL_ADMIN_EMAIL || '')) throw new Error('Set INITIAL_ADMIN_EMAIL in functions/.env');
   if (backend.TENET_ENFORCE_APP_CHECK !== 'true') throw new Error('Set TENET_ENFORCE_APP_CHECK=true for production');

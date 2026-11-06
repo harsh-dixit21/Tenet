@@ -61,3 +61,12 @@ test('verify Firestore index document shape', t => {
   put('firestore.indexes.json', '{"indexes":[]}');
   assert.doesNotThrow(() => validateDeployment(root, 'tenet-live'));
 });
+
+test('detect runtime drift between Firebase and the functions package', t => {
+  const {root, put} = setup(t);
+  put('functions/package.json', '{"engines":{"node":"20"}}');
+  assert.throws(() => validateDeployment(root, 'tenet-live'), /Node.js 22/);
+  put('functions/package.json', '{"engines":{"node":"22"}}');
+  put('firebase.json', JSON.stringify({...config, functions: [{source: 'functions', codebase: 'tenet', runtime: 'nodejs20'}]}));
+  assert.throws(() => validateDeployment(root, 'tenet-live'), /nodejs22 runtime/);
+});

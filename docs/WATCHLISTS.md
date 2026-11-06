@@ -9,3 +9,7 @@ To rename a list, enter its new name in Watchlist name and choose Rename using n
 Each account can keep five lists with up to 500 instruments each. Watchlists stay in local browser storage. Clearing that storage removes them. A separate demo scope keeps sample memberships apart from signed-in accounts. Open tabs receive changes through browser storage events.
 
 Saved filter presets and copied filter links retain their existing filter fields. Watchlist selection is a separate browser preference. Recipients of filter links select their own watchlists. All instrument data continues to follow the account's workspace permissions.
+
+Duplicate using name copies the current membership into a separate list. Merge from watchlist adds the source memberships to the current list, removing duplicate IDs and checking the 500-instrument limit. Clear membership and Delete watchlist request confirmation.
+
+Watch all filtered and Unwatch all filtered apply to every matching record across pages. Undo watchlist change restores the last local edit when another tab has not changed the stored lists. A conflicting tab edit makes undo unavailable. The register shows the visible row range, supports First and Last page navigation, and counts active filters next to Clear filters.

@@ -1,4 +1,4 @@
-import {useState, type FormEvent} from 'react';
+import {useEffect, useState, type FormEvent} from 'react';
 import {renameSavedView, validFilters, decodeViews, saveView, type RegisterFilters, type SavedView} from '@/lib/saved-views';
 import {CopyRegisterLink} from './copy-register-link';
 import {Button} from '../ui/button';
@@ -8,6 +8,14 @@ export function SavedViews({storageKey, filters, onApply}: {storageKey: string; 
   const [views, setViews] = useState<SavedView[]>(() => {
     try { return decodeViews(localStorage.getItem(storageKey)); } catch { return []; }
   });
+  useEffect(() => {
+    function sync(event: StorageEvent) {
+      if (event.storageArea === localStorage && (event.key === storageKey || event.key === null))
+        setViews(decodeViews(event.newValue));
+    }
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [storageKey]);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');

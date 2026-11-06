@@ -29,7 +29,7 @@ export function WatchlistControls({lists, selected, onSelect, update}: Props) {
       <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm">Current watchlist
         <select className="workspace-select max-w-full" value={selected} onChange={event => onSelect(event.target.value)}>
           <option value="">Select a watchlist</option>
-          {lists.map(list => <option key={list.name} value={list.name}>{list.name}</option>)}
+          {lists.map(list => <option key={list.name} value={list.name}>{list.name} ({list.ids.length})</option>)}
         </select>
       </label>
       <Button type="button" variant="outline" disabled={!selected || !name.trim()} onClick={() => {

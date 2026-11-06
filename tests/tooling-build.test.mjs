@@ -11,3 +11,11 @@ test('explain missing build entry points and accept complete builds', t => {
   assert.throws(() => validateBuild(root), /Missing build entry: index.html.*npm run build/);
   assert.doesNotThrow(() => validateBuild(setup(t).root));
 });
+
+test('verify single quoted uppercase and cache-busted asset references', t => {
+  const {root, put} = setup(t);
+  put('index.html', "<title>Tenet</title><script SRC = '/assets/app.js?v=1#module'></script>");
+  assert.throws(() => validateBuild(root), /Missing built asset: \/assets\/app.js/);
+  put('assets/app.js', 'export {};');
+  assert.doesNotThrow(() => validateBuild(root));
+});

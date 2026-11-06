@@ -7,9 +7,10 @@ export function validateBuild(root = 'dist') {
     if (!existsSync(entryPath)) throw new Error(`Missing build entry: ${entry}. Run npm run build first.`);
     const html = readFileSync(entryPath, 'utf8');
     if (!html.includes('Tenet')) throw new Error(`Missing title in ${entry}`);
-    for (const match of html.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)/g)) {
-      const path = resolve(root, '.' + match[1]);
-      if (!existsSync(path)) throw new Error(`Missing built asset: ${match[1]}`);
+    for (const match of html.matchAll(/(?:src|href)\s*=\s*(["'])(\/assets\/[^"']+)\1/gi)) {
+      const reference = match[2].split(/[?#]/)[0];
+      const path = resolve(root, '.' + reference);
+      if (!existsSync(path)) throw new Error(`Missing built asset: ${reference}`);
     }
   }
   const video = resolve(root, 'assets/tenet-background.mp4');

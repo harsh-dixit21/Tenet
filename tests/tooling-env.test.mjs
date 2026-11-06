@@ -49,3 +49,8 @@ test('accept custom auth domains and reject URLs or malformed hosts', () => {
   assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_AUTH_DOMAIN: 'auth.example.org'}), []);
   for (const value of ['https://auth.example.org', 'auth.example.org/path', 'auth..org', '-auth.example.org']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_AUTH_DOMAIN: value}).some(error => error.includes('must be a hostname')));
 });
+
+test('require numeric sender IDs without converting their precision', () => {
+  assert.deepEqual(validateFirebaseEnv({...valid(), VITE_FIREBASE_MESSAGING_SENDER_ID: '12345678901234567890'}), []);
+  for (const value of ['123abc', '1e10', '12 34']) assert.ok(validateFirebaseEnv({...valid(), VITE_FIREBASE_MESSAGING_SENDER_ID: value}).some(error => error.includes('only digits')));
+});

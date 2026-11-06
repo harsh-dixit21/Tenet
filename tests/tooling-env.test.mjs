@@ -22,3 +22,8 @@ test('parse comments without truncating quoted hashes or equals', () => {
   assert.equal(parseEnv("KEY='literal#value'").KEY, 'literal#value');
   assert.throws(() => parseEnv('KEY="secret'), /Invalid quoted value on line 1/);
 });
+
+test('reject duplicate keys instead of silently overriding configuration', () => {
+  assert.throws(() => parseEnv('KEY=first\nKEY=second'), /Duplicate environment key KEY on line 2/);
+  assert.equal(parseEnv('__proto__=literal').__proto__, 'literal');
+});

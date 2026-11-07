@@ -19,3 +19,5 @@ test('bank filter uses exact names',()=>{assert.deepEqual(filter({bank:'Other Ba
 test('institution scope combines with bank',()=>{assert.equal(filter({institution:'Alpha College'}).length,2);assert.equal(filter({institution:'Alpha College',bank:'Other Bank'}).length,0);});
 
 test('status scope excludes other lifecycle stages',()=>{assert.deepEqual(filter({status:'Verified'}).map(r=>r.id),['A']);});
+
+test('active exposure excludes drafts and terminal records',()=>{assert.deepEqual(filter({activeOnly:true}).map(r=>r.id),['A','B']);assert.equal(p.filterPortfolio([record({status:'Draft'})],{query:'',activeOnly:true},'2026-11-08').length,0);});

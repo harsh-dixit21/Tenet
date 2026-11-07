@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; status?: string; institution?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -13,6 +13,7 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     if (filters.bank && record.bank !== filters.bank) return false;
     if (filters.institution && record.institution !== filters.institution) return false;
     if (filters.status && record.status !== filters.status) return false;
+    if (filters.activeOnly && (record.status === 'Draft' || closed.has(record.status))) return false;
     // FILTERS
     return true;
   });

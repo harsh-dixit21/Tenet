@@ -31,3 +31,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 25. **Analyze portfolio concentration by bank.** Rank banks by face value and show their share of filtered exposure with exact totals.
 26. **Analyze portfolio concentration by institution.** Identify institutions with the largest matching face value and compare exact amounts and shares.
 27. **Build a monthly ladder of active deposit maturities.** Group active maturity dates by calendar month in chronological order.
+28. **Create a prioritized document gap worklist.** Rank active instruments by missing required categories and link directly to each record.

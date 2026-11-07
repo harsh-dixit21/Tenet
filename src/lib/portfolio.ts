@@ -126,3 +126,7 @@ export function maturityLadder(records: Instrument[]) {
   }
   return [...groups.values()].sort((a,b)=>a.month.localeCompare(b.month));
 }
+
+export function documentGaps(records: Instrument[]) {
+  return records.filter(record=>record.status!=='Draft'&&!closed.has(record.status)).map(record=>({record,missing:missingKinds(record)})).filter(row=>row.missing.length).sort((a,b)=>b.missing.length-a.missing.length||a.record.id.localeCompare(b.record.id));
+}

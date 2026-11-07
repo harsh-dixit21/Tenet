@@ -65,3 +65,5 @@ test('bank concentration reconciles amounts shares and zero totals',()=>{const g
 test('institution concentration groups across banks and retains count totals',()=>{const groups=p.concentration(records,'institution');assert.equal(groups.reduce((sum,g)=>sum+g.count,0),3);assert.equal(groups.find(g=>g.label==='Alpha College')?.amountMinor,15000);assert.deepEqual(p.concentration([],'institution'),[]);});
 
 test('maturity ladder excludes closed drafts and invalid dates',()=>{const ladder=p.maturityLadder([...records,record({status:'Draft'}),record({maturity:'invalid'})]);assert.deepEqual(ladder.map(g=>g.month),['2026-11','2026-12']);assert.equal(ladder.reduce((sum,g)=>sum+g.amountMinor,0),30000);});
+
+test('document worklist ignores closed history and orders by missing categories',()=>{const gaps=p.documentGaps(records);assert.deepEqual(gaps.map(g=>g.record.id),['A','B']);assert.equal(gaps[0].missing.length,3);});

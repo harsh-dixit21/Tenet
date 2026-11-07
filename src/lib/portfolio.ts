@@ -141,3 +141,10 @@ export function duplicateCandidates(records: Instrument[]) {
 export function evidenceGaps(records: Instrument[]) {
   return records.filter(record=>['Verified','Release requested'].includes(record.status)&&(!record.evidence?.source?.trim()||!record.evidence.reference?.trim()||!validDate(record.evidence.date))).sort((a,b)=>a.id.localeCompare(b.id));
 }
+
+export function successorLinks(records: Instrument[], authorized: Instrument[]) {
+  const lookup=new Map(authorized.map(record=>[record.id,record]));
+  const children=new Map<string,Instrument[]>();
+  for(const record of authorized) if(record.parent) children.set(record.parent,[...(children.get(record.parent)||[]),record]);
+  return records.filter(record=>record.parent||children.has(record.id)).map(record=>({record,parent:record.parent ? lookup.get(record.parent)?.id||'Unavailable in this workspace' : 'None',children:children.get(record.id)||[]}));
+}

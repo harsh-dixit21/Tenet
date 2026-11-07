@@ -49,3 +49,10 @@ export type SortField = 'id' | 'institution' | 'bank' | 'amount' | 'maturity' | 
 export function sortPortfolio(records: Instrument[], field: SortField, descending=false) {
   return [...records].sort((a,b)=> ((field === 'amount' ? minor(a)-minor(b) : a[field].localeCompare(b[field])) || a.id.localeCompare(b.id)) * (descending ? -1 : 1));
 }
+
+export function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
+  const size = [10,25,50].includes(pageSize) ? pageSize : 10;
+  const pages = Math.max(1,Math.ceil(items.length/size));
+  const page = Math.min(pages,Math.max(1,Number.isInteger(requestedPage) ? requestedPage : 1));
+  return {items:items.slice((page-1)*size,page*size),page,pages,start:items.length ? (page-1)*size+1 : 0,end:Math.min(page*size,items.length)};
+}

@@ -35,3 +35,5 @@ test('issue periods combine with maturity constraints',()=>{assert.equal(filter(
 test('maturity horizons exclude closed history and include day boundaries',()=>{assert.deepEqual(filter({horizon:'7'}).map(r=>r.id),['A']);assert.equal(filter({horizon:'overdue'}).length,0);assert.equal(p.filterPortfolio([record({maturity:'2026-11-08'})],{query:'',horizon:'7'},'2026-11-08').length,1);});
 
 test('portfolio sorting is stable and immutable',()=>{assert.deepEqual(p.sortPortfolio(records,'amount',true).map(r=>r.id),['B','A','C']);assert.deepEqual(records.map(r=>r.id),['A','B','C']);assert.deepEqual(p.sortPortfolio([record({id:'Z'}),record({id:'A'})],'maturity').map(r=>r.id),['A','Z']);});
+
+test('pagination clamps stale pages and empty ranges',()=>{const list=Array.from({length:26},(_,i)=>i);assert.deepEqual(p.paginate(list,3,10).items,[20,21,22,23,24,25]);assert.equal(p.paginate(list,99,10).page,3);assert.equal(p.paginate([],99,10).start,0);assert.equal(p.paginate(list,1,0).end,10);});

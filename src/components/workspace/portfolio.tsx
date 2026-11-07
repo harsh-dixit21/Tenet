@@ -33,18 +33,21 @@ export function Portfolio() {
   const referenceDate = filters.referenceDate || today();
   const [sort, setSort] = useState<p.SortField>('maturity');
   const [descending, setDescending] = useState(false);
-  function change(patch: Partial<p.PortfolioFilters>) { setFilters(current => ({...current, ...patch}));  }
+  const [page,setPage] = useState(1);
+  const [pageSize,setPageSize] = useState(10);
+  function change(patch: Partial<p.PortfolioFilters>) { setFilters(current => ({...current, ...patch})); setPage(1); }
   const rows = useMemo(() => p.filterPortfolio(workspace.records, filters, referenceDate), [workspace.records, filters, referenceDate]);
   const sorted = useMemo(()=>p.sortPortfolio(rows,sort,descending),[rows,sort,descending]);
+  const paged = p.paginate(sorted,page,pageSize);
   
   return <section className="portfolio" aria-label="Deposit portfolio">
-    <div className="portfolio-heading"><div><h2>Deposit portfolio</h2><p className="portfolio-note">{live ? 'Authorized workspace records' : 'Synthetic demo records'} · Amounts in INR</p></div><div className="portfolio-actions"></div></div>
+    <div className="portfolio-heading"><div><h2>Deposit portfolio</h2><p className="portfolio-note">{live ? 'Authorized workspace records' : 'Synthetic demo records'} Â· Amounts in INR</p></div><div className="portfolio-actions"></div></div>
     <div className="portfolio-totals"><div><span>Matching instruments</span><strong>{rows.length.toLocaleString('en-IN')}</strong></div><div><span>Matching face value</span><strong>{p.formatMinor(p.totalMinor(rows))}</strong></div></div>
     <div className="portfolio-filters">
       <Field label="Search portfolio"><input type="search" value={filters.query} onChange={event => change({query: event.target.value})} placeholder="Institution, bank, ID or instrument number"/></Field>
       <Field label="Portfolio bank"><select value={filters.bank || ''} onChange={event=>change({bank:event.target.value})}><option value="">All banks</option>{p.distinct(workspace.records,'bank').map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Portfolio institution"><select value={filters.institution || ''} onChange={event=>change({institution:event.target.value})}><option value="">All institutions</option>{p.distinct(workspace.records,'institution').map(value=><option key={value}>{value}</option>)}</select></Field>
-      <button type="button" onClick={() => {setFilters({query: ''}); }}>Clear filters</button>
+      <button type="button" onClick={() => {setFilters({query: ''}); setPage(1);}}>Clear filters</button>
     </div>
     <details className="portfolio-advanced"><summary>More filters</summary><div className="portfolio-filters"><Field label="Portfolio status"><select value={filters.status || ''} onChange={event=>change({status:event.target.value})}><option value="">All statuses</option>{p.distinct(workspace.records,'status').map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Lifecycle scope"><select value={filters.activeOnly?'active':'all'} onChange={event=>change({activeOnly:event.target.value==='active'})}><option value="all">All lifecycle history</option><option value="active">Active exposure only</option></select></Field>
@@ -56,8 +59,8 @@ export function Portfolio() {
 <Field label="Maturity horizon"><select value={filters.horizon || ''} onChange={event=>change({horizon:event.target.value as p.PortfolioFilters['horizon']})}><option value="">Any maturity</option><option value="overdue">Overdue active instruments</option><option value="7">Next 7 days</option><option value="30">Next 30 days</option><option value="90">Next 90 days</option></select></Field></div></details>
     {notice && <p role="status" className="portfolio-note">{notice}</p>}
     <div className="portfolio-filters"><Field label="Sort portfolio"><select value={sort} onChange={event=>setSort(event.target.value as p.SortField)}>{(['maturity','amount','institution','bank','status','id'] as const).map(value=><option key={value}>{value}</option>)}</select></Field><Field label="Sort direction"><select value={descending?'descending':'ascending'} onChange={event=>setDescending(event.target.value==='descending')}><option value="ascending">Ascending</option><option value="descending">Descending</option></select></Field></div>
-    <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col">Instrument</th>{columns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{sorted.map(record => <tr key={record.id}><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{columns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>
-    
+    <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col">Instrument</th>{columns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{paged.items.map(record => <tr key={record.id}><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{columns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>
+    <div className="portfolio-paging"><p className="portfolio-note" role="status">{paged.start}–{paged.end} of {rows.length} instruments · Page {paged.page} of {paged.pages}</p><div className="portfolio-actions"><Field label="Portfolio rows per page"><select value={pageSize} onChange={event=>{setPageSize(Number(event.target.value));setPage(1);}}>{[10,25,50].map(size=><option key={size}>{size}</option>)}</select></Field><button disabled={paged.page===1} onClick={()=>setPage(paged.page-1)}>Previous page</button><button disabled={paged.page===paged.pages} onClick={()=>setPage(paged.page+1)}>Next page</button></div></div>
     
   </section>;
 }

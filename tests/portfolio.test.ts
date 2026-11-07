@@ -41,3 +41,5 @@ test('pagination clamps stale pages and empty ranges',()=>{const list=Array.from
 test('column visibility removes unknown and duplicate saved fields',()=>{assert.deepEqual(p.readColumns(['Bank','Bank','Injected']),['Bank']);assert.deepEqual(p.readColumns(null),[...p.portfolioColumns]);assert.deepEqual(p.readColumns([]),[]);});
 
 test('density preferences fall back to comfortable spacing',()=>{assert.equal(p.readDensity('compact'),'compact');assert.equal(p.readDensity('unsupported'),'comfortable');});
+
+test('selection toggles immutably and excludes out-of-scope IDs',()=>{const initial=['A'];assert.deepEqual(p.toggleSelection(initial,'B'),['A','B']);assert.deepEqual(initial,['A']);assert.deepEqual(p.toggleSelection(initial,'A'),[]);assert.deepEqual(p.selectedInScope(records,['A','foreign']).map(r=>r.id),['A']);});

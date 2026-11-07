@@ -61,3 +61,6 @@ export const portfolioColumns = ['Institution','Bank','Amount INR','Maturity','S
 export function readColumns(value: unknown) { return Array.isArray(value) ? portfolioColumns.filter(column=>value.includes(column)) : [...portfolioColumns]; }
 
 export const readDensity = (value: unknown) => value === 'compact' ? 'compact' : 'comfortable';
+
+export function toggleSelection(ids: string[], id: string) { return ids.includes(id) ? ids.filter(value=>value!==id) : [...new Set([...ids,id])]; }
+export function selectedInScope(records: Instrument[], ids: string[]) { const selected=new Set(ids); return records.filter(record=>selected.has(record.id)); }

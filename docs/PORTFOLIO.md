@@ -5,3 +5,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 ## Features
 
 1. **Add searchable deposit portfolio workspace.** Search all tokens across institutions, bank, branch, record IDs and instrument numbers, with accent-insensitive matching and exact paise totals.
+2. **Filter portfolio by bank.** Select one bank from the authorized dataset.

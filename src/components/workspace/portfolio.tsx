@@ -41,7 +41,7 @@ export function Portfolio() {
     <div className="portfolio-totals"><div><span>Matching instruments</span><strong>{rows.length.toLocaleString('en-IN')}</strong></div><div><span>Matching face value</span><strong>{p.formatMinor(p.totalMinor(rows))}</strong></div></div>
     <div className="portfolio-filters">
       <Field label="Search portfolio"><input type="search" value={filters.query} onChange={event => change({query: event.target.value})} placeholder="Institution, bank, ID or instrument number"/></Field>
-      
+      <Field label="Portfolio bank"><select value={filters.bank || ''} onChange={event=>change({bank:event.target.value})}><option value="">All banks</option>{p.distinct(workspace.records,'bank').map(value=><option key={value}>{value}</option>)}</select></Field>
       <button type="button" onClick={() => {setFilters({query: ''}); }}>Clear filters</button>
     </div>
     

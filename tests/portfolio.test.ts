@@ -13,3 +13,5 @@ test('portfolio search combines tokens and preserves authorized input records', 
   assert.equal(records.length,3);
   assert.equal(p.filterPortfolio([record({institution:'École'})],{query:'ecole'},'2026-11-08').length,1);
 });
+
+test('bank filter uses exact names',()=>{assert.deepEqual(filter({bank:'Other Bank'}).map(r=>r.id),['B']);assert.equal(filter({bank:'Bank'}).length,0);assert.deepEqual(p.distinct(records,'bank'),['Other Bank','State Bank']);});

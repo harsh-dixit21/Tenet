@@ -31,3 +31,5 @@ test('maximum amounts and reversed amount bounds fail closed',()=>{assert.deepEq
 test('maturity windows include both boundaries',()=>{assert.deepEqual(filter({maturityFrom:'2026-11-15',maturityTo:'2026-12-01'}).map(r=>r.id),['A','B']);assert.equal(filter({maturityFrom:'2026-12-01',maturityTo:'2026-11-01'}).length,0);assert.equal(p.validDate('2026-02-30'),false);});
 
 test('issue periods combine with maturity constraints',()=>{assert.equal(filter({issuedFrom:'2026-01-01',issuedTo:'2026-01-01',maturityFrom:'2026-11-01'}).length,2);assert.equal(filter({issuedFrom:'2026-01-02'}).length,0);});
+
+test('maturity horizons exclude closed history and include day boundaries',()=>{assert.deepEqual(filter({horizon:'7'}).map(r=>r.id),['A']);assert.equal(filter({horizon:'overdue'}).length,0);assert.equal(p.filterPortfolio([record({maturity:'2026-11-08'})],{query:'',horizon:'7'},'2026-11-08').length,1);});

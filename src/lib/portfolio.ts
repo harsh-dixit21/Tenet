@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; issuedFrom?: string; issuedTo?: string; maturityFrom?: string; maturityTo?: string; maximum?: string; minimum?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; horizon?: '' | 'overdue' | '7' | '30' | '90'; issuedFrom?: string; issuedTo?: string; maturityFrom?: string; maturityTo?: string; maximum?: string; minimum?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -20,6 +20,10 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     if (filters.maximum && (parseAmount(filters.maximum) === null || minor(record) > parseAmount(filters.maximum)!)) return false;
     if ((filters.maturityFrom || filters.maturityTo) && !withinDate(record.maturity, filters.maturityFrom, filters.maturityTo)) return false;
     if ((filters.issuedFrom || filters.issuedTo) && !withinDate(record.issued, filters.issuedFrom, filters.issuedTo)) return false;
+    if (filters.horizon) {
+      const days = daysBetween(record.maturity, referenceDate);
+      if (closed.has(record.status) || record.status === 'Draft' || !Number.isFinite(days) || (filters.horizon === 'overdue' ? days >= 0 : days < 0 || days > Number(filters.horizon))) return false;
+    }
     // FILTERS
     return true;
   });
@@ -38,3 +42,5 @@ export function parseAmount(value: string) {
 
 export function validDate(value: string) { return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value; }
 export function withinDate(value: string, from='', to='') { return validDate(value) && (!from || validDate(from) && value >= from) && (!to || validDate(to) && value <= to); }
+
+export const daysBetween = (date: string, referenceDate: string) => validDate(date) && validDate(referenceDate) ? Math.round((Date.parse(date)-Date.parse(referenceDate))/86400000) : NaN;

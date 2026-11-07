@@ -49,3 +49,5 @@ test('selection totals and date spans reconcile with selected records',()=>{asse
 test('comparison enforces bounds and preserves exact monetary values',()=>{assert.equal(p.comparisonRows([records[0]]).length,0);assert.equal(p.comparisonRows(Array(5).fill(records[0])).length,0);assert.equal(p.comparisonRows(records.slice(0,2))[2][1],p.formatMinor(10000));});
 
 test('CSV rows use authoritative amounts and a stable export schema',()=>{const row=p.portfolioCsvRows([record({amount:999,amountMinor:10001})]);assert.equal(row[1][4],100.01);assert.equal(row[0].length,row[1].length);assert.equal(p.portfolioCsvRows([]).length,1);});
+
+test('snapshot exports metadata and reconciled totals without evidence or file contents',()=>{const snapshot=p.portfolioSnapshot([record({evidence:{source:'private source',reference:'private',date:'2026-01-01',note:'private note'}})],'2026-11-08');assert.equal(snapshot.totalAmountMinor,10000);assert.equal(snapshot.currency,'INR');assert.equal(JSON.stringify(snapshot).includes('private note'),false);assert.equal('docs' in snapshot.records[0],false);});

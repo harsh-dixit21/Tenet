@@ -84,3 +84,7 @@ export function comparisonRows(records: Instrument[]) {
 }
 
 export function portfolioCsvRows(records: Instrument[]): (string|number)[][] { return [['Instrument ID','Institution','Bank','Instrument number','Amount INR','Issued','Maturity','Status','Missing document categories'],...records.map(record=>[record.id,record.institution,record.bank,record.number,minor(record)/100,record.issued,record.maturity,record.status,missingKinds(record).join('; ')])]; }
+
+export function portfolioSnapshot(records: Instrument[], referenceDate: string) {
+  return {version:1,referenceDate,currency:'INR',count:records.length,totalAmountMinor:totalMinor(records),records:records.map(record=>({id:record.id,institution:record.institution,bank:record.bank,branch:record.branch,number:record.number,amountMinor:minor(record),issued:record.issued,maturity:record.maturity,status:record.status,missingDocuments:missingKinds(record)}))};
+}

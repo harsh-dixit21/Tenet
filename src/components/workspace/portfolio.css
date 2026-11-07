@@ -1,0 +1,30 @@
+.portfolio { min-width: 0; --portfolio-gap: 24px; display: flex; flex-direction: column; gap: var(--portfolio-gap); }
+/* At desktop, two equal columns plus a 24px gutter fill the available canvas exactly. */
+.portfolio-heading,.portfolio-actions,.portfolio-paging { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.portfolio h2 { font-size: 20px; font-weight: 600; }
+.portfolio-note { font-size: 13px; line-height: 1.6; color: var(--muted-foreground); margin-top: 6px; overflow-wrap: anywhere; }
+.portfolio-totals { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; padding: 20px 0; border-block: 1px solid var(--border); }
+.portfolio-totals span { display: block; color: var(--muted-foreground); font-size: 13px; }
+.portfolio-totals strong { font-size: clamp(20px,2.3vw,30px); font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.portfolio-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; }
+.portfolio-field { display: flex; min-width: 0; flex: 1 1 180px; flex-direction: column; gap: 8px; font-size: 13px; }
+.portfolio input:not([type=checkbox]),.portfolio select,.portfolio button { min-height: 44px; max-width: 100%; border: 1px solid var(--border); border-radius: 6px; background: var(--background); padding: 8px 12px; font-size: 13px; color: var(--foreground); }
+.portfolio input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--foreground); }
+.portfolio button { cursor: pointer; }
+.portfolio button:hover { background: var(--accent); }
+.portfolio button:disabled { cursor: default; opacity: .55; }
+.portfolio :is(input,select,button,a,summary,[tabindex]):focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
+.portfolio-scroll { width: 100%; max-width: 100%; overflow-x: auto; }
+.portfolio table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.portfolio :is(th,td) { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+.portfolio th { font-weight: 500; color: var(--muted-foreground); white-space: nowrap; }
+.portfolio td { overflow-wrap: anywhere; }
+.portfolio td:first-child { white-space: nowrap; }
+.portfolio a { text-decoration: underline; text-underline-offset: 3px; }
+.portfolio .portfolio-number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.portfolio summary { cursor: pointer; padding: 12px 0; font-size: 14px; font-weight: 500; }
+.portfolio-advanced { border-block: 1px solid var(--border); padding-bottom: 12px; }
+.portfolio-panel { border-top: 1px solid var(--border); min-width: 0; }
+.portfolio-panel-content { margin-top: 12px; }
+.portfolio-empty { padding: 24px 0; font-size: 14px; color: var(--muted-foreground); }
+@media(max-width:600px) { .portfolio-actions { width: 100%; justify-content: start; } .portfolio-totals { grid-template-columns: 1fr; gap: 16px; } .portfolio-filters>* { flex-basis: 100%; } .portfolio :is(th,td) { padding: 12px 8px; } }

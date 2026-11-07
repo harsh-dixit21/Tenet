@@ -18,3 +18,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 12. **Sort portfolio by value date institution or lifecycle stage.** Apply deterministic ascending or descending sorting without mutating records.
 13. **Page large portfolios with adjustable result counts.** Show 10, 25 or 50 rows with a truthful range; clamp pages after filters reduce results.
 14. **Customize visible portfolio table columns.** Hide optional columns while retaining instrument links and a fixed export schema.
+15. **Offer compact portfolio row density.** Switch to denser instrument rows while preserving control hit areas and readable numbers.

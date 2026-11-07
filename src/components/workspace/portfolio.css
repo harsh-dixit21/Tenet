@@ -30,3 +30,5 @@
 @media(max-width:600px) { .portfolio-actions { width: 100%; justify-content: start; } .portfolio-totals { grid-template-columns: 1fr; gap: 16px; } .portfolio-filters>* { flex-basis: 100%; } .portfolio :is(th,td) { padding: 12px 8px; } }
 
 .portfolio-check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; padding-right: 12px; }
+
+.portfolio:has(input[aria-label="Compact portfolio rows"]:checked) .portfolio-scroll :is(td,th) { padding-block: 9px; }

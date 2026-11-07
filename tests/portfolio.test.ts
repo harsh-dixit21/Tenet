@@ -39,3 +39,5 @@ test('portfolio sorting is stable and immutable',()=>{assert.deepEqual(p.sortPor
 test('pagination clamps stale pages and empty ranges',()=>{const list=Array.from({length:26},(_,i)=>i);assert.deepEqual(p.paginate(list,3,10).items,[20,21,22,23,24,25]);assert.equal(p.paginate(list,99,10).page,3);assert.equal(p.paginate([],99,10).start,0);assert.equal(p.paginate(list,1,0).end,10);});
 
 test('column visibility removes unknown and duplicate saved fields',()=>{assert.deepEqual(p.readColumns(['Bank','Bank','Injected']),['Bank']);assert.deepEqual(p.readColumns(null),[...p.portfolioColumns]);assert.deepEqual(p.readColumns([]),[]);});
+
+test('density preferences fall back to comfortable spacing',()=>{assert.equal(p.readDensity('compact'),'compact');assert.equal(p.readDensity('unsupported'),'comfortable');});

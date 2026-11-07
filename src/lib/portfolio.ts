@@ -59,3 +59,5 @@ export function paginate<T>(items: T[], requestedPage: number, pageSize: number)
 
 export const portfolioColumns = ['Institution','Bank','Amount INR','Maturity','Status'] as const;
 export function readColumns(value: unknown) { return Array.isArray(value) ? portfolioColumns.filter(column=>value.includes(column)) : [...portfolioColumns]; }
+
+export const readDensity = (value: unknown) => value === 'compact' ? 'compact' : 'comfortable';

@@ -45,3 +45,5 @@ test('density preferences fall back to comfortable spacing',()=>{assert.equal(p.
 test('selection toggles immutably and excludes out-of-scope IDs',()=>{const initial=['A'];assert.deepEqual(p.toggleSelection(initial,'B'),['A','B']);assert.deepEqual(initial,['A']);assert.deepEqual(p.toggleSelection(initial,'A'),[]);assert.deepEqual(p.selectedInScope(records,['A','foreign']).map(r=>r.id),['A']);});
 
 test('selection totals and date spans reconcile with selected records',()=>{assert.deepEqual(p.selectionSummary([records[0],records[1]]),{count:2,amountMinor:30000,earliest:'2026-11-15',latest:'2026-12-01'});assert.equal(p.selectionSummary([]).earliest,'—');});
+
+test('comparison enforces bounds and preserves exact monetary values',()=>{assert.equal(p.comparisonRows([records[0]]).length,0);assert.equal(p.comparisonRows(Array(5).fill(records[0])).length,0);assert.equal(p.comparisonRows(records.slice(0,2))[2][1],p.formatMinor(10000));});

@@ -69,3 +69,16 @@ export function selectionSummary(records: Instrument[]) {
   const dates=records.map(record=>record.maturity).filter(validDate).sort();
   return {count:records.length,amountMinor:totalMinor(records),earliest:dates[0]||'—',latest:dates.at(-1)||'—'};
 }
+
+export function comparisonRows(records: Instrument[]) {
+  if (records.length<2 || records.length>4) return [];
+  return [
+    ['Institution',...records.map(record=>record.institution)],
+    ['Bank',...records.map(record=>record.bank)],
+    ['Face value INR',...records.map(record=>formatMinor(minor(record)))],
+    ['Issued',...records.map(record=>record.issued)],
+    ['Maturity',...records.map(record=>record.maturity)],
+    ['Status',...records.map(record=>record.status)],
+    ['Missing categories',...records.map(record=>missingKinds(record).join(', ')||'None')]
+  ];
+}

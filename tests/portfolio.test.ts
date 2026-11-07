@@ -29,3 +29,5 @@ test('minimum amounts use paise and reject unsafe or malformed input',()=>{asser
 test('maximum amounts and reversed amount bounds fail closed',()=>{assert.deepEqual(filter({maximum:'100'}).map(r=>r.id),['A','C']);assert.equal(filter({minimum:'200',maximum:'100'}).length,0);assert.equal(filter({maximum:'0'}).length,0);});
 
 test('maturity windows include both boundaries',()=>{assert.deepEqual(filter({maturityFrom:'2026-11-15',maturityTo:'2026-12-01'}).map(r=>r.id),['A','B']);assert.equal(filter({maturityFrom:'2026-12-01',maturityTo:'2026-11-01'}).length,0);assert.equal(p.validDate('2026-02-30'),false);});
+
+test('issue periods combine with maturity constraints',()=>{assert.equal(filter({issuedFrom:'2026-01-01',issuedTo:'2026-01-01',maturityFrom:'2026-11-01'}).length,2);assert.equal(filter({issuedFrom:'2026-01-02'}).length,0);});

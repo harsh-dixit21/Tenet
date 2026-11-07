@@ -45,3 +45,5 @@
   .portfolio-print-only th,.portfolio-print-only td { color: black; border-color: #ccc; padding: 8px 4px; }
   .portfolio-print-only tr { break-inside: avoid; }
 }
+
+.portfolio textarea { width: 100%; min-height: 100px; border: 1px solid var(--border); padding: 12px; border-radius: 6px; background: var(--background); font-size: 13px; }

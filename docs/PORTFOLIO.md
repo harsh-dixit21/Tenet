@@ -27,3 +27,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 21. **Export only selected in-scope instruments.** Download an independent CSV of selected rows, excluding hidden or no-longer-authorized records.
 22. **Export active deposit maturities as calendar events.** Generate all-day iCalendar events with stable IDs, exclusive end dates, escaped content and UTF-8 line folding.
 23. **Print a complete filtered portfolio report.** Print all filtered results with reporting date and reconciled totals, regardless of on-screen pagination or hidden columns.
+24. **Copy filtered instrument IDs with a manual clipboard fallback.** Copy one record ID per line in current sort order and provide a selectable fallback when clipboard access fails.

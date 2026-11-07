@@ -108,3 +108,5 @@ export function maturityCalendar(records: Instrument[], referenceDate: string) {
   }
   lines.push('END:VCALENDAR');return lines.map(foldCalendarLine).join('\r\n')+'\r\n';
 }
+
+export const portfolioIds = (records: Instrument[]) => records.map(record=>record.id).join('\n');

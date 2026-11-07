@@ -57,3 +57,5 @@ test('selected exports exclude hidden and foreign records',()=>{const selected=p
 test('calendar exports active maturities with escaped and folded RFC lines',()=>{const calendar=p.maturityCalendar([record({institution:'Alpha, College; Unit\nTwo'}),records[2]],'2026-11-08');assert.equal((calendar.match(/BEGIN:VEVENT/g)||[]).length,1);assert.match(calendar,/DTSTART;VALUE=DATE:20261115/);assert.match(calendar,/DTEND;VALUE=DATE:20261116/);assert.ok(calendar.includes('Alpha\\, College\\; Unit\\nTwo'));for(const line of p.foldCalendarLine('SUMMARY:'+ 'कॉलेज'.repeat(30)).split('\r\n')) assert.ok(new TextEncoder().encode(line).length<=75);});
 
 test('print report totals cover all filtered pages',()=>{const many=Array.from({length:26},(_,i)=>record({id:String(i)}));assert.equal(p.portfolioSnapshot(many,'2026-11-08').count,26);assert.equal(p.totalMinor(many),260000);assert.equal(p.paginate(many,1,10).items.length,10);});
+
+test('ID copy output preserves order and handles empty results',()=>{assert.equal(p.portfolioIds([records[1],records[0]]),'B\nA');assert.equal(p.portfolioIds([]),'');});

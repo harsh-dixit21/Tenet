@@ -130,3 +130,10 @@ export function maturityLadder(records: Instrument[]) {
 export function documentGaps(records: Instrument[]) {
   return records.filter(record=>record.status!=='Draft'&&!closed.has(record.status)).map(record=>({record,missing:missingKinds(record)})).filter(row=>row.missing.length).sort((a,b)=>b.missing.length-a.missing.length||a.record.id.localeCompare(b.record.id));
 }
+
+export function duplicateCandidates(records: Instrument[]) {
+  const groups=new Map<string,Instrument[]>();
+  const clean=(value:string)=>value.normalize('NFKC').replace(/\s+/g,'').toUpperCase();
+  for (const record of records) {if(!record.number.trim())continue;const key=JSON.stringify([clean(record.bank),clean(record.number)]);groups.set(key,[...(groups.get(key)||[]),record]);}
+  return [...groups.values()].filter(group=>group.length>1).sort((a,b)=>a[0].bank.localeCompare(b[0].bank)||a[0].number.localeCompare(b[0].number));
+}

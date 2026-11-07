@@ -67,3 +67,5 @@ test('institution concentration groups across banks and retains count totals',()
 test('maturity ladder excludes closed drafts and invalid dates',()=>{const ladder=p.maturityLadder([...records,record({status:'Draft'}),record({maturity:'invalid'})]);assert.deepEqual(ladder.map(g=>g.month),['2026-11','2026-12']);assert.equal(ladder.reduce((sum,g)=>sum+g.amountMinor,0),30000);});
 
 test('document worklist ignores closed history and orders by missing categories',()=>{const gaps=p.documentGaps(records);assert.deepEqual(gaps.map(g=>g.record.id),['A','B']);assert.equal(gaps[0].missing.length,3);});
+
+test('duplicate candidates require both matching bank and nonempty number',()=>{const same=record({id:'D',number:' n-001 ',bank:'State Bank'});assert.equal(p.duplicateCandidates([...records,same]).length,1);assert.equal(p.duplicateCandidates([records[0],record({id:'D',number:'N-001',bank:'Different Bank'})]).length,0);assert.equal(p.duplicateCandidates([record({number:''}),record({id:'D',number:' '})]).length,0);});

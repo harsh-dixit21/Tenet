@@ -88,3 +88,23 @@ export function portfolioCsvRows(records: Instrument[]): (string|number)[][] { r
 export function portfolioSnapshot(records: Instrument[], referenceDate: string) {
   return {version:1,referenceDate,currency:'INR',count:records.length,totalAmountMinor:totalMinor(records),records:records.map(record=>({id:record.id,institution:record.institution,bank:record.bank,branch:record.branch,number:record.number,amountMinor:minor(record),issued:record.issued,maturity:record.maturity,status:record.status,missingDocuments:missingKinds(record)}))};
 }
+
+const calendarEscape = (value: string) => value.replaceAll('\\','\\\\').replace(/\r?\n/g,'\\n').replaceAll(';','\\;').replaceAll(',','\\,');
+export function foldCalendarLine(line: string) {
+  const lines: string[]=[]; let chunk=''; let bytes=0; let limit=75;
+  for (const character of line) {
+    const size=new TextEncoder().encode(character).length;
+    if (bytes+size>limit) {lines.push(chunk);chunk=' ';bytes=1;limit=75;}
+    chunk+=character;bytes+=size;
+  }
+  lines.push(chunk);return lines.join('\r\n');
+}
+export function maturityCalendar(records: Instrument[], referenceDate: string) {
+  if (!validDate(referenceDate)) throw new Error('Choose a valid reporting date.');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Tenet//Deposit Maturities//EN','CALSCALE:GREGORIAN'];
+  for (const record of records.filter(record=>record.status!=='Draft'&&!closed.has(record.status)&&validDate(record.maturity))) {
+    const end=new Date(Date.parse(record.maturity)+86400000).toISOString().slice(0,10).replaceAll('-','');
+    lines.push('BEGIN:VEVENT',`UID:${encodeURIComponent(record.id)}@tenet.local`,`DTSTAMP:${referenceDate.replaceAll('-','')}T000000Z`,`DTSTART;VALUE=DATE:${record.maturity.replaceAll('-','')}`,`DTEND;VALUE=DATE:${end}`,`SUMMARY:${calendarEscape('Deposit matures: '+record.id)}`,`DESCRIPTION:${calendarEscape(record.institution+'; '+record.bank+'; '+formatMinor(minor(record)))}`,'END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');return lines.map(foldCalendarLine).join('\r\n')+'\r\n';
+}

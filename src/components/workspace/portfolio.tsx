@@ -48,7 +48,8 @@ export function Portfolio() {
   
   return <section className="portfolio" aria-label="Deposit portfolio">
     <div className="portfolio-heading"><div><h2>Deposit portfolio</h2><p className="portfolio-note">{live ? 'Authorized workspace records' : 'Synthetic demo records'} Â· Amounts in INR</p></div><div className="portfolio-actions"><button disabled={!rows.length} onClick={()=>{download('tenet-portfolio.csv',csv(p.portfolioCsvRows(sorted)));setNotice(`Exported ${rows.length} filtered instruments as CSV.`);}}>Export portfolio CSV</button>
-<button disabled={!rows.length} onClick={()=>{download('tenet-portfolio.json',JSON.stringify(p.portfolioSnapshot(sorted,referenceDate),null,2),'application/json');setNotice('Exported a portfolio data snapshot without attachment contents.');}}>Export portfolio JSON</button></div></div>
+<button disabled={!rows.length} onClick={()=>{download('tenet-portfolio.json',JSON.stringify(p.portfolioSnapshot(sorted,referenceDate),null,2),'application/json');setNotice('Exported a portfolio data snapshot without attachment contents.');}}>Export portfolio JSON</button>
+<button disabled={!rows.some(record=>record.status!=='Draft'&&!['Released','Refunded','Discharged','Renewed','Replaced'].includes(record.status))} onClick={()=>{download('tenet-maturities.ics',p.maturityCalendar(sorted,referenceDate),'text/calendar;charset=utf-8');setNotice('Exported active maturity dates as all-day calendar events.');}}>Export maturity calendar</button></div></div>
     <div className="portfolio-totals"><div><span>Matching instruments</span><strong>{rows.length.toLocaleString('en-IN')}</strong></div><div><span>Matching face value</span><strong>{p.formatMinor(p.totalMinor(rows))}</strong></div></div>
     <div className="portfolio-filters">
       <Field label="Search portfolio"><input type="search" value={filters.query} onChange={event => change({query: event.target.value})} placeholder="Institution, bank, ID or instrument number"/></Field>

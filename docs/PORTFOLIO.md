@@ -22,3 +22,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 16. **Select individual instruments or an entire portfolio page.** Keep selections across pages and restrict bulk actions to selected records inside the current filters.
 17. **Summarize selected value and maturity span.** Calculate selected face value, instrument count and earliest/latest maturity dates.
 18. **Compare up to four selected instruments side by side.** Compare values, dates, banks, lifecycle states and missing document categories.
+19. **Export the entire filtered portfolio as safe CSV.** Export all matching results in sorted order, across pages, using formula-safe CSV encoding.

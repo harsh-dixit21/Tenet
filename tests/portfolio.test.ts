@@ -47,3 +47,5 @@ test('selection toggles immutably and excludes out-of-scope IDs',()=>{const init
 test('selection totals and date spans reconcile with selected records',()=>{assert.deepEqual(p.selectionSummary([records[0],records[1]]),{count:2,amountMinor:30000,earliest:'2026-11-15',latest:'2026-12-01'});assert.equal(p.selectionSummary([]).earliest,'—');});
 
 test('comparison enforces bounds and preserves exact monetary values',()=>{assert.equal(p.comparisonRows([records[0]]).length,0);assert.equal(p.comparisonRows(Array(5).fill(records[0])).length,0);assert.equal(p.comparisonRows(records.slice(0,2))[2][1],p.formatMinor(10000));});
+
+test('CSV rows use authoritative amounts and a stable export schema',()=>{const row=p.portfolioCsvRows([record({amount:999,amountMinor:10001})]);assert.equal(row[1][4],100.01);assert.equal(row[0].length,row[1].length);assert.equal(p.portfolioCsvRows([]).length,1);});

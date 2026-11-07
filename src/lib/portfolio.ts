@@ -82,3 +82,5 @@ export function comparisonRows(records: Instrument[]) {
     ['Missing categories',...records.map(record=>missingKinds(record).join(', ')||'None')]
   ];
 }
+
+export function portfolioCsvRows(records: Instrument[]): (string|number)[][] { return [['Instrument ID','Institution','Bank','Instrument number','Amount INR','Issued','Maturity','Status','Missing document categories'],...records.map(record=>[record.id,record.institution,record.bank,record.number,minor(record)/100,record.issued,record.maturity,record.status,missingKinds(record).join('; ')])]; }

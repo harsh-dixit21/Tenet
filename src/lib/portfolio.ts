@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -11,6 +11,7 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     const text = normalize([record.id, record.institution, record.bank, record.number, record.branch].join(' '));
     if (!tokens.every(token => text.includes(token))) return false;
     if (filters.bank && record.bank !== filters.bank) return false;
+    if (filters.institution && record.institution !== filters.institution) return false;
     // FILTERS
     return true;
   });

@@ -42,6 +42,7 @@ export function Portfolio() {
     <div className="portfolio-filters">
       <Field label="Search portfolio"><input type="search" value={filters.query} onChange={event => change({query: event.target.value})} placeholder="Institution, bank, ID or instrument number"/></Field>
       <Field label="Portfolio bank"><select value={filters.bank || ''} onChange={event=>change({bank:event.target.value})}><option value="">All banks</option>{p.distinct(workspace.records,'bank').map(value=><option key={value}>{value}</option>)}</select></Field>
+<Field label="Portfolio institution"><select value={filters.institution || ''} onChange={event=>change({institution:event.target.value})}><option value="">All institutions</option>{p.distinct(workspace.records,'institution').map(value=><option key={value}>{value}</option>)}</select></Field>
       <button type="button" onClick={() => {setFilters({query: ''}); }}>Clear filters</button>
     </div>
     

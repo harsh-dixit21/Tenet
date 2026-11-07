@@ -69,3 +69,5 @@ test('maturity ladder excludes closed drafts and invalid dates',()=>{const ladde
 test('document worklist ignores closed history and orders by missing categories',()=>{const gaps=p.documentGaps(records);assert.deepEqual(gaps.map(g=>g.record.id),['A','B']);assert.equal(gaps[0].missing.length,3);});
 
 test('duplicate candidates require both matching bank and nonempty number',()=>{const same=record({id:'D',number:' n-001 ',bank:'State Bank'});assert.equal(p.duplicateCandidates([...records,same]).length,1);assert.equal(p.duplicateCandidates([records[0],record({id:'D',number:'N-001',bank:'Different Bank'})]).length,0);assert.equal(p.duplicateCandidates([record({number:''}),record({id:'D',number:' '})]).length,0);});
+
+test('evidence gap report checks metadata only for verified lifecycle states',()=>{assert.deepEqual(p.evidenceGaps(records).map(r=>r.id),['A']);assert.equal(p.evidenceGaps([record({evidence:{source:'Bank',reference:'REF1',date:'2026-11-01',note:''}})]).length,0);assert.equal(p.evidenceGaps([record({evidence:{source:'Bank',reference:'REF1',date:'bad',note:''}})]).length,1);});

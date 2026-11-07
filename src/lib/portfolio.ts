@@ -137,3 +137,7 @@ export function duplicateCandidates(records: Instrument[]) {
   for (const record of records) {if(!record.number.trim())continue;const key=JSON.stringify([clean(record.bank),clean(record.number)]);groups.set(key,[...(groups.get(key)||[]),record]);}
   return [...groups.values()].filter(group=>group.length>1).sort((a,b)=>a[0].bank.localeCompare(b[0].bank)||a[0].number.localeCompare(b[0].number));
 }
+
+export function evidenceGaps(records: Instrument[]) {
+  return records.filter(record=>['Verified','Release requested'].includes(record.status)&&(!record.evidence?.source?.trim()||!record.evidence.reference?.trim()||!validDate(record.evidence.date))).sort((a,b)=>a.id.localeCompare(b.id));
+}

@@ -148,3 +148,8 @@ export function successorLinks(records: Instrument[], authorized: Instrument[]) 
   for(const record of authorized) if(record.parent) children.set(record.parent,[...(children.get(record.parent)||[]),record]);
   return records.filter(record=>record.parent||children.has(record.id)).map(record=>({record,parent:record.parent ? lookup.get(record.parent)?.id||'Unavailable in this workspace' : 'None',children:children.get(record.id)||[]}));
 }
+
+export function requestAging(records: Instrument[], requests: RequestItem[], referenceDate: string) {
+  const ids=new Set(records.map(record=>record.id));
+  return requests.filter(request=>request.status==='Pending'&&ids.has(request.recordId)).map(request=>{const age=daysBetween(referenceDate,request.date.slice(0,10));return {request,ageDays:Number.isFinite(age)?Math.max(0,age):null};}).sort((a,b)=>(b.ageDays??-1)-(a.ageDays??-1)||a.request.id.localeCompare(b.request.id));
+}

@@ -35,3 +35,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 29. **Detect possible duplicate bank instrument numbers.** Find same-bank number collisions while ignoring case, Unicode width and incidental whitespace.
 30. **Flag verified instruments with incomplete evidence metadata.** Surface missing evidence sources, references or valid dates without altering record status.
 31. **Explore renewal and replacement successor relationships.** Inspect predecessor and successor states while handling unavailable predecessor records safely.
+32. **Prioritize pending requests by elapsed age.** Show the oldest pending release, refund or discharge requests within the filtered portfolio.

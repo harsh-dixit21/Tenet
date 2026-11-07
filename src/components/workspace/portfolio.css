@@ -11,7 +11,7 @@
 .portfolio input:not([type=checkbox]),.portfolio select,.portfolio button { min-height: 44px; max-width: 100%; border: 1px solid var(--border); border-radius: 6px; background: var(--background); padding: 8px 12px; font-size: 13px; color: var(--foreground); }
 .portfolio input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--foreground); }
 .portfolio button { cursor: pointer; }
-.portfolio button:hover { background: var(--accent); }
+.portfolio button:hover { background: var(--color-accent, #242424); }
 .portfolio button:disabled { cursor: default; opacity: .55; }
 .portfolio :is(input,select,button,a,summary,[tabindex]):focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
 .portfolio-scroll { width: 100%; max-width: 100%; overflow-x: auto; }
@@ -47,3 +47,27 @@
 }
 
 .portfolio textarea { width: 100%; min-height: 100px; border: 1px solid var(--border); padding: 12px; border-radius: 6px; background: var(--background); font-size: 13px; }
+
+.portfolio-export { width: 100%; }
+.portfolio-export>summary { text-align: right; }
+.portfolio-export .portfolio-actions { justify-content: flex-end; padding: 12px 0; }
+.portfolio-panel table td:not(:first-child) { font-variant-numeric: tabular-nums; }
+
+.portfolio-display-content { display: flex; flex-direction: column; gap: 16px; padding: 12px 0; }
+.portfolio-totals>div:first-child strong { font-size: 24px; }
+.portfolio-totals>div:last-child strong { font-size: clamp(26px,2.5vw,32px); }
+.portfolio-heading>.portfolio-actions { margin-left: auto; }
+.portfolio-heading .portfolio-export[open] { max-width: 620px; }
+.portfolio-print-only .portfolio-number { text-align: right; }
+@media(max-width:600px) { .portfolio-export>summary { text-align: left; } .portfolio-export .portfolio-actions { justify-content: start; } }
+.portfolio-results { min-width: 900px; }
+.portfolio-results td:nth-child(2),.portfolio-date { white-space: nowrap; }
+@media(max-width:600px) {
+  .portfolio-totals { grid-template-columns: minmax(64px,.65fr) minmax(0,2fr); }
+  .portfolio-totals>div:last-child strong { font-size: clamp(20px,6vw,26px); }
+}
+@media print {
+  .portfolio { display: block; width: 100%; }
+  .portfolio > :not(.portfolio-print-only) { display: none !important; }
+  .portfolio-print-only { position: static; }
+}

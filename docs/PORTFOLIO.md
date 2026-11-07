@@ -38,3 +38,18 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 32. **Prioritize pending requests by elapsed age.** Show the oldest pending release, refund or discharge requests within the filtered portfolio.
 33. **Search and scope audit activity to the current portfolio.** Filter authorized instrument events by actor and action tokens, newest first, with a bounded preview.
 34. **Save account-scoped portfolio display preferences.** Persist only sort, direction, page size, column visibility and density locally; validate stored data and provide an explicit reset.
+35. **Analyze maturity horizons and request ages at a chosen reporting date.** Choose a reporting reference date without implying historical balance reconstruction. Invalid amount ranges and reversed date ranges receive inline feedback.
+
+## Scope and exports
+
+Face-value totals include the lifecycle states currently selected. Choose **Active exposure only** to exclude drafts and terminal history. Calendar exports always exclude drafts and terminal instruments. CSV exports include all filtered results, across pages; selected exports include only selections within the current filters. JSON contains record metadata and required-document gaps, without attachment contents or evidence notes.
+
+Display preferences are saved per account in this browser, rather than to Firebase. They contain only presentation settings. Filters, record selections and reporting dates are not saved with those preferences. Browser storage failures produce feedback and leave the portfolio usable.
+
+The reporting date changes relative maturity horizons and pending-request ages against the current workspace snapshot. It does not reconstruct historical balances or audit permissions. Relationship links resolve only within the authorized snapshot. Duplicate-number and evidence-gap panels identify records for review and never change lifecycle state.
+
+## Validation and design
+
+Run `npm run test:portfolio` for the 35 portfolio regression cases. The complete utility, backend, tooling and portfolio suites contain 124 passing tests. The production build and repository checks pass. Browser verification covers 41 interactions and state checks, including exports, printing, reload persistence, keyboard navigation and collapsed/expanded layouts at 1440, 768 and 390 pixels. Browser flow validation uses the existing synthetic demo dataset; production Firebase credentials are not required by this feature.
+
+The interface retains Tenet's dark palette, Inter typography and existing navigation shell. The design reference is **True-black flat**, seed `884981776`, with palette and type preserved and no redraws. The screen answers “Which deposits match this scope, and what needs attention?” through exact face-value totals, a maturity-ordered instrument ledger and expandable analytical worklists. The browser design inspector reports zero failures or warnings. Sample institutions and values remain the existing explicitly labeled synthetic demo data.

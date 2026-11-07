@@ -33,3 +33,5 @@ The flower renderer is adapted from the user-supplied Lycoris Specimen by Kedhar
 All records and verification evidence are synthetic. The reference date is 29 October 2026. New records stay in dashboard component memory; refreshing or leaving the dashboard resets them. There is no authentication, persistent database, document upload, bank integration, real notification service, or financial approval execution. Those require the authorized backend described in the solution brief.
 
 UI UX Pro Max was installed into the user's Codex skills directory. Its spacing, accessibility, and restrained interaction guidance informed this interface; the requested black/off-white palette takes precedence over its suggested colors.
+
+Portfolio analysis is available from **Portfolio** in the authenticated or demo workspace. See [docs/PORTFOLIO.md](docs/PORTFOLIO.md) for its filters, selections, exports and analytical worklists.

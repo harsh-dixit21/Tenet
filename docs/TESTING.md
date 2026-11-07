@@ -5,6 +5,7 @@ Run these commands from the repository root with Node.js 22:
 ```powershell
 npm run test:tooling
 npm run test:utils
+npm run test:portfolio
 npm run test:backend
 npm run build
 npm run check:dist

@@ -170,3 +170,11 @@ export function readPreferences(raw: string|null): PortfolioPreferences {
     return {version:1,sort,descending:value.descending===true,pageSize:[10,25,50].includes(value.pageSize)?value.pageSize:10,columns:readColumns(value.columns),dense:value.dense===true};
   } catch { return defaults; }
 }
+
+export function filterWarnings(filters: PortfolioFilters) {
+  const errors:string[]=[];
+  for(const [label,value] of [['Minimum',filters.minimum],['Maximum',filters.maximum]]) if(value&&parseAmount(value)===null)errors.push(`${label} amount must be a nonnegative decimal with at most two places.`);
+  if(filters.minimum&&filters.maximum&&parseAmount(filters.minimum)!==null&&parseAmount(filters.maximum)!==null&&parseAmount(filters.minimum)!>parseAmount(filters.maximum)!)errors.push('Minimum amount must not exceed maximum amount.');
+  for(const [label,from,to] of [['Maturity',filters.maturityFrom,filters.maturityTo],['Issue',filters.issuedFrom,filters.issuedTo]])if(from&&to&&from>to)errors.push(`${label} start date must not follow its end date.`);
+  return errors;
+}

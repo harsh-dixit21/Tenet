@@ -12,3 +12,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 6. **Filter instruments by document readiness.** Identify complete instruments or those missing required document categories.
 7. **Filter portfolio by minimum face value.** Use inclusive minimum amounts with exact decimal-to-paise parsing.
 8. **Filter portfolio by maximum face value.** Apply an inclusive upper amount bound, including zero.
+9. **Inspect an inclusive maturity date window.** Limit results by maturity dates and reject reversed or invalid ranges.

@@ -27,3 +27,5 @@ test('required categories ignore unrelated uploads',()=>{const complete=record({
 test('minimum amounts use paise and reject unsafe or malformed input',()=>{assert.equal(p.parseAmount('10.01'),1001);assert.equal(p.parseAmount('1e3'),null);assert.equal(p.parseAmount('1.001'),null);assert.equal(p.parseAmount('9007199254740992'),null);assert.deepEqual(filter({minimum:'100.00'}).map(r=>r.id),['A','B']);});
 
 test('maximum amounts and reversed amount bounds fail closed',()=>{assert.deepEqual(filter({maximum:'100'}).map(r=>r.id),['A','C']);assert.equal(filter({minimum:'200',maximum:'100'}).length,0);assert.equal(filter({maximum:'0'}).length,0);});
+
+test('maturity windows include both boundaries',()=>{assert.deepEqual(filter({maturityFrom:'2026-11-15',maturityTo:'2026-12-01'}).map(r=>r.id),['A','B']);assert.equal(filter({maturityFrom:'2026-12-01',maturityTo:'2026-11-01'}).length,0);assert.equal(p.validDate('2026-02-30'),false);});

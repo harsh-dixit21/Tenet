@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; maximum?: string; minimum?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; maturityFrom?: string; maturityTo?: string; maximum?: string; minimum?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -18,6 +18,7 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     if (filters.documents === 'missing' && !missingKinds(record).length) return false;
     if (filters.minimum && (parseAmount(filters.minimum) === null || minor(record) < parseAmount(filters.minimum)!)) return false;
     if (filters.maximum && (parseAmount(filters.maximum) === null || minor(record) > parseAmount(filters.maximum)!)) return false;
+    if ((filters.maturityFrom || filters.maturityTo) && !withinDate(record.maturity, filters.maturityFrom, filters.maturityTo)) return false;
     // FILTERS
     return true;
   });
@@ -33,3 +34,6 @@ export function parseAmount(value: string) {
   const result = Number(whole)*100 + Number(fraction.padEnd(2,'0'));
   return Number.isSafeInteger(result) ? result : null;
 }
+
+export function validDate(value: string) { return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value; }
+export function withinDate(value: string, from='', to='') { return validDate(value) && (!from || validDate(from) && value >= from) && (!to || validDate(to) && value <= to); }

@@ -37,3 +37,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 31. **Explore renewal and replacement successor relationships.** Inspect predecessor and successor states while handling unavailable predecessor records safely.
 32. **Prioritize pending requests by elapsed age.** Show the oldest pending release, refund or discharge requests within the filtered portfolio.
 33. **Search and scope audit activity to the current portfolio.** Filter authorized instrument events by actor and action tokens, newest first, with a bounded preview.
+34. **Save account-scoped portfolio display preferences.** Persist only sort, direction, page size, column visibility and density locally; validate stored data and provide an explicit reset.

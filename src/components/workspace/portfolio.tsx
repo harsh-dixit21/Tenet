@@ -31,12 +31,14 @@ export function Portfolio() {
   const [filters, setFilters] = useState<p.PortfolioFilters>({query: ''});
   const [notice, setNotice] = useState('');
   const referenceDate = filters.referenceDate || today();
-  const [sort, setSort] = useState<p.SortField>('maturity');
-  const [descending, setDescending] = useState(false);
+  const preferenceKey = p.portfolioPreferencesKey(session.user?.uid||'demo');
+  const [storedPrefs] = useState(()=>{try{return p.readPreferences(localStorage.getItem(preferenceKey));}catch{return p.readPreferences(null);}});
+  const [sort, setSort] = useState<p.SortField>(storedPrefs.sort);
+  const [descending, setDescending] = useState(storedPrefs.descending);
   const [page,setPage] = useState(1);
-  const [pageSize,setPageSize] = useState(10);
-  const [visibleColumns,setVisibleColumns] = useState<Column[]>([...columns]);
-  const [dense,setDense] = useState(false);
+  const [pageSize,setPageSize] = useState(storedPrefs.pageSize);
+  const [visibleColumns,setVisibleColumns] = useState<Column[]>(storedPrefs.columns);
+  const [dense,setDense] = useState(storedPrefs.dense);
   const [selected,setSelected] = useState<string[]>([]);
   const [copyIds,setCopyIds] = useState('');
   const [activityQuery,setActivityQuery] = useState('');
@@ -78,6 +80,7 @@ export function Portfolio() {
 <div className="portfolio-actions"><span className="portfolio-note">{selectedRows.length} selected within current filters</span><button disabled={!selected.length} onClick={()=>setSelected([])}>Clear selection</button></div>
 {selection.count>0 && <p className="portfolio-selection" role="status">Selected face value: <strong>{p.formatMinor(selection.amountMinor)}</strong> · {selection.count} instruments · Maturities {selection.earliest} through {selection.latest}</p>}
 <button disabled={!selectedRows.length} onClick={()=>{download('tenet-selected-portfolio.csv',csv(p.portfolioCsvRows(selectedRows)));setNotice(`Exported ${selectedRows.length} selected instruments within current filters.`);}}>Export selected CSV</button>
+<div className="portfolio-actions"><button onClick={()=>{try{localStorage.setItem(preferenceKey,JSON.stringify({version:1,sort,descending,pageSize,columns:visibleColumns,dense}));setNotice('Display preferences saved for this account in this browser.');}catch{setNotice('Unable to save display preferences. Browser storage may be unavailable or full.');}}}>Save display preferences</button><button onClick={()=>{try{localStorage.removeItem(preferenceKey);const defaults=p.readPreferences(null);setSort(defaults.sort);setDescending(defaults.descending);setPageSize(defaults.pageSize);setVisibleColumns(defaults.columns);setDense(defaults.dense);setPage(1);setNotice('Display preferences reset.');}catch{setNotice('Unable to clear saved preferences. Browser storage is unavailable.');}}}>Reset display preferences</button></div>
     <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col"><input type="checkbox" aria-label="Select current portfolio page" checked={paged.items.length>0&&paged.items.every(record=>selectedSet.has(record.id))} onChange={event=>setSelected(current=>event.target.checked?[...new Set([...current,...paged.items.map(record=>record.id)])]:current.filter(id=>!paged.items.some(record=>record.id===id)))}/></th><th scope="col">Instrument</th>{visibleColumns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{paged.items.map(record => <tr key={record.id}><td><input type="checkbox" aria-label={`Select portfolio instrument ${record.id}`} checked={selectedSet.has(record.id)} onChange={()=>setSelected(current=>p.toggleSelection(current,record.id))}/></td><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{visibleColumns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>
     <div className="portfolio-paging"><p className="portfolio-note" role="status">{paged.start}–{paged.end} of {rows.length} instruments · Page {paged.page} of {paged.pages}</p><div className="portfolio-actions"><Field label="Portfolio rows per page"><select value={pageSize} onChange={event=>{setPageSize(Number(event.target.value));setPage(1);}}>{[10,25,50].map(size=><option key={size}>{size}</option>)}</select></Field><button disabled={paged.page===1} onClick={()=>setPage(paged.page-1)}>Previous page</button><button disabled={paged.page===paged.pages} onClick={()=>setPage(paged.page+1)}>Next page</button></div></div>
 {copyIds && <Field label="Portfolio IDs to copy manually"><textarea readOnly rows={4} value={copyIds} onFocus={event=>event.target.select()}/></Field>}

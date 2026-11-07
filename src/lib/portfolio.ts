@@ -158,3 +158,15 @@ export function portfolioActivity(records: Instrument[], events: EventItem[], qu
   const ids=new Set(records.map(record=>record.id));const tokens=normalize(query).trim().split(/\s+/).filter(Boolean);
   return events.filter(event=>ids.has(event.recordId)&&(!actor||event.actor===actor)&&tokens.every(token=>normalize(event.action+' '+event.recordId+' '+event.actor).includes(token))).sort((a,b)=>(Date.parse(b.date)||0)-(Date.parse(a.date)||0)||a.id.localeCompare(b.id));
 }
+
+export const portfolioPreferencesKey = (account: string) => 'tenet:portfolio:preferences:v1:'+encodeURIComponent(account);
+export type PortfolioPreferences = {version:1;sort:SortField;descending:boolean;pageSize:number;columns:typeof portfolioColumns[number][];dense:boolean};
+export function readPreferences(raw: string|null): PortfolioPreferences {
+  const defaults:PortfolioPreferences={version:1,sort:'maturity',descending:false,pageSize:10,columns:[...portfolioColumns],dense:false};
+  try {
+    const value=JSON.parse(raw||'null');
+    if(!value||value.version!==1)return defaults;
+    const sort:SortField=['id','institution','bank','amount','maturity','status'].includes(value.sort)?value.sort:'maturity';
+    return {version:1,sort,descending:value.descending===true,pageSize:[10,25,50].includes(value.pageSize)?value.pageSize:10,columns:readColumns(value.columns),dense:value.dense===true};
+  } catch { return defaults; }
+}

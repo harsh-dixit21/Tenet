@@ -56,3 +56,6 @@ export function paginate<T>(items: T[], requestedPage: number, pageSize: number)
   const page = Math.min(pages,Math.max(1,Number.isInteger(requestedPage) ? requestedPage : 1));
   return {items:items.slice((page-1)*size,page*size),page,pages,start:items.length ? (page-1)*size+1 : 0,end:Math.min(page*size,items.length)};
 }
+
+export const portfolioColumns = ['Institution','Bank','Amount INR','Maturity','Status'] as const;
+export function readColumns(value: unknown) { return Array.isArray(value) ? portfolioColumns.filter(column=>value.includes(column)) : [...portfolioColumns]; }

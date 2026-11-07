@@ -17,3 +17,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 11. **Apply quick maturity horizon presets.** Review overdue exposure or active maturities in 7, 30 or 90 days, relative to the reporting date.
 12. **Sort portfolio by value date institution or lifecycle stage.** Apply deterministic ascending or descending sorting without mutating records.
 13. **Page large portfolios with adjustable result counts.** Show 10, 25 or 50 rows with a truthful range; clamp pages after filters reduce results.
+14. **Customize visible portfolio table columns.** Hide optional columns while retaining instrument links and a fixed export schema.

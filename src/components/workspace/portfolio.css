@@ -28,3 +28,5 @@
 .portfolio-panel-content { margin-top: 12px; }
 .portfolio-empty { padding: 24px 0; font-size: 14px; color: var(--muted-foreground); }
 @media(max-width:600px) { .portfolio-actions { width: 100%; justify-content: start; } .portfolio-totals { grid-template-columns: 1fr; gap: 16px; } .portfolio-filters>* { flex-basis: 100%; } .portfolio :is(th,td) { padding: 12px 8px; } }
+
+.portfolio-check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; padding-right: 12px; }

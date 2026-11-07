@@ -45,7 +45,7 @@ export function Portfolio() {
 <Field label="Portfolio institution"><select value={filters.institution || ''} onChange={event=>change({institution:event.target.value})}><option value="">All institutions</option>{p.distinct(workspace.records,'institution').map(value=><option key={value}>{value}</option>)}</select></Field>
       <button type="button" onClick={() => {setFilters({query: ''}); }}>Clear filters</button>
     </div>
-    
+    <details className="portfolio-advanced"><summary>More filters</summary><div className="portfolio-filters"><Field label="Portfolio status"><select value={filters.status || ''} onChange={event=>change({status:event.target.value})}><option value="">All statuses</option>{p.distinct(workspace.records,'status').map(value=><option key={value}>{value}</option>)}</select></Field></div></details>
     {notice && <p role="status" className="portfolio-note">{notice}</p>}
     
     <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col">Instrument</th>{columns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{rows.map(record => <tr key={record.id}><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{columns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>

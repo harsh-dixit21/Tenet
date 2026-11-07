@@ -64,3 +64,8 @@ export const readDensity = (value: unknown) => value === 'compact' ? 'compact' :
 
 export function toggleSelection(ids: string[], id: string) { return ids.includes(id) ? ids.filter(value=>value!==id) : [...new Set([...ids,id])]; }
 export function selectedInScope(records: Instrument[], ids: string[]) { const selected=new Set(ids); return records.filter(record=>selected.has(record.id)); }
+
+export function selectionSummary(records: Instrument[]) {
+  const dates=records.map(record=>record.maturity).filter(validDate).sort();
+  return {count:records.length,amountMinor:totalMinor(records),earliest:dates[0]||'—',latest:dates.at(-1)||'—'};
+}

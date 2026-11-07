@@ -20,3 +20,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 14. **Customize visible portfolio table columns.** Hide optional columns while retaining instrument links and a fixed export schema.
 15. **Offer compact portfolio row density.** Switch to denser instrument rows while preserving control hit areas and readable numbers.
 16. **Select individual instruments or an entire portfolio page.** Keep selections across pages and restrict bulk actions to selected records inside the current filters.
+17. **Summarize selected value and maturity span.** Calculate selected face value, instrument count and earliest/latest maturity dates.

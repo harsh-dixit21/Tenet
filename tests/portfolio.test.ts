@@ -43,3 +43,5 @@ test('column visibility removes unknown and duplicate saved fields',()=>{assert.
 test('density preferences fall back to comfortable spacing',()=>{assert.equal(p.readDensity('compact'),'compact');assert.equal(p.readDensity('unsupported'),'comfortable');});
 
 test('selection toggles immutably and excludes out-of-scope IDs',()=>{const initial=['A'];assert.deepEqual(p.toggleSelection(initial,'B'),['A','B']);assert.deepEqual(initial,['A']);assert.deepEqual(p.toggleSelection(initial,'A'),[]);assert.deepEqual(p.selectedInScope(records,['A','foreign']).map(r=>r.id),['A']);});
+
+test('selection totals and date spans reconcile with selected records',()=>{assert.deepEqual(p.selectionSummary([records[0],records[1]]),{count:2,amountMinor:30000,earliest:'2026-11-15',latest:'2026-12-01'});assert.equal(p.selectionSummary([]).earliest,'—');});

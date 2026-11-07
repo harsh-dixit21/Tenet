@@ -39,6 +39,8 @@ export function Portfolio() {
   const [dense,setDense] = useState(false);
   const [selected,setSelected] = useState<string[]>([]);
   const [copyIds,setCopyIds] = useState('');
+  const [activityQuery,setActivityQuery] = useState('');
+  const [activityActor,setActivityActor] = useState('');
   function change(patch: Partial<p.PortfolioFilters>) { setFilters(current => ({...current, ...patch})); setPage(1); }
   const rows = useMemo(() => p.filterPortfolio(workspace.records, filters, referenceDate), [workspace.records, filters, referenceDate]);
   const sorted = useMemo(()=>p.sortPortfolio(rows,sort,descending),[rows,sort,descending]);
@@ -46,6 +48,7 @@ export function Portfolio() {
   const selectedRows = p.selectedInScope(rows,selected);
   const selectedSet = new Set(selectedRows.map(record=>record.id));
   const selection = p.selectionSummary(selectedRows);
+  const activity = p.portfolioActivity(rows,workspace.events,activityQuery,activityActor);
   
   return <section className="portfolio" aria-label="Deposit portfolio">
     <div className="portfolio-heading"><div><h2>Deposit portfolio</h2><p className="portfolio-note">{live ? 'Authorized workspace records' : 'Synthetic demo records'} Â· Amounts in INR</p></div><div className="portfolio-actions"><button disabled={!rows.length} onClick={()=>{download('tenet-portfolio.csv',csv(p.portfolioCsvRows(sorted)));setNotice(`Exported ${rows.length} filtered instruments as CSV.`);}}>Export portfolio CSV</button>
@@ -88,5 +91,6 @@ export function Portfolio() {
 <Panel title="Verification evidence gaps" note="Verified or release-requested records with missing source, reference or a valid evidence date. This report does not change verification status."><Grid headers={['Instrument','Institution','Status']} rows={p.evidenceGaps(rows).map(record=>[<a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a>,record.institution,record.status])}/></Panel>
 <Panel title="Renewal and replacement relationships" note="Predecessor and successor links are resolved only within the authorized workspace snapshot."><Grid headers={['Instrument','Relationship','Predecessor','Successors']} rows={p.successorLinks(rows,workspace.records).map(({record,parent,children})=>[<a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a>,record.relation||'Original',parent,children.map(child=>`${child.id} (${child.status})`).join(', ')||'None'])}/></Panel>
 <Panel title="Pending request aging" note={`Pending requests for matching instruments, measured at ${referenceDate}; future request dates count as zero elapsed days.`}><Grid headers={['Request','Instrument','Type','Age in days']} rows={p.requestAging(rows,workspace.requests,referenceDate).map(({request,ageDays})=>[request.id,<a href={`#instrument/${encodeURIComponent(request.recordId)}`}>{request.recordId}</a>,request.type,ageDays===null?'Unknown date':ageDays])}/></Panel>
+<Panel title="Portfolio activity" note={`${activity.length} matching events. Showing the newest 50; full history remains available in Audit history.`}><div className="portfolio-filters"><Field label="Search portfolio activity"><input type="search" value={activityQuery} onChange={event=>setActivityQuery(event.target.value)} placeholder="Action, actor or instrument"/></Field><Field label="Portfolio activity actor"><select value={activityActor} onChange={event=>setActivityActor(event.target.value)}><option value="">All actors</option>{[...new Set(workspace.events.filter(event=>rows.some(record=>record.id===event.recordId)).map(event=>event.actor))].sort().map(actor=><option key={actor}>{actor}</option>)}</select></Field></div><Grid headers={['Date','Instrument','Actor','Action']} rows={activity.slice(0,50).map(event=>[event.date,<a href={`#instrument/${encodeURIComponent(event.recordId)}`}>{event.recordId}</a>,event.actor,event.action])}/></Panel>
   </section>;
 }

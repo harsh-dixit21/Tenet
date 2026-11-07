@@ -153,3 +153,8 @@ export function requestAging(records: Instrument[], requests: RequestItem[], ref
   const ids=new Set(records.map(record=>record.id));
   return requests.filter(request=>request.status==='Pending'&&ids.has(request.recordId)).map(request=>{const age=daysBetween(referenceDate,request.date.slice(0,10));return {request,ageDays:Number.isFinite(age)?Math.max(0,age):null};}).sort((a,b)=>(b.ageDays??-1)-(a.ageDays??-1)||a.request.id.localeCompare(b.request.id));
 }
+
+export function portfolioActivity(records: Instrument[], events: EventItem[], query='', actor='') {
+  const ids=new Set(records.map(record=>record.id));const tokens=normalize(query).trim().split(/\s+/).filter(Boolean);
+  return events.filter(event=>ids.has(event.recordId)&&(!actor||event.actor===actor)&&tokens.every(token=>normalize(event.action+' '+event.recordId+' '+event.actor).includes(token))).sort((a,b)=>(Date.parse(b.date)||0)-(Date.parse(a.date)||0)||a.id.localeCompare(b.id));
+}

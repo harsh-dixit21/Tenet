@@ -33,3 +33,5 @@ test('maturity windows include both boundaries',()=>{assert.deepEqual(filter({ma
 test('issue periods combine with maturity constraints',()=>{assert.equal(filter({issuedFrom:'2026-01-01',issuedTo:'2026-01-01',maturityFrom:'2026-11-01'}).length,2);assert.equal(filter({issuedFrom:'2026-01-02'}).length,0);});
 
 test('maturity horizons exclude closed history and include day boundaries',()=>{assert.deepEqual(filter({horizon:'7'}).map(r=>r.id),['A']);assert.equal(filter({horizon:'overdue'}).length,0);assert.equal(p.filterPortfolio([record({maturity:'2026-11-08'})],{query:'',horizon:'7'},'2026-11-08').length,1);});
+
+test('portfolio sorting is stable and immutable',()=>{assert.deepEqual(p.sortPortfolio(records,'amount',true).map(r=>r.id),['B','A','C']);assert.deepEqual(records.map(r=>r.id),['A','B','C']);assert.deepEqual(p.sortPortfolio([record({id:'Z'}),record({id:'A'})],'maturity').map(r=>r.id),['A','Z']);});

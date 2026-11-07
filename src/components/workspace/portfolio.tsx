@@ -31,10 +31,11 @@ export function Portfolio() {
   const [filters, setFilters] = useState<p.PortfolioFilters>({query: ''});
   const [notice, setNotice] = useState('');
   const referenceDate = filters.referenceDate || today();
-  
+  const [sort, setSort] = useState<p.SortField>('maturity');
+  const [descending, setDescending] = useState(false);
   function change(patch: Partial<p.PortfolioFilters>) { setFilters(current => ({...current, ...patch}));  }
   const rows = useMemo(() => p.filterPortfolio(workspace.records, filters, referenceDate), [workspace.records, filters, referenceDate]);
-  
+  const sorted = useMemo(()=>p.sortPortfolio(rows,sort,descending),[rows,sort,descending]);
   
   return <section className="portfolio" aria-label="Deposit portfolio">
     <div className="portfolio-heading"><div><h2>Deposit portfolio</h2><p className="portfolio-note">{live ? 'Authorized workspace records' : 'Synthetic demo records'} · Amounts in INR</p></div><div className="portfolio-actions"></div></div>
@@ -54,8 +55,8 @@ export function Portfolio() {
 <Field label="Issued from"><input type="date" value={filters.issuedFrom || ''} onChange={event=>change({issuedFrom:event.target.value})}/></Field><Field label="Issued through"><input type="date" value={filters.issuedTo || ''} onChange={event=>change({issuedTo:event.target.value})}/></Field>
 <Field label="Maturity horizon"><select value={filters.horizon || ''} onChange={event=>change({horizon:event.target.value as p.PortfolioFilters['horizon']})}><option value="">Any maturity</option><option value="overdue">Overdue active instruments</option><option value="7">Next 7 days</option><option value="30">Next 30 days</option><option value="90">Next 90 days</option></select></Field></div></details>
     {notice && <p role="status" className="portfolio-note">{notice}</p>}
-    
-    <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col">Instrument</th>{columns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{rows.map(record => <tr key={record.id}><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{columns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>
+    <div className="portfolio-filters"><Field label="Sort portfolio"><select value={sort} onChange={event=>setSort(event.target.value as p.SortField)}>{(['maturity','amount','institution','bank','status','id'] as const).map(value=><option key={value}>{value}</option>)}</select></Field><Field label="Sort direction"><select value={descending?'descending':'ascending'} onChange={event=>setDescending(event.target.value==='descending')}><option value="ascending">Ascending</option><option value="descending">Descending</option></select></Field></div>
+    <div className="portfolio-scroll" tabIndex={0} role="region" aria-label="Portfolio instrument results"><table className=""><caption className="sr-only">Filtered deposit portfolio, {rows.length} instruments</caption><thead><tr><th scope="col">Instrument</th>{columns.map(column => <th key={column} scope="col" className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{column}</th>)}</tr></thead><tbody>{sorted.map(record => <tr key={record.id}><td><a href={`#instrument/${encodeURIComponent(record.id)}`}>{record.id}</a></td>{columns.map(column => <td key={column} className={column === 'Amount INR' ? 'portfolio-number' : undefined}>{cell(record, column)}</td>)}</tr>)}</tbody></table>{!rows.length && <p className="portfolio-empty">No matching instruments. Adjust the filters or clear them to see all authorized records.</p>}</div>
     
     
   </section>;

@@ -15,3 +15,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 9. **Inspect an inclusive maturity date window.** Limit results by maturity dates and reject reversed or invalid ranges.
 10. **Inspect instruments by issue period.** Combine issuance periods with maturity and amount criteria.
 11. **Apply quick maturity horizon presets.** Review overdue exposure or active maturities in 7, 30 or 90 days, relative to the reporting date.
+12. **Sort portfolio by value date institution or lifecycle stage.** Apply deterministic ascending or descending sorting without mutating records.

@@ -44,3 +44,8 @@ export function validDate(value: string) { return /^\d{4}-\d{2}-\d{2}$/.test(val
 export function withinDate(value: string, from='', to='') { return validDate(value) && (!from || validDate(from) && value >= from) && (!to || validDate(to) && value <= to); }
 
 export const daysBetween = (date: string, referenceDate: string) => validDate(date) && validDate(referenceDate) ? Math.round((Date.parse(date)-Date.parse(referenceDate))/86400000) : NaN;
+
+export type SortField = 'id' | 'institution' | 'bank' | 'amount' | 'maturity' | 'status';
+export function sortPortfolio(records: Instrument[], field: SortField, descending=false) {
+  return [...records].sort((a,b)=> ((field === 'amount' ? minor(a)-minor(b) : a[field].localeCompare(b[field])) || a.id.localeCompare(b.id)) * (descending ? -1 : 1));
+}

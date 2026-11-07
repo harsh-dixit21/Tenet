@@ -24,3 +24,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 18. **Compare up to four selected instruments side by side.** Compare values, dates, banks, lifecycle states and missing document categories.
 19. **Export the entire filtered portfolio as safe CSV.** Export all matching results in sorted order, across pages, using formula-safe CSV encoding.
 20. **Export a structured portfolio snapshot without attachment contents.** Download versioned JSON with explicit INR/paise units and reporting date; exclude uploaded files and evidence notes.
+21. **Export only selected in-scope instruments.** Download an independent CSV of selected rows, excluding hidden or no-longer-authorized records.

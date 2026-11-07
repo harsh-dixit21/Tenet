@@ -117,3 +117,12 @@ export function concentration(records: Instrument[], field: 'bank'|'institution'
   for (const record of records) {const label=record[field];const group=groups.get(label)||{label,count:0,amountMinor:0,share:0};group.count++;group.amountMinor+=minor(record);groups.set(label,group);}
   return [...groups.values()].map(group=>({...group,share:total ? group.amountMinor/total*100 : 0})).sort((a,b)=>b.amountMinor-a.amountMinor||a.label.localeCompare(b.label));
 }
+
+export function maturityLadder(records: Instrument[]) {
+  const groups=new Map<string,{month:string;count:number;amountMinor:number}>();
+  for (const record of records) {
+    if (record.status==='Draft'||closed.has(record.status)||!validDate(record.maturity)) continue;
+    const month=record.maturity.slice(0,7);const group=groups.get(month)||{month,count:0,amountMinor:0};group.count++;group.amountMinor+=minor(record);groups.set(month,group);
+  }
+  return [...groups.values()].sort((a,b)=>a.month.localeCompare(b.month));
+}

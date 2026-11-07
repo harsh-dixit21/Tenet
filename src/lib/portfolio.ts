@@ -110,3 +110,10 @@ export function maturityCalendar(records: Instrument[], referenceDate: string) {
 }
 
 export const portfolioIds = (records: Instrument[]) => records.map(record=>record.id).join('\n');
+
+export function concentration(records: Instrument[], field: 'bank'|'institution') {
+  const groups = new Map<string,{label:string;count:number;amountMinor:number;share:number}>();
+  const total = totalMinor(records);
+  for (const record of records) {const label=record[field];const group=groups.get(label)||{label,count:0,amountMinor:0,share:0};group.count++;group.amountMinor+=minor(record);groups.set(label,group);}
+  return [...groups.values()].map(group=>({...group,share:total ? group.amountMinor/total*100 : 0})).sort((a,b)=>b.amountMinor-a.amountMinor||a.label.localeCompare(b.label));
+}

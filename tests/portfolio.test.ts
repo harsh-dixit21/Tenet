@@ -59,3 +59,5 @@ test('calendar exports active maturities with escaped and folded RFC lines',()=>
 test('print report totals cover all filtered pages',()=>{const many=Array.from({length:26},(_,i)=>record({id:String(i)}));assert.equal(p.portfolioSnapshot(many,'2026-11-08').count,26);assert.equal(p.totalMinor(many),260000);assert.equal(p.paginate(many,1,10).items.length,10);});
 
 test('ID copy output preserves order and handles empty results',()=>{assert.equal(p.portfolioIds([records[1],records[0]]),'B\nA');assert.equal(p.portfolioIds([]),'');});
+
+test('bank concentration reconciles amounts shares and zero totals',()=>{const groups=p.concentration(records,'bank');assert.equal(groups.reduce((sum,g)=>sum+g.amountMinor,0),35000);assert.ok(Math.abs(groups.reduce((sum,g)=>sum+g.share,0)-100)<1e-10);assert.equal(p.concentration([record({amountMinor:0})],'bank')[0].share,0);});

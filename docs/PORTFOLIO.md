@@ -10,3 +10,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 4. **Filter portfolio by lifecycle status.** Inspect one lifecycle stage independently of the main register.
 5. **Isolate active portfolio exposure.** Exclude drafts and terminal lifecycle states from exposure analysis.
 6. **Filter instruments by document readiness.** Identify complete instruments or those missing required document categories.
+7. **Filter portfolio by minimum face value.** Use inclusive minimum amounts with exact decimal-to-paise parsing.

@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; minimum?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -16,6 +16,7 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     if (filters.activeOnly && (record.status === 'Draft' || closed.has(record.status))) return false;
     if (filters.documents === 'complete' && missingKinds(record).length) return false;
     if (filters.documents === 'missing' && !missingKinds(record).length) return false;
+    if (filters.minimum && (parseAmount(filters.minimum) === null || minor(record) < parseAmount(filters.minimum)!)) return false;
     // FILTERS
     return true;
   });
@@ -24,3 +25,10 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
 export const distinct = (records: Instrument[], field: 'bank' | 'institution' | 'status') => [...new Set(records.map(record=>record[field]))].sort((a,b)=>a.localeCompare(b));
 
 export const missingKinds = (record: Instrument) => ['Instrument copy','Bank letter','Declaration'].filter(kind=>!record.docs.some(doc=>doc.kind===kind));
+
+export function parseAmount(value: string) {
+  if (!/^\d+(?:\.\d{1,2})?$/.test(value)) return null;
+  const [whole, fraction=''] = value.split('.');
+  const result = Number(whole)*100 + Number(fraction.padEnd(2,'0'));
+  return Number.isSafeInteger(result) ? result : null;
+}

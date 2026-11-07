@@ -25,3 +25,5 @@ test('active exposure excludes drafts and terminal records',()=>{assert.deepEqua
 test('required categories ignore unrelated uploads',()=>{const complete=record({docs:['Instrument copy','Bank letter','Declaration'].map((kind,i)=>({id:String(i),kind,name:'file.txt',version:1,date:'2026-01-01',data:'',size:1}))});assert.equal(p.filterPortfolio([complete],{query:'',documents:'complete'},'2026-11-08').length,1);assert.equal(filter({documents:'complete'}).length,0);assert.equal(filter({documents:'missing'}).length,3);});
 
 test('minimum amounts use paise and reject unsafe or malformed input',()=>{assert.equal(p.parseAmount('10.01'),1001);assert.equal(p.parseAmount('1e3'),null);assert.equal(p.parseAmount('1.001'),null);assert.equal(p.parseAmount('9007199254740992'),null);assert.deepEqual(filter({minimum:'100.00'}).map(r=>r.id),['A','B']);});
+
+test('maximum amounts and reversed amount bounds fail closed',()=>{assert.deepEqual(filter({maximum:'100'}).map(r=>r.id),['A','C']);assert.equal(filter({minimum:'200',maximum:'100'}).length,0);assert.equal(filter({maximum:'0'}).length,0);});

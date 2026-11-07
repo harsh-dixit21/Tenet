@@ -34,3 +34,14 @@
 .portfolio:has(input[aria-label="Compact portfolio rows"]:checked) .portfolio-scroll :is(td,th) { padding-block: 9px; }
 
 .portfolio-selection { padding: 14px 0; border-block: 1px solid var(--border); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+.portfolio-print-only { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  .portfolio-print-only,.portfolio-print-only * { visibility: visible; }
+  .portfolio-print-only { display: block; position: absolute; top: 0; left: 0; width: 100%; background: white; color: black; font-family: sans-serif; }
+  .portfolio-print-only .portfolio-scroll { overflow: visible; }
+  .portfolio-print-only table { font-size: 10px; }
+  .portfolio-print-only th,.portfolio-print-only td { color: black; border-color: #ccc; padding: 8px 4px; }
+  .portfolio-print-only tr { break-inside: avoid; }
+}

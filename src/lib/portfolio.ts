@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem, EventItem} from '../components/workspace/store.ts';
-export type PortfolioFilters = {query: string; referenceDate?: string; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
+export type PortfolioFilters = {query: string; referenceDate?: string; documents?: '' | 'complete' | 'missing'; activeOnly?: boolean; status?: string; institution?: string; bank?: string};
 const closed = new Set(['Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 export const minor = (record: Instrument) => record.amountMinor ?? Math.round(record.amount * 100);
 export const totalMinor = (records: Instrument[]) => records.reduce((sum, record) => sum + minor(record), 0);
@@ -14,9 +14,13 @@ export function filterPortfolio(records: Instrument[], filters: PortfolioFilters
     if (filters.institution && record.institution !== filters.institution) return false;
     if (filters.status && record.status !== filters.status) return false;
     if (filters.activeOnly && (record.status === 'Draft' || closed.has(record.status))) return false;
+    if (filters.documents === 'complete' && missingKinds(record).length) return false;
+    if (filters.documents === 'missing' && !missingKinds(record).length) return false;
     // FILTERS
     return true;
   });
 }
 
 export const distinct = (records: Instrument[], field: 'bank' | 'institution' | 'status') => [...new Set(records.map(record=>record[field]))].sort((a,b)=>a.localeCompare(b));
+
+export const missingKinds = (record: Instrument) => ['Instrument copy','Bank letter','Declaration'].filter(kind=>!record.docs.some(doc=>doc.kind===kind));

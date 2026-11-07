@@ -21,3 +21,5 @@ test('institution scope combines with bank',()=>{assert.equal(filter({institutio
 test('status scope excludes other lifecycle stages',()=>{assert.deepEqual(filter({status:'Verified'}).map(r=>r.id),['A']);});
 
 test('active exposure excludes drafts and terminal records',()=>{assert.deepEqual(filter({activeOnly:true}).map(r=>r.id),['A','B']);assert.equal(p.filterPortfolio([record({status:'Draft'})],{query:'',activeOnly:true},'2026-11-08').length,0);});
+
+test('required categories ignore unrelated uploads',()=>{const complete=record({docs:['Instrument copy','Bank letter','Declaration'].map((kind,i)=>({id:String(i),kind,name:'file.txt',version:1,date:'2026-01-01',data:'',size:1}))});assert.equal(p.filterPortfolio([complete],{query:'',documents:'complete'},'2026-11-08').length,1);assert.equal(filter({documents:'complete'}).length,0);assert.equal(filter({documents:'missing'}).length,3);});

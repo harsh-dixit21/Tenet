@@ -9,3 +9,4 @@ Open **Portfolio** in the workspace navigation. All calculations use the current
 3. **Filter portfolio by institution.** Combine institution and bank scopes without changing source records.
 4. **Filter portfolio by lifecycle status.** Inspect one lifecycle stage independently of the main register.
 5. **Isolate active portfolio exposure.** Exclude drafts and terminal lifecycle states from exposure analysis.
+6. **Filter instruments by document readiness.** Identify complete instruments or those missing required document categories.

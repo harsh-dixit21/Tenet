@@ -99,3 +99,5 @@ export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.ran
   const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
   return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false},newId,now);
 }
+
+export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}

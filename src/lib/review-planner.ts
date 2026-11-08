@@ -186,3 +186,5 @@ export function toggleChecklist(data:PlannerData,taskId:string,itemId:string,now
   const task=data.tasks.find(task=>task.id===taskId);if(!task||!task.checklist.some(item=>item.id===itemId))throw new Error('This checklist step was removed.');
   return updateTask(data,taskId,{checklist:task.checklist.map(item=>item.id===itemId?{...item,done:!item.done}:item)},now);
 }
+
+export function checklistProgress(task:ReviewTask) {const total=task.checklist.length;const done=task.checklist.filter(item=>item.done).length;return {total,done,percent:total?Math.round(done/total*100):0};}

@@ -33,3 +33,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 27. **Generate follow-up tasks for aging pending requests.** Suggest high-priority personal tasks for authorized pending requests past a configurable age threshold.
 28. **Keep a bounded personal task activity trail.** Record created, edited, rescheduled, completed, reopened and deleted task actions locally without copying note contents into the history.
 29. **Add bounded checklists to personal review tasks.** Create and edit up to ten named steps, preserve completion for unchanged labels, and toggle individual steps.
+30. **Show review checklist completion progress.** Display accessible progress and exact completed-step counts while leaving parent-task completion under user control.

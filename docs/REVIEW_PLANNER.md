@@ -10,3 +10,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 4. **Categorize personal reviews by workflow.** Label tasks as document, verification, maturity, request or general follow-up.
 5. **Keep private follow-up notes with review tasks.** Store bounded multiline personal notes locally and render them as plain text.
 6. **Complete and reopen personal review tasks.** Track personal completion separately from the linked instrument lifecycle.
+7. **Edit existing review task titles.** Rename personal tasks while preserving identity, creation time and instrument linkage.

@@ -25,6 +25,7 @@ export function ReviewPlanner() {
   const [importError,setImportError]=useState('');
   const [suggestionHorizon,setSuggestionHorizon]=useState(30);
   const [requestThreshold,setRequestThreshold]=useState(7);
+  const [focused,setFocused]=useState(false);
 
   const visible = p.sortTasks(p.filterTasks(scoped,taskFilters,reference),sort);
   function create(event:FormEvent<HTMLFormElement>) {
@@ -36,6 +37,7 @@ export function ReviewPlanner() {
     {planner.error&&<div role="alert" className="planner-note">{planner.error}{planner.blocked&&<button onClick={()=>{if(window.confirm('Remove unreadable personal planner data for this account in this browser?'))planner.reset();}}>Reset unreadable planner data</button>}</div>}
     {planner.notice&&<p role="status" className="planner-note">{planner.notice}</p>}
     {deleted&&<div className="planner-actions"><p className="planner-note">Deleted task: {deleted.title}</p><button onClick={()=>{if(workspace.records.some(record=>record.id===deleted.recordId)&&planner.update(data=>p.restoreTask(data,deleted),'Task restored.'))setDeleted(null);}}>Undo task deletion</button></div>}
+<div className="planner-actions"><p className="planner-note">{focused?(p.nextReviewTask(visible)?'Focus mode: showing the next open review. Completing it reveals the next task.':'Focus mode: no open tasks remain in these filters.'):'Choose a review from the queue, or work through one task at a time.'}</p><button disabled={!focused&&!p.nextReviewTask(visible)} onClick={()=>setFocused(current=>!current)}>{focused?'Show full review queue':'Focus next review task'}</button></div>
     <details className="planner-create" open><summary>Add a review task</summary><form onSubmit={create} className="planner-form">
       <Field label="Review task title"><input name="title" required maxLength={120} placeholder="Follow up on a deposit review"/></Field>
       <Field label="Linked instrument"><select name="recordId" required defaultValue=""><option value="" disabled>Choose an authorized instrument</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id} · {record.institution}</option>)}</select></Field>
@@ -63,7 +65,7 @@ export function ReviewPlanner() {
 <div className="planner-form"><Field label="Suggested pending request age in days"><input type="number" min={1} max={90} value={requestThreshold} onChange={event=>setRequestThreshold(Number(event.target.value))}/></Field><button onClick={()=>planner.update(data=>p.addSuggestedTasks(data,p.requestSuggestions(workspace.records,workspace.requests,reference,requestThreshold)),'Added pending-request follow-up tasks. Existing source tasks were skipped.')}>Suggest pending-request follow-ups</button></div></div></Panel>
     <div className="planner-actions"><label className="planner-check"><input type="checkbox" checked={visible.length>0&&visible.every(task=>selected.includes(task.id))} onChange={event=>setSelected(event.target.checked?visible.map(task=>task.id):[])}/>Select matching tasks</label><span className="planner-note">{p.taskSelection(visible,selected).length} selected in current filters</span><button disabled={!p.taskSelection(visible,selected).length} onClick={()=>{if(planner.update(data=>p.completeTasks(data,p.taskSelection(visible,selected).map(task=>task.id),workspace.records.map(record=>record.id)),'Selected review tasks completed.'))setSelected([]);}}>Complete selected tasks</button></div>
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>
-    <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
+    <div className="planner-task-list">{(focused?p.focusQueue(visible):visible).map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
       <div className="planner-task-main"><label className="planner-check"><input type="checkbox" aria-label={`Select review task ${task.title}`} checked={selected.includes(task.id)} onChange={()=>setSelected(current=>current.includes(task.id)?current.filter(id=>id!==task.id):[...current,task.id])}/><span className="sr-only">Select task</span></label><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span>
 <span>{task.priority} priority</span>
 <span>{task.category}</span>

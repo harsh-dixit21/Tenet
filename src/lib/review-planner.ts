@@ -189,3 +189,8 @@ export function toggleChecklist(data:PlannerData,taskId:string,itemId:string,now
 }
 
 export function checklistProgress(task:ReviewTask) {const total=task.checklist.length;const done=task.checklist.filter(item=>item.done).length;return {total,done,percent:total?Math.round(done/total*100):0};}
+
+export function nextReviewTask(tasks:ReviewTask[]) {
+  return [...tasks].filter(task=>!task.completed).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||priorities.indexOf(a.priority)-priorities.indexOf(b.priority)||(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31')||a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))[0];
+}
+export function focusQueue(tasks:ReviewTask[]) {const next=nextReviewTask(tasks);return next?[next]:[];}

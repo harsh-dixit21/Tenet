@@ -101,3 +101,5 @@ export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.ran
 }
 
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}
+
+export function taskBackup(tasks:ReviewTask[],exportedAt=new Date().toISOString()) {return {version:1 as const,exportedAt,tasks:tasks.map(readTask)};}

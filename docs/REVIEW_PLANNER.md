@@ -24,3 +24,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 18. **Reschedule selected review tasks together.** Apply or clear one due date across the currently selected authorized tasks.
 19. **Duplicate a review task as independent open follow-up.** Copy task context to a new identity while resetting completion and creation timestamps.
 20. **Export filtered personal review tasks as safe CSV.** Download the current task queue, including personal notes, with the existing formula-safe CSV encoder.
+21. **Back up authorized personal review tasks as versioned JSON.** Export the full authorized personal task collection rather than just the current filtered queue.

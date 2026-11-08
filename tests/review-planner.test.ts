@@ -45,3 +45,5 @@ test('bulk rescheduling preserves completion and respects scope',()=>{const data
 test('duplicates reopen work with independent identity and bounded title length',()=>{const data=p.updateTask(initial(),'task-a',{completed:true,title:'x'.repeat(120)},now);const duplicate=p.duplicateTask(data,'task-a','task-copy','2026-11-10T09:00:00Z');assert.equal(duplicate.tasks[1].completed,false);assert.equal(duplicate.tasks[1].title.length,120);assert.equal(duplicate.tasks[1].createdAt,'2026-11-10T09:00:00Z');assert.equal(data.tasks.length,1);});
 
 test('task CSV has a fixed schema and explicit completion vocabulary',()=>{const rows=p.taskCsvRows(initial().tasks);assert.equal(rows[0].length,rows[1].length);assert.equal(rows[1][6],'Open');assert.equal(rows[1][1],'A');assert.equal(p.taskCsvRows([]).length,1);});
+
+test('JSON backup round trips all whitelisted task fields',()=>{const data=p.updateTask(initial(),'task-a',{notes:'Private follow-up',due:'2026-11-12'},now);const backup=p.taskBackup(data.tasks,now);assert.equal(backup.exportedAt,now);assert.deepEqual(p.readPlanner(JSON.stringify(backup)).tasks,data.tasks);assert.equal('docs' in backup.tasks[0],false);});

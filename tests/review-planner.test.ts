@@ -11,3 +11,5 @@ test('task creation round trips and isolates account and instrument scopes',()=>
 test('due dates accept leap days and reject impossible dates',()=>{assert.equal(p.taskDue('2028-02-29'),'2028-02-29');assert.throws(()=>p.taskDue('2026-02-30'),/valid task due date/);assert.equal(p.taskDue(undefined),'');});
 
 test('priorities use an explicit supported vocabulary',()=>{assert.equal(p.taskPriority(undefined),'Medium');assert.equal(p.taskPriority('High'),'High');assert.throws(()=>p.taskPriority('Critical'),/supported task priority/);});
+
+test('categories round trip and reject unsupported imported values',()=>{const data=p.addTask(p.emptyPlanner(),{recordId:'A',title:'Review',category:'Documents'},'task-a',now);assert.equal(p.readPlanner(JSON.stringify(data)).tasks[0].category,'Documents');assert.throws(()=>p.taskCategory('Admin'),/supported review category/);});

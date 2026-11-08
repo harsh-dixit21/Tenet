@@ -19,3 +19,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 13. **Separate open and completed personal review queues.** Keep current work and finished follow-up independently searchable.
 14. **Find overdue due-today and unscheduled review tasks.** Filter personal due dates against the current India calendar date, with inclusive seven-day boundaries.
 15. **Order personal tasks by due date priority recency or title.** Sort deterministically and immutably; unscheduled work follows dated work in due-date order.
+16. **Organize personal follow-up in a due-date agenda.** Group matching tasks into overdue, today, next seven days, later and unscheduled work without double-counting.

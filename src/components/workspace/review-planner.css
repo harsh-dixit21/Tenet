@@ -29,3 +29,5 @@
 @media(max-width:600px) {.planner-form>*:not(input[type=checkbox]),.planner-filters>* {flex-basis:100%;}.planner-task-main {flex-wrap:wrap;}.planner-task-main>.planner-actions {width:100%;justify-content:start;}.planner-heading {align-items:start;}}
 
 .planner-notes {white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;}
+
+.planner-agenda {margin-bottom:20px;}.planner-agenda h3 {font-size:14px;font-weight:500;margin-bottom:8px;}.planner-agenda li {font-size:13px;line-height:1.7;overflow-wrap:anywhere;}

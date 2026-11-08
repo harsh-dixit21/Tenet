@@ -67,6 +67,6 @@ export function ReviewPlanner() {
       </form>}
     </article>)}</div>
     {!visible.length&&<p className="planner-empty">No matching review tasks. Create a task for an authorized instrument or adjust the task filters.</p>}
-
+    <Panel title="Due-date agenda">{p.taskAgenda(visible,reference).map(group=><section key={group.label} className="planner-agenda"><h3>{group.label} · {group.tasks.length}</h3><ul>{group.tasks.map(task=><li key={task.id}><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> — {task.title}{task.due?` · ${task.due}`:''}</li>)}</ul></section>)}</Panel>
   </section>;
 }

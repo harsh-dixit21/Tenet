@@ -70,3 +70,11 @@ export function dueMatches(task:ReviewTask,horizon:string|undefined,reference:st
   const days=daysBetween(task.due,reference);
   return horizon==='overdue'?days<0:horizon==='today'?days===0:horizon==='week'?days>=0&&days<=7:false;
 }
+
+export type TaskSort='due'|'priority'|'created'|'title';
+export function sortTasks(tasks:ReviewTask[],sort:TaskSort) {
+  return [...tasks].sort((a,b)=>{
+    const result=sort==='priority'?priorities.indexOf(a.priority)-priorities.indexOf(b.priority):sort==='created'?b.createdAt.localeCompare(a.createdAt):sort==='title'?a.title.localeCompare(b.title):(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31');
+    return result||a.id.localeCompare(b.id);
+  });
+}

@@ -13,3 +13,5 @@ test('due dates accept leap days and reject impossible dates',()=>{assert.equal(
 test('priorities use an explicit supported vocabulary',()=>{assert.equal(p.taskPriority(undefined),'Medium');assert.equal(p.taskPriority('High'),'High');assert.throws(()=>p.taskPriority('Critical'),/supported task priority/);});
 
 test('categories round trip and reject unsupported imported values',()=>{const data=p.addTask(p.emptyPlanner(),{recordId:'A',title:'Review',category:'Documents'},'task-a',now);assert.equal(p.readPlanner(JSON.stringify(data)).tasks[0].category,'Documents');assert.throws(()=>p.taskCategory('Admin'),/supported review category/);});
+
+test('notes preserve multiline content without accepting unsafe controls',()=>{assert.equal(p.taskNotes('First\r\nSecond'),'First\nSecond');assert.equal(p.taskNotes('<script>literal text</script>'),'<script>literal text</script>');assert.throws(()=>p.taskNotes('x'.repeat(1001)),/1000 characters/);assert.throws(()=>p.taskNotes('bad\u0000note'),/unsafe controls/);});

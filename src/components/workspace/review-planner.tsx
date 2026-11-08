@@ -21,7 +21,7 @@ export function ReviewPlanner() {
   const visible = scoped;
   function create(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
-    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory}), 'Review task created.'))form.reset();
+    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'')}), 'Review task created.'))form.reset();
   }
   return <section className="review-planner" aria-label="Personal review planner">
     <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
@@ -34,6 +34,7 @@ export function ReviewPlanner() {
       <Field label="Task due date"><input name="due" type="date"/></Field>
 <Field label="Task priority"><select name="priority" defaultValue="Medium">{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Review category"><select name="category" defaultValue="General">{p.categories.map(value=><option key={value}>{value}</option>)}</select></Field>
+<Field label="Personal task notes"><textarea name="notes" maxLength={1000} placeholder="Optional follow-up context"/></Field>
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
 
@@ -45,7 +46,7 @@ export function ReviewPlanner() {
 <span>{task.priority} priority</span>
 <span>{task.category}</span></div></div><div className="planner-actions"></div></div>
 
-
+      <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
       {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{  }),'Review task updated.'))setEditing('');}}>
 
         <button type="submit">Save task changes</button><button type="button" onClick={()=>setEditing('')}>Cancel editing</button>

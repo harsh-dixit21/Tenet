@@ -8,3 +8,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 2. **Schedule personal review task due dates.** Set optional calendar due dates when creating tasks, with strict date validation.
 3. **Assign high medium or low review priorities.** Distinguish urgent reviews from routine follow-up without altering financial authorization.
 4. **Categorize personal reviews by workflow.** Label tasks as document, verification, maturity, request or general follow-up.
+5. **Keep private follow-up notes with review tasks.** Store bounded multiline personal notes locally and render them as plain text.

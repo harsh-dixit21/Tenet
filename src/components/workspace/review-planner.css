@@ -27,3 +27,5 @@
 .planner-empty {padding:24px 0;font-size:14px;color:var(--muted-foreground);}
 .planner-tools {display:flex;flex-wrap:wrap;gap:16px;align-items:end;}
 @media(max-width:600px) {.planner-form>*:not(input[type=checkbox]),.planner-filters>* {flex-basis:100%;}.planner-task-main {flex-wrap:wrap;}.planner-task-main>.planner-actions {width:100%;justify-content:start;}.planner-heading {align-items:start;}}
+
+.planner-notes {white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;}

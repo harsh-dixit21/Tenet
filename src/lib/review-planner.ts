@@ -139,3 +139,8 @@ export function documentSuggestions(records:Instrument[],reference:string):TaskI
   taskDue(reference);
   return records.filter(activeReviewRecord).flatMap(record=>missingKinds(record).map(kind=>({recordId:record.id,title:`Collect ${kind} for ${record.id}`,due:reference,priority:'Medium' as Priority,category:'Documents' as TaskCategory,origin:`document:${record.id}:${kind}`})));
 }
+
+export function evidenceSuggestions(records:Instrument[],reference:string):TaskInput[] {
+  taskDue(reference);
+  return records.filter(record=>['Verified','Release requested'].includes(record.status)&&(!record.evidence?.source?.trim()||!record.evidence.reference?.trim()||!validDate(record.evidence.date))).map(record=>({recordId:record.id,title:`Review evidence metadata for ${record.id}`,due:reference,priority:'High',category:'Verification',origin:`evidence:${record.id}`}));
+}

@@ -103,3 +103,15 @@ export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.ran
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}
 
 export function taskBackup(tasks:ReviewTask[],exportedAt=new Date().toISOString()) {return {version:1 as const,exportedAt,tasks:tasks.map(readTask)};}
+
+export function previewTaskImport(raw:string,data:PlannerData,authorizedIds:string[]) {
+  const incoming=readPlanner(raw).tasks;const allowed=new Set(authorizedIds);
+  if(incoming.some(task=>!allowed.has(task.recordId)))throw new Error('Backup references instruments outside this authorized workspace.');
+  const existing=new Set(data.tasks.map(task=>task.id));const additions=incoming.filter(task=>!existing.has(task.id));
+  if(data.tasks.length+additions.length>200)throw new Error('Import would exceed the 200-task capacity.');
+  return {tasks:additions,skipped:incoming.length-additions.length};
+}
+export function mergeTaskImport(data:PlannerData,tasks:ReviewTask[],authorizedIds:string[]) {
+  const preview=previewTaskImport(JSON.stringify({version:1,tasks}),data,authorizedIds);
+  return {...data,tasks:[...data.tasks,...preview.tasks]};
+}

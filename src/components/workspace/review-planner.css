@@ -33,3 +33,5 @@
 .planner-agenda {margin-bottom:20px;}.planner-agenda h3 {font-size:14px;font-weight:500;margin-bottom:8px;}.planner-agenda li {font-size:13px;line-height:1.7;overflow-wrap:anywhere;}
 
 .planner-check {display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:13px;flex-shrink:0;}
+
+.planner-import {flex:1 1 100%;min-width:0;}.planner-import-preview {font-size:13px;padding-top:12px;}.planner-import-preview li {overflow-wrap:anywhere;line-height:1.7;}

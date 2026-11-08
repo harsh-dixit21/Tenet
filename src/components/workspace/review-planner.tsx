@@ -1,0 +1,53 @@
+import {useMemo,useState,type FormEvent,type ReactNode} from 'react';
+import * as p from '@/lib/review-planner';
+import {useSession} from '@/lib/firebase/session';
+import {useWorkspace,today,download,csv} from './store';
+import {useReviewPlanner} from './use-review-planner';
+import './review-planner.css';
+
+function Field({label,children}:{label:string;children:ReactNode}) { return <label className="planner-field"><span>{label}</span>{children}</label>; }
+function Panel({title,children}:{title:string;children:ReactNode}) {const[open,setOpen]=useState(false);return <details className="planner-panel" onToggle={event=>setOpen(event.currentTarget.open)}><summary>{title}</summary>{open&&<div className="planner-panel-body">{children}</div>}</details>;}
+
+export function ReviewPlanner() {
+  const {state:workspace}=useWorkspace();
+  const session=useSession();
+  const planner=useReviewPlanner(p.plannerKey(session.user?.uid||'demo'));
+  const reference=today();
+  const scoped=useMemo(()=>p.scopedTasks(planner.data.tasks,workspace.records.map(record=>record.id)),[planner.data.tasks,workspace.records]);
+  const recordNames=useMemo(()=>new Map(workspace.records.map(record=>[record.id,record.institution])),[workspace.records]);
+  const [editing,setEditing]=useState('');
+
+
+  const visible = scoped;
+  function create(event:FormEvent<HTMLFormElement>) {
+    event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
+    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') }), 'Review task created.'))form.reset();
+  }
+  return <section className="review-planner" aria-label="Personal review planner">
+    <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
+    {planner.error&&<div role="alert" className="planner-note">{planner.error}{planner.blocked&&<button onClick={()=>{if(window.confirm('Remove unreadable personal planner data for this account in this browser?'))planner.reset();}}>Reset unreadable planner data</button>}</div>}
+    {planner.notice&&<p role="status" className="planner-note">{planner.notice}</p>}
+
+    <details className="planner-create" open><summary>Add a review task</summary><form onSubmit={create} className="planner-form">
+      <Field label="Review task title"><input name="title" required maxLength={120} placeholder="Follow up on a deposit review"/></Field>
+      <Field label="Linked instrument"><select name="recordId" required defaultValue=""><option value="" disabled>Choose an authorized instrument</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id} · {record.institution}</option>)}</select></Field>
+
+      <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
+    </form></details>
+
+
+
+    <p className="planner-note" role="status">{visible.length} matching review tasks</p>
+    <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
+      <div className="planner-task-main"><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"></div></div><div className="planner-actions"></div></div>
+
+
+      {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{  }),'Review task updated.'))setEditing('');}}>
+
+        <button type="submit">Save task changes</button><button type="button" onClick={()=>setEditing('')}>Cancel editing</button>
+      </form>}
+    </article>)}</div>
+    {!visible.length&&<p className="planner-empty">No matching review tasks. Create a task for an authorized instrument or adjust the task filters.</p>}
+
+  </section>;
+}

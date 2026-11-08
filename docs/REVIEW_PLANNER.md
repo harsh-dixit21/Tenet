@@ -1,0 +1,7 @@
+# Personal review planner
+
+Open **Review planner** from the workspace navigation. Tasks belong to this account in this browser. Only tasks linked to currently authorized instruments appear or leave through exports. No task action changes a bank record, role, verification decision or financial request.
+
+## Features
+
+1. **Create an account-scoped personal review planner.** Create persistent browser tasks linked to authorized instruments; validate stored data and preserve it on read or write failures.

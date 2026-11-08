@@ -149,3 +149,9 @@ export function maturitySuggestions(records:Instrument[],reference:string,horizo
   taskDue(reference);if(!Number.isInteger(horizon)||horizon<1||horizon>365)throw new Error('Maturity horizon must be 1 to 365 days.');
   return records.filter(record=>activeReviewRecord(record)&&daysBetween(record.maturity,reference)>=0&&daysBetween(record.maturity,reference)<=horizon).map(record=>({recordId:record.id,title:`Review upcoming maturity for ${record.id}`,due:record.maturity,priority:daysBetween(record.maturity,reference)<=7?'High':'Medium',category:'Maturity',origin:`maturity:${record.id}:${record.maturity}`}));
 }
+
+export function requestSuggestions(records:Instrument[],requests:RequestItem[],reference:string,threshold:number):TaskInput[] {
+  taskDue(reference);if(!Number.isInteger(threshold)||threshold<1||threshold>90)throw new Error('Pending request age must be 1 to 90 days.');
+  const authorized=new Set(records.map(record=>record.id));
+  return requests.filter(request=>authorized.has(request.recordId)&&request.status==='Pending'&&daysBetween(reference,request.date.slice(0,10))>=threshold).map(request=>({recordId:request.recordId,title:`Follow up ${request.type.toLowerCase()} request ${request.id}`,due:reference,priority:'High',category:'Requests',origin:`request:${request.id}`}));
+}

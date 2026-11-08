@@ -17,8 +17,9 @@ export function ReviewPlanner() {
   const recordNames=useMemo(()=>new Map(workspace.records.map(record=>[record.id,record.institution])),[workspace.records]);
   const [editing,setEditing]=useState('');
   const [deleted,setDeleted]=useState<p.ReviewTask|null>(null);
+  const [taskFilters,setTaskFilters]=useState<p.TaskFilters>({query:''});
 
-  const visible = scoped;
+  const visible = p.filterTasks(scoped,taskFilters,reference);
   function create(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
     if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'')}), 'Review task created.'))form.reset();
@@ -37,7 +38,7 @@ export function ReviewPlanner() {
 <Field label="Personal task notes"><textarea name="notes" maxLength={1000} placeholder="Optional follow-up context"/></Field>
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
-
+    <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field></div>
 
 
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>

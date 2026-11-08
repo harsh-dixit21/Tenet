@@ -13,3 +13,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 7. **Edit existing review task titles.** Rename personal tasks while preserving identity, creation time and instrument linkage.
 8. **Reschedule and revise existing task follow-up details.** Edit due dates, priority, category and personal notes together, with the same validation as new tasks.
 9. **Delete review tasks with a recoverable undo action.** Confirm deletions and restore the most recently deleted task while it remains authorized and capacity permits.
+10. **Search review tasks across titles notes and instrument IDs.** Apply accent-insensitive multi-token task search within authorized records.

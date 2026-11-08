@@ -89,3 +89,8 @@ export function completeTasks(data:PlannerData,ids:string[],authorizedIds:string
   const selected=new Set(ids);const allowed=new Set(authorizedIds);
   return {...data,tasks:data.tasks.map(task=>selected.has(task.id)&&allowed.has(task.recordId)?{...task,completed:true,updatedAt:now}:task)};
 }
+
+export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:string[],due:string,now=new Date().toISOString()) {
+  const nextDue=taskDue(due);const selected=new Set(ids);const allowed=new Set(authorizedIds);
+  return {...data,tasks:data.tasks.map(task=>selected.has(task.id)&&allowed.has(task.recordId)?{...task,due:nextDue,updatedAt:now}:task)};
+}

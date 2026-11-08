@@ -20,6 +20,7 @@ export function ReviewPlanner() {
   const [taskFilters,setTaskFilters]=useState<p.TaskFilters>({query:'',completion:'open'});
   const [sort,setSort]=useState<p.TaskSort>('due');
   const [selected,setSelected]=useState<string[]>([]);
+  const [bulkDue,setBulkDue]=useState('');
 
   const visible = p.sortTasks(p.filterTasks(scoped,taskFilters,reference),sort);
   function create(event:FormEvent<HTMLFormElement>) {
@@ -46,7 +47,7 @@ export function ReviewPlanner() {
 <Field label="Task completion filter"><select value={taskFilters.completion||'all'} onChange={event=>setTaskFilters(current=>({...current,completion:event.target.value as p.TaskFilters['completion']}))}><option value="open">Open tasks</option><option value="completed">Completed tasks</option><option value="all">All completion states</option></select></Field>
 <Field label="Task due horizon"><select value={taskFilters.horizon||'all'} onChange={event=>setTaskFilters(current=>({...current,horizon:event.target.value as p.TaskFilters['horizon']}))}><option value="all">Any due date</option><option value="overdue">Overdue tasks</option><option value="today">Due today</option><option value="week">Next 7 days</option><option value="unscheduled">No due date</option></select></Field>
 <Field label="Review task order"><select value={sort} onChange={event=>setSort(event.target.value as p.TaskSort)}><option value="due">Due date first</option><option value="priority">Priority first</option><option value="created">Newest created</option><option value="title">Title A–Z</option></select></Field></div>
-
+    <Panel title="Planner tools"><div className="planner-tools"><div className="planner-form"><Field label="Selected tasks due date"><input type="date" value={bulkDue} onChange={event=>setBulkDue(event.target.value)}/></Field><button disabled={!p.taskSelection(visible,selected).length} onClick={()=>planner.update(data=>p.rescheduleTasks(data,p.taskSelection(visible,selected).map(task=>task.id),workspace.records.map(record=>record.id),bulkDue),bulkDue?'Selected task due dates updated.':'Selected task due dates cleared.')}>Reschedule selected tasks</button><p className="planner-note">A blank date clears selected due dates.</p></div></div></Panel>
     <div className="planner-actions"><label className="planner-check"><input type="checkbox" checked={visible.length>0&&visible.every(task=>selected.includes(task.id))} onChange={event=>setSelected(event.target.checked?visible.map(task=>task.id):[])}/>Select matching tasks</label><span className="planner-note">{p.taskSelection(visible,selected).length} selected in current filters</span><button disabled={!p.taskSelection(visible,selected).length} onClick={()=>{if(planner.update(data=>p.completeTasks(data,p.taskSelection(visible,selected).map(task=>task.id),workspace.records.map(record=>record.id)),'Selected review tasks completed.'))setSelected([]);}}>Complete selected tasks</button></div>
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>
     <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>

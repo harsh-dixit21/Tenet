@@ -39,7 +39,8 @@ export function ReviewPlanner() {
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
     <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field>
-<Field label="Filter task instrument"><select value={taskFilters.recordId||''} onChange={event=>setTaskFilters(current=>({...current,recordId:event.target.value}))}><option value="">All authorized instruments</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id}</option>)}</select></Field></div>
+<Field label="Filter task instrument"><select value={taskFilters.recordId||''} onChange={event=>setTaskFilters(current=>({...current,recordId:event.target.value}))}><option value="">All authorized instruments</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id}</option>)}</select></Field>
+<Field label="Filter task priority"><select value={taskFilters.priority||''} onChange={event=>setTaskFilters(current=>({...current,priority:(event.target.value||undefined) as p.Priority|undefined}))}><option value="">All priorities</option>{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field></div>
 
 
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>

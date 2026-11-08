@@ -15,3 +15,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 9. **Delete review tasks with a recoverable undo action.** Confirm deletions and restore the most recently deleted task while it remains authorized and capacity permits.
 10. **Search review tasks across titles notes and instrument IDs.** Apply accent-insensitive multi-token task search within authorized records.
 11. **Scope personal tasks to one instrument.** Inspect all personal follow-up for a single authorized deposit.
+12. **Isolate high priority personal reviews.** Combine priority and instrument scope to build focused review queues.

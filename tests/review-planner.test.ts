@@ -27,3 +27,5 @@ test('delete and restore preserve content and reject conflicting identities',()=
 test('task search combines tokens across titles and notes with accent folding',()=>{const task=p.updateTask(initial(),'task-a',{title:'Vérify evidence',notes:'Call bank branch'},now).tasks;assert.equal(p.filterTasks(task,{query:'verify branch'},'2026-11-09').length,1);assert.equal(p.filterTasks(task,{query:'unmatched'},'2026-11-09').length,0);});
 
 test('instrument task filters use exact authorized linkage',()=>{const tasks=p.addTask(initial(),{recordId:'B',title:'Other review'},'task-b',now).tasks;assert.deepEqual(p.filterTasks(tasks,{query:'',recordId:'B'},'2026-11-09').map(task=>task.id),['task-b']);});
+
+test('priority filters combine with instrument scope',()=>{const tasks=p.addTask(initial(),{recordId:'B',title:'Urgent',priority:'High'},'task-b',now).tasks;assert.equal(p.filterTasks(tasks,{query:'',priority:'High'},'2026-11-09').length,1);assert.equal(p.filterTasks(tasks,{query:'',priority:'High',recordId:'A'},'2026-11-09').length,0);});

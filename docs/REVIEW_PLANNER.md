@@ -27,3 +27,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 21. **Back up authorized personal review tasks as versioned JSON.** Export the full authorized personal task collection rather than just the current filtered queue.
 22. **Preview and merge personal task backups without overwrites.** Validate JSON shape, capacity, duplicate IDs and authorized instrument references before an explicit import.
 23. **Export open scheduled review tasks to a calendar.** Generate all-day iCalendar events with escaped Unicode-safe lines, stable task IDs and no personal notes.
+24. **Generate deduplicated missing-document follow-up tasks.** Create one personal task per missing required category on active authorized instruments; repeated generation skips existing sources.

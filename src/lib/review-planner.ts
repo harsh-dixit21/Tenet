@@ -1,8 +1,8 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; /* FIELDS */};
 export type PlannerData={version:1;tasks:ReviewTask[]};
-export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
@@ -11,7 +11,7 @@ export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), /* READ */};
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();
@@ -97,7 +97,7 @@ export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:stri
 
 export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.randomUUID(),now=new Date().toISOString()) {
   const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
-  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false},newId,now);
+  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:''},newId,now);
 }
 
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}
@@ -126,4 +126,16 @@ export function taskCalendar(tasks:ReviewTask[],reference:string) {
     lines.push('BEGIN:VEVENT',`UID:review-${task.id}@tenet.local`,`DTSTAMP:${reference.replaceAll('-','')}T000000Z`,`DTSTART;VALUE=DATE:${task.due.replaceAll('-','')}`,`DTEND;VALUE=DATE:${end}`,`SUMMARY:${taskCalendarEscape(task.title)}`,`DESCRIPTION:${taskCalendarEscape('Instrument '+task.recordId+'; '+task.category+'; '+task.priority+' priority')}`,'END:VEVENT');
   }
   lines.push('END:VCALENDAR');return lines.map(foldCalendarLine).join(calendarCR+calendarNewline)+calendarCR+calendarNewline;
+}
+
+const terminalStatuses=new Set(['Released','Refunded','Discharged','Renewed','Replaced']);
+const activeReviewRecord=(record:Instrument)=>record.status!=='Draft'&&!terminalStatuses.has(record.status);
+export function addSuggestedTasks(data:PlannerData,candidates:TaskInput[],idFactory:()=>string=()=>crypto.randomUUID(),now=new Date().toISOString()) {
+  const origins=new Set(data.tasks.map(task=>task.origin).filter(Boolean));let next=data;
+  for(const candidate of candidates){if(!candidate.origin)throw new Error('Suggested tasks need a source key.');if(origins.has(candidate.origin))continue;next=addTask(next,{...candidate,title:candidate.title.slice(0,120)},idFactory(),now);origins.add(candidate.origin);}
+  return next;
+}
+export function documentSuggestions(records:Instrument[],reference:string):TaskInput[] {
+  taskDue(reference);
+  return records.filter(activeReviewRecord).flatMap(record=>missingKinds(record).map(kind=>({recordId:record.id,title:`Collect ${kind} for ${record.id}`,due:reference,priority:'Medium' as Priority,category:'Documents' as TaskCategory,origin:`document:${record.id}:${kind}`})));
 }

@@ -36,3 +36,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 30. **Show review checklist completion progress.** Display accessible progress and exact completed-step counts while leaving parent-task completion under user control.
 31. **Pin important reviews above ordinary queue items.** Keep marked tasks first across task sort modes and retain pin state in browser storage.
 32. **Work through a ranked next-review focus queue.** Show one open task at a time, prioritizing pins, urgency and due dates, then advance automatically after completion.
+33. **Summarize the personal review workload with reconciled counts.** Show all authorized open, overdue, due-today and completed task counts independently of queue filters.

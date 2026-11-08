@@ -194,3 +194,8 @@ export function nextReviewTask(tasks:ReviewTask[]) {
   return [...tasks].filter(task=>!task.completed).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||priorities.indexOf(a.priority)-priorities.indexOf(b.priority)||(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31')||a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))[0];
 }
 export function focusQueue(tasks:ReviewTask[]) {const next=nextReviewTask(tasks);return next?[next]:[];}
+
+export function plannerSummary(tasks:ReviewTask[],reference:string) {
+  const open=tasks.filter(task=>!task.completed);
+  return {open:open.length,overdue:open.filter(task=>task.due&&daysBetween(task.due,reference)<0).length,today:open.filter(task=>task.due===reference).length,completed:tasks.filter(task=>task.completed).length};
+}

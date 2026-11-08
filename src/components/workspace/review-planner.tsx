@@ -26,7 +26,7 @@ export function ReviewPlanner() {
   const [suggestionHorizon,setSuggestionHorizon]=useState(30);
   const [requestThreshold,setRequestThreshold]=useState(7);
   const [focused,setFocused]=useState(false);
-
+  const summary=p.plannerSummary(scoped,reference);
   const visible = p.sortTasks(p.filterTasks(scoped,taskFilters,reference),sort);
   function create(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
@@ -36,7 +36,8 @@ export function ReviewPlanner() {
     <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
     {planner.error&&<div role="alert" className="planner-note">{planner.error}{planner.blocked&&<button onClick={()=>{if(window.confirm('Remove unreadable personal planner data for this account in this browser?'))planner.reset();}}>Reset unreadable planner data</button>}</div>}
     {planner.notice&&<p role="status" className="planner-note">{planner.notice}</p>}
-    {deleted&&<div className="planner-actions"><p className="planner-note">Deleted task: {deleted.title}</p><button onClick={()=>{if(workspace.records.some(record=>record.id===deleted.recordId)&&planner.update(data=>p.restoreTask(data,deleted),'Task restored.'))setDeleted(null);}}>Undo task deletion</button></div>}
+    <div className="planner-summary" aria-label="All authorized personal task totals">{([['Open reviews',summary.open],['Overdue reviews',summary.overdue],['Due today',summary.today],['Completed reviews',summary.completed]] as const).map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+{deleted&&<div className="planner-actions"><p className="planner-note">Deleted task: {deleted.title}</p><button onClick={()=>{if(workspace.records.some(record=>record.id===deleted.recordId)&&planner.update(data=>p.restoreTask(data,deleted),'Task restored.'))setDeleted(null);}}>Undo task deletion</button></div>}
 <div className="planner-actions"><p className="planner-note">{focused?(p.nextReviewTask(visible)?'Focus mode: showing the next open review. Completing it reveals the next task.':'Focus mode: no open tasks remain in these filters.'):'Choose a review from the queue, or work through one task at a time.'}</p><button disabled={!focused&&!p.nextReviewTask(visible)} onClick={()=>setFocused(current=>!current)}>{focused?'Show full review queue':'Focus next review task'}</button></div>
     <details className="planner-create" open><summary>Add a review task</summary><form onSubmit={create} className="planner-form">
       <Field label="Review task title"><input name="title" required maxLength={120} placeholder="Follow up on a deposit review"/></Field>

@@ -21,7 +21,7 @@ export function ReviewPlanner() {
   const visible = scoped;
   function create(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
-    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||'')}), 'Review task created.'))form.reset();
+    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority}), 'Review task created.'))form.reset();
   }
   return <section className="review-planner" aria-label="Personal review planner">
     <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
@@ -32,6 +32,7 @@ export function ReviewPlanner() {
       <Field label="Review task title"><input name="title" required maxLength={120} placeholder="Follow up on a deposit review"/></Field>
       <Field label="Linked instrument"><select name="recordId" required defaultValue=""><option value="" disabled>Choose an authorized instrument</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id} · {record.institution}</option>)}</select></Field>
       <Field label="Task due date"><input name="due" type="date"/></Field>
+<Field label="Task priority"><select name="priority" defaultValue="Medium">{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
 
@@ -39,7 +40,8 @@ export function ReviewPlanner() {
 
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>
     <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
-      <div className="planner-task-main"><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span></div></div><div className="planner-actions"></div></div>
+      <div className="planner-task-main"><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span>
+<span>{task.priority} priority</span></div></div><div className="planner-actions"></div></div>
 
 
       {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{  }),'Review task updated.'))setEditing('');}}>

@@ -37,3 +37,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 31. **Pin important reviews above ordinary queue items.** Keep marked tasks first across task sort modes and retain pin state in browser storage.
 32. **Work through a ranked next-review focus queue.** Show one open task at a time, prioritizing pins, urgency and due dates, then advance automatically after completion.
 33. **Summarize the personal review workload with reconciled counts.** Show all authorized open, overdue, due-today and completed task counts independently of queue filters.
+34. **Synchronize personal task changes across browser tabs.** Refresh matching-account data on storage changes, ignore other accounts, and block saving over unreadable external updates.

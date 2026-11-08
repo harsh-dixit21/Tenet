@@ -199,3 +199,5 @@ export function plannerSummary(tasks:ReviewTask[],reference:string) {
   const open=tasks.filter(task=>!task.completed);
   return {open:open.length,overdue:open.filter(task=>task.due&&daysBetween(task.due,reference)<0).length,today:open.filter(task=>task.due===reference).length,completed:tasks.filter(task=>task.completed).length};
 }
+
+export const plannerStorageKeyMatches=(expected:string,incoming:string|null)=>incoming===expected||incoming===null;

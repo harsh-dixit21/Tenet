@@ -17,3 +17,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 11. **Scope personal tasks to one instrument.** Inspect all personal follow-up for a single authorized deposit.
 12. **Isolate high priority personal reviews.** Combine priority and instrument scope to build focused review queues.
 13. **Separate open and completed personal review queues.** Keep current work and finished follow-up independently searchable.
+14. **Find overdue due-today and unscheduled review tasks.** Filter personal due dates against the current India calendar date, with inclusive seven-day boundaries.

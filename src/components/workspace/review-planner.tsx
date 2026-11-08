@@ -17,7 +17,7 @@ export function ReviewPlanner() {
   const recordNames=useMemo(()=>new Map(workspace.records.map(record=>[record.id,record.institution])),[workspace.records]);
   const [editing,setEditing]=useState('');
   const [deleted,setDeleted]=useState<p.ReviewTask|null>(null);
-  const [taskFilters,setTaskFilters]=useState<p.TaskFilters>({query:''});
+  const [taskFilters,setTaskFilters]=useState<p.TaskFilters>({query:'',completion:'open'});
 
   const visible = p.filterTasks(scoped,taskFilters,reference);
   function create(event:FormEvent<HTMLFormElement>) {
@@ -41,7 +41,8 @@ export function ReviewPlanner() {
     <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field>
 <Field label="Filter task instrument"><select value={taskFilters.recordId||''} onChange={event=>setTaskFilters(current=>({...current,recordId:event.target.value}))}><option value="">All authorized instruments</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id}</option>)}</select></Field>
 <Field label="Filter task priority"><select value={taskFilters.priority||''} onChange={event=>setTaskFilters(current=>({...current,priority:(event.target.value||undefined) as p.Priority|undefined}))}><option value="">All priorities</option>{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
-<Field label="Task completion filter"><select value={taskFilters.completion||'all'} onChange={event=>setTaskFilters(current=>({...current,completion:event.target.value as p.TaskFilters['completion']}))}><option value="open">Open tasks</option><option value="completed">Completed tasks</option><option value="all">All completion states</option></select></Field></div>
+<Field label="Task completion filter"><select value={taskFilters.completion||'all'} onChange={event=>setTaskFilters(current=>({...current,completion:event.target.value as p.TaskFilters['completion']}))}><option value="open">Open tasks</option><option value="completed">Completed tasks</option><option value="all">All completion states</option></select></Field>
+<Field label="Task due horizon"><select value={taskFilters.horizon||'all'} onChange={event=>setTaskFilters(current=>({...current,horizon:event.target.value as p.TaskFilters['horizon']}))}><option value="all">Any due date</option><option value="overdue">Overdue tasks</option><option value="today">Due today</option><option value="week">Next 7 days</option><option value="unscheduled">No due date</option></select></Field></div>
 
 
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>

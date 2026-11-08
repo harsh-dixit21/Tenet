@@ -48,7 +48,7 @@ export function taskNotes(value:unknown) {if(value===undefined)return '';if(type
 export function removeTask(data:PlannerData,id:string) {if(!data.tasks.some(task=>task.id===id))throw new Error('This task was already removed.');return {...data,tasks:data.tasks.filter(task=>task.id!==id)};}
 export function restoreTask(data:PlannerData,task:ReviewTask) {if(data.tasks.length>=200)throw new Error('Personal planner capacity is 200 tasks.');if(data.tasks.some(item=>item.id===task.id))throw new Error('This task already exists.');return {...data,tasks:[...data.tasks,readTask(task)]};}
 
-export type TaskFilters={query:string; recordId?:string; priority?:Priority; completion?:'open'|'completed'|'all'; /* FILTER_FIELDS */};
+export type TaskFilters={query:string; recordId?:string; priority?:Priority; completion?:'open'|'completed'|'all'; horizon?:'all'|'overdue'|'today'|'week'|'unscheduled'; /* FILTER_FIELDS */};
 const searchText=(value:string)=>value.normalize('NFKD').replace(/\p{Diacritic}/gu,'').toLowerCase();
 export function filterTasks(tasks:ReviewTask[],filters:TaskFilters,reference:string) {
   const tokens=searchText(filters.query).trim().split(/\s+/).filter(Boolean);
@@ -57,7 +57,16 @@ export function filterTasks(tasks:ReviewTask[],filters:TaskFilters,reference:str
     if(filters.recordId&&task.recordId!==filters.recordId)return false;
     if(filters.priority&&task.priority!==filters.priority)return false;
     if(filters.completion==='open'&&task.completed||filters.completion==='completed'&&!task.completed)return false;
+    if(!dueMatches(task,filters.horizon,reference))return false;
     /* FILTER_RULES */
     return true;
   });
+}
+
+export function dueMatches(task:ReviewTask,horizon:string|undefined,reference:string) {
+  if(!horizon||horizon==='all')return true;
+  if(horizon==='unscheduled')return !task.due;
+  if(!task.due)return false;
+  const days=daysBetween(task.due,reference);
+  return horizon==='overdue'?days<0:horizon==='today'?days===0:horizon==='week'?days>=0&&days<=7:false;
 }

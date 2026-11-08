@@ -34,3 +34,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 28. **Keep a bounded personal task activity trail.** Record created, edited, rescheduled, completed, reopened and deleted task actions locally without copying note contents into the history.
 29. **Add bounded checklists to personal review tasks.** Create and edit up to ten named steps, preserve completion for unchanged labels, and toggle individual steps.
 30. **Show review checklist completion progress.** Display accessible progress and exact completed-step counts while leaving parent-task completion under user control.
+31. **Pin important reviews above ordinary queue items.** Keep marked tasks first across task sort modes and retain pin state in browser storage.

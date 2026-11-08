@@ -1,9 +1,9 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; checklist:ChecklistItem[]; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; checklist:ChecklistItem[]; pinned:boolean; /* FIELDS */};
 export type PlannerEvent={id:string;taskId:string;recordId:string;action:string;at:string};
 export type PlannerData={version:1;tasks:ReviewTask[];events:PlannerEvent[]};
-export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; checklist?:ChecklistItem[]; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; checklist?:ChecklistItem[]; pinned?:boolean; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[],events:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
@@ -12,7 +12,7 @@ export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), checklist:readChecklist(item.checklist), /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), checklist:readChecklist(item.checklist), pinned:item.pinned===true, /* READ */};
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();
@@ -76,6 +76,7 @@ export function dueMatches(task:ReviewTask,horizon:string|undefined,reference:st
 export type TaskSort='due'|'priority'|'created'|'title';
 export function sortTasks(tasks:ReviewTask[],sort:TaskSort) {
   return [...tasks].sort((a,b)=>{
+    if(a.pinned!==b.pinned)return a.pinned?-1:1;
     const result=sort==='priority'?priorities.indexOf(a.priority)-priorities.indexOf(b.priority):sort==='created'?b.createdAt.localeCompare(a.createdAt):sort==='title'?a.title.localeCompare(b.title):(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31');
     return result||a.id.localeCompare(b.id);
   });
@@ -99,7 +100,7 @@ export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:stri
 
 export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.randomUUID(),now=new Date().toISOString()) {
   const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
-  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:'',checklist:task.checklist.map(item=>({...item,id:crypto.randomUUID(),done:false}))},newId,now);
+  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:'',pinned:false,checklist:task.checklist.map(item=>({...item,id:crypto.randomUUID(),done:false}))},newId,now);
 }
 
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}

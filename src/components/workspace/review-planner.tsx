@@ -83,5 +83,6 @@ export function ReviewPlanner() {
     </article>)}</div>
     {!visible.length&&<p className="planner-empty">No matching review tasks. Create a task for an authorized instrument or adjust the task filters.</p>}
     <Panel title="Due-date agenda">{p.taskAgenda(visible,reference).map(group=><section key={group.label} className="planner-agenda"><h3>{group.label} · {group.tasks.length}</h3><ul>{group.tasks.map(task=><li key={task.id}><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> — {task.title}{task.due?` · ${task.due}`:''}</li>)}</ul></section>)}</Panel>
+<Panel title="Personal planner activity"><p className="planner-note">The latest 100 local task actions. This is personal browser history, separate from the institution audit trail.</p><ol className="planner-history">{p.scopedPlannerEvents(planner.data.events,workspace.records.map(record=>record.id)).map(event=><li key={event.id}><span>{event.action} · {event.recordId}</span><time dateTime={event.at}>{new Date(event.at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})}</time></li>)}</ol></Panel>
   </section>;
 }

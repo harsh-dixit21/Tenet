@@ -1,10 +1,11 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
 export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; /* FIELDS */};
-export type PlannerData={version:1;tasks:ReviewTask[]};
+export type PlannerEvent={id:string;taskId:string;recordId:string;action:string;at:string};
+export type PlannerData={version:1;tasks:ReviewTask[];events:PlannerEvent[]};
 export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
-export const emptyPlanner=():PlannerData=>({version:1,tasks:[]});
+export const emptyPlanner=():PlannerData=>({version:1,tasks:[],events:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
 function timestamp(value:unknown) {if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(value)||!Number.isFinite(Date.parse(value)))throw new Error('Invalid task timestamp.');return value;}
 export function readTask(value:unknown):ReviewTask {
@@ -20,7 +21,8 @@ export function readPlanner(raw:string|null):PlannerData {
   if(!value||value.version!==1||!Array.isArray(value.tasks)||value.tasks.length>200)throw new Error('Unsupported or oversized planner data.');
   const tasks:ReviewTask[]=value.tasks.map(readTask);
   if(new Set(tasks.map(task=>task.id)).size!==tasks.length)throw new Error('Duplicate task IDs in planner data.');
-  return {version:1,tasks};
+  const events=readPlannerEvents(value.events);
+  return {version:1,tasks,events};
 }
 export function scopedTasks(tasks:ReviewTask[],authorizedIds:string[]) {const ids=new Set(authorizedIds);return tasks.filter(task=>ids.has(task.recordId));}
 export function addTask(data:PlannerData,input:TaskInput,id:string=crypto.randomUUID(),now=new Date().toISOString()):PlannerData {
@@ -155,3 +157,15 @@ export function requestSuggestions(records:Instrument[],requests:RequestItem[],r
   const authorized=new Set(records.map(record=>record.id));
   return requests.filter(request=>authorized.has(request.recordId)&&request.status==='Pending'&&daysBetween(reference,request.date.slice(0,10))>=threshold).map(request=>({recordId:request.recordId,title:`Follow up ${request.type.toLowerCase()} request ${request.id}`,due:reference,priority:'High',category:'Requests',origin:`request:${request.id}`}));
 }
+
+export function readPlannerEvents(value:unknown):PlannerEvent[] {
+  if(value===undefined)return [];if(!Array.isArray(value)||value.length>100)throw new Error('Invalid personal planner history.');
+  return value.map(raw=>{if(!raw||typeof raw!=='object')throw new Error('Invalid planner event.');const event=raw as Record<string,unknown>;return {id:text(event.id,'Event ID',80),taskId:text(event.taskId,'Task ID',80),recordId:text(event.recordId,'Instrument ID',120),action:text(event.action,'Planner action',120),at:timestamp(event.at)};});
+}
+export function recordPlannerChanges(before:PlannerData,next:PlannerData,now=new Date().toISOString()):PlannerData {
+  const previous=new Map(before.tasks.map(task=>[task.id,task]));const after=new Set(next.tasks.map(task=>task.id));const changes:PlannerEvent[]=[];
+  for(const task of next.tasks){const prior=previous.get(task.id);let action='';if(!prior)action='Created task';else if(task.completed!==prior.completed)action=task.completed?'Completed task':'Reopened task';else if(task.due!==prior.due)action='Rescheduled task';else if(JSON.stringify(task)!==JSON.stringify(prior))action='Edited task';if(action)changes.push({id:crypto.randomUUID(),taskId:task.id,recordId:task.recordId,action,at:now});}
+  for(const task of before.tasks)if(!after.has(task.id))changes.push({id:crypto.randomUUID(),taskId:task.id,recordId:task.recordId,action:'Deleted task',at:now});
+  return {...next,events:[...changes.reverse(),...before.events].slice(0,100)};
+}
+export function scopedPlannerEvents(events:PlannerEvent[],authorizedIds:string[]) {const allowed=new Set(authorizedIds);return events.filter(event=>allowed.has(event.recordId));}

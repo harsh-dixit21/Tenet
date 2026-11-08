@@ -35,3 +35,5 @@
 .planner-check {display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:13px;flex-shrink:0;}
 
 .planner-import {flex:1 1 100%;min-width:0;}.planner-import-preview {font-size:13px;padding-top:12px;}.planner-import-preview li {overflow-wrap:anywhere;line-height:1.7;}
+
+.planner-history li {display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:12px 0;font-size:13px;border-bottom:1px solid var(--border);}.planner-history time {color:var(--muted-foreground);font-variant-numeric:tabular-nums;}

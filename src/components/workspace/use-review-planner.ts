@@ -1,5 +1,5 @@
 import {useState,useEffect,useRef} from 'react';
-import {readPlanner,emptyPlanner,type PlannerData} from '@/lib/review-planner';
+import {readPlanner,emptyPlanner,recordPlannerChanges,type PlannerData} from '@/lib/review-planner';
 
 function load(key:string) {try{return {data:readPlanner(localStorage.getItem(key)),error:'',blocked:false};}catch{return {data:emptyPlanner(),error:'Saved personal tasks could not be read. The existing browser data has been preserved.',blocked:true};}}
 export function useReviewPlanner(key:string) {
@@ -11,7 +11,7 @@ export function useReviewPlanner(key:string) {
     if(ref.current.blocked){setError('Resolve unreadable planner storage before saving changes.');return false;}
     try {
       const current=readPlanner(localStorage.getItem(key));
-      const next=readPlanner(JSON.stringify(transform(current)));
+      const next=readPlanner(JSON.stringify(recordPlannerChanges(current,transform(current))));
       localStorage.setItem(key,JSON.stringify(next));
       setSnapshot({data:next,error:'',blocked:false});setError('');setNotice(message);return true;
     }catch(error){setError(error instanceof Error&&error.name!=='QuotaExceededError'?error.message:'Browser storage is full. No personal task changes were saved.');return false;}

@@ -1,5 +1,5 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
-import {validDate,daysBetween,missingKinds} from './portfolio.ts';
+import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
 export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; /* FIELDS */};
 export type PlannerData={version:1;tasks:ReviewTask[]};
 export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; /* INPUT */};
@@ -33,7 +33,7 @@ export function updateTask(data:PlannerData,id:string,patch:Partial<TaskInput>,n
   return {...data,tasks:data.tasks.map(task=>task.id===id?readTask({...task,...patch,id:task.id,recordId:task.recordId,createdAt:task.createdAt,updatedAt:now}):task)};
 }
 
-export function taskDue(value:unknown) {if(value===undefined||value==='')return '';if(typeof value!=='string'||!validDate(value))throw new Error('Choose a valid task due date.');return value;}
+export function taskDue(value:unknown) {if(value===undefined||value==='')return '';if(typeof value!=='string'||(!validDate(value)||value>'9999-12-30'))throw new Error('Choose a valid task due date.');return value;}
 
 export const priorities=['High','Medium','Low'] as const;
 export type Priority=typeof priorities[number];
@@ -114,4 +114,16 @@ export function previewTaskImport(raw:string,data:PlannerData,authorizedIds:stri
 export function mergeTaskImport(data:PlannerData,tasks:ReviewTask[],authorizedIds:string[]) {
   const preview=previewTaskImport(JSON.stringify({version:1,tasks}),data,authorizedIds);
   return {...data,tasks:[...data.tasks,...preview.tasks]};
+}
+
+const calendarSlash=String.fromCharCode(92),calendarNewline=String.fromCharCode(10),calendarCR=String.fromCharCode(13);
+const taskCalendarEscape=(value:string)=>value.replaceAll(calendarSlash,calendarSlash+calendarSlash).replaceAll(calendarCR+calendarNewline,calendarNewline).replaceAll(calendarCR,calendarNewline).replaceAll(calendarNewline,calendarSlash+'n').replaceAll(';',calendarSlash+';').replaceAll(',',calendarSlash+',');
+export function taskCalendar(tasks:ReviewTask[],reference:string) {
+  if(!validDate(reference))throw new Error('Choose a valid reporting date.');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Tenet//Personal Review Tasks//EN','CALSCALE:GREGORIAN'];
+  for(const task of tasks.filter(task=>!task.completed&&task.due)){
+    const end=new Date(Date.parse(task.due)+86400000).toISOString().slice(0,10).replaceAll('-','');
+    lines.push('BEGIN:VEVENT',`UID:review-${task.id}@tenet.local`,`DTSTAMP:${reference.replaceAll('-','')}T000000Z`,`DTSTART;VALUE=DATE:${task.due.replaceAll('-','')}`,`DTEND;VALUE=DATE:${end}`,`SUMMARY:${taskCalendarEscape(task.title)}`,`DESCRIPTION:${taskCalendarEscape('Instrument '+task.recordId+'; '+task.category+'; '+task.priority+' priority')}`,'END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');return lines.map(foldCalendarLine).join(calendarCR+calendarNewline)+calendarCR+calendarNewline;
 }

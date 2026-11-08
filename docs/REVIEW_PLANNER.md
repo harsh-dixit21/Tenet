@@ -16,3 +16,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 10. **Search review tasks across titles notes and instrument IDs.** Apply accent-insensitive multi-token task search within authorized records.
 11. **Scope personal tasks to one instrument.** Inspect all personal follow-up for a single authorized deposit.
 12. **Isolate high priority personal reviews.** Combine priority and instrument scope to build focused review queues.
+13. **Separate open and completed personal review queues.** Keep current work and finished follow-up independently searchable.

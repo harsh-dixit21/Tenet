@@ -29,3 +29,5 @@ test('task search combines tokens across titles and notes with accent folding',(
 test('instrument task filters use exact authorized linkage',()=>{const tasks=p.addTask(initial(),{recordId:'B',title:'Other review'},'task-b',now).tasks;assert.deepEqual(p.filterTasks(tasks,{query:'',recordId:'B'},'2026-11-09').map(task=>task.id),['task-b']);});
 
 test('priority filters combine with instrument scope',()=>{const tasks=p.addTask(initial(),{recordId:'B',title:'Urgent',priority:'High'},'task-b',now).tasks;assert.equal(p.filterTasks(tasks,{query:'',priority:'High'},'2026-11-09').length,1);assert.equal(p.filterTasks(tasks,{query:'',priority:'High',recordId:'A'},'2026-11-09').length,0);});
+
+test('completion filtering distinguishes open completed and all states',()=>{const data=p.updateTask(initial(),'task-a',{completed:true},now);assert.equal(p.filterTasks(data.tasks,{query:'',completion:'open'},'2026-11-09').length,0);assert.equal(p.filterTasks(data.tasks,{query:'',completion:'completed'},'2026-11-09').length,1);assert.equal(p.filterTasks(data.tasks,{query:'',completion:'all'},'2026-11-09').length,1);});

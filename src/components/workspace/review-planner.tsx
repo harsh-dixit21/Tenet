@@ -49,8 +49,12 @@ export function ReviewPlanner() {
 <button onClick={()=>setEditing(task.id)}>Edit task</button></div></div>
 
       <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
-      {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||'') }),'Review task updated.'))setEditing('');}}>
+      {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||''),due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'') }),'Review task updated.'))setEditing('');}}>
         <Field label="Edit review task title"><input name="title" required maxLength={120} defaultValue={task.title}/></Field>
+<Field label="Edit task due date"><input name="due" type="date" defaultValue={task.due}/></Field>
+<Field label="Edit task priority"><select name="priority" defaultValue={task.priority}>{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
+<Field label="Edit review category"><select name="category" defaultValue={task.category}>{p.categories.map(value=><option key={value}>{value}</option>)}</select></Field>
+<Field label="Edit personal notes"><textarea name="notes" maxLength={1000} defaultValue={task.notes}/></Field>
         <button type="submit">Save task changes</button><button type="button" onClick={()=>setEditing('')}>Cancel editing</button>
       </form>}
     </article>)}</div>

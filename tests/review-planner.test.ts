@@ -25,3 +25,5 @@ test('rescheduling can remove a due date and preserves completion state',()=>{co
 test('delete and restore preserve content and reject conflicting identities',()=>{const data=initial();const removed=p.removeTask(data,'task-a');assert.equal(removed.tasks.length,0);assert.deepEqual(p.restoreTask(removed,data.tasks[0]).tasks,data.tasks);assert.throws(()=>p.restoreTask(data,data.tasks[0]),/already exists/);assert.throws(()=>p.removeTask(removed,'task-a'),/already removed/);});
 
 test('task search combines tokens across titles and notes with accent folding',()=>{const task=p.updateTask(initial(),'task-a',{title:'Vérify evidence',notes:'Call bank branch'},now).tasks;assert.equal(p.filterTasks(task,{query:'verify branch'},'2026-11-09').length,1);assert.equal(p.filterTasks(task,{query:'unmatched'},'2026-11-09').length,0);});
+
+test('instrument task filters use exact authorized linkage',()=>{const tasks=p.addTask(initial(),{recordId:'B',title:'Other review'},'task-b',now).tasks;assert.deepEqual(p.filterTasks(tasks,{query:'',recordId:'B'},'2026-11-09').map(task=>task.id),['task-b']);});

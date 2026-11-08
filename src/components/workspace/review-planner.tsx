@@ -38,7 +38,8 @@ export function ReviewPlanner() {
 <Field label="Personal task notes"><textarea name="notes" maxLength={1000} placeholder="Optional follow-up context"/></Field>
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
-    <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field></div>
+    <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field>
+<Field label="Filter task instrument"><select value={taskFilters.recordId||''} onChange={event=>setTaskFilters(current=>({...current,recordId:event.target.value}))}><option value="">All authorized instruments</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id}</option>)}</select></Field></div>
 
 
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>

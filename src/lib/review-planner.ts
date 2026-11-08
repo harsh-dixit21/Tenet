@@ -48,12 +48,13 @@ export function taskNotes(value:unknown) {if(value===undefined)return '';if(type
 export function removeTask(data:PlannerData,id:string) {if(!data.tasks.some(task=>task.id===id))throw new Error('This task was already removed.');return {...data,tasks:data.tasks.filter(task=>task.id!==id)};}
 export function restoreTask(data:PlannerData,task:ReviewTask) {if(data.tasks.length>=200)throw new Error('Personal planner capacity is 200 tasks.');if(data.tasks.some(item=>item.id===task.id))throw new Error('This task already exists.');return {...data,tasks:[...data.tasks,readTask(task)]};}
 
-export type TaskFilters={query:string; /* FILTER_FIELDS */};
+export type TaskFilters={query:string; recordId?:string; /* FILTER_FIELDS */};
 const searchText=(value:string)=>value.normalize('NFKD').replace(/\p{Diacritic}/gu,'').toLowerCase();
 export function filterTasks(tasks:ReviewTask[],filters:TaskFilters,reference:string) {
   const tokens=searchText(filters.query).trim().split(/\s+/).filter(Boolean);
   return tasks.filter(task=>{
     if(!tokens.every(token=>searchText([task.title,task.notes,task.recordId,task.category].join(' ')).includes(token)))return false;
+    if(filters.recordId&&task.recordId!==filters.recordId)return false;
     /* FILTER_RULES */
     return true;
   });

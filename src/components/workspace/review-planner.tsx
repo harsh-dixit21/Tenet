@@ -19,6 +19,7 @@ export function ReviewPlanner() {
   const [deleted,setDeleted]=useState<p.ReviewTask|null>(null);
   const [taskFilters,setTaskFilters]=useState<p.TaskFilters>({query:'',completion:'open'});
   const [sort,setSort]=useState<p.TaskSort>('due');
+  const [selected,setSelected]=useState<string[]>([]);
 
   const visible = p.sortTasks(p.filterTasks(scoped,taskFilters,reference),sort);
   function create(event:FormEvent<HTMLFormElement>) {
@@ -46,10 +47,10 @@ export function ReviewPlanner() {
 <Field label="Task due horizon"><select value={taskFilters.horizon||'all'} onChange={event=>setTaskFilters(current=>({...current,horizon:event.target.value as p.TaskFilters['horizon']}))}><option value="all">Any due date</option><option value="overdue">Overdue tasks</option><option value="today">Due today</option><option value="week">Next 7 days</option><option value="unscheduled">No due date</option></select></Field>
 <Field label="Review task order"><select value={sort} onChange={event=>setSort(event.target.value as p.TaskSort)}><option value="due">Due date first</option><option value="priority">Priority first</option><option value="created">Newest created</option><option value="title">Title A–Z</option></select></Field></div>
 
-
+    <div className="planner-actions"><label className="planner-check"><input type="checkbox" checked={visible.length>0&&visible.every(task=>selected.includes(task.id))} onChange={event=>setSelected(event.target.checked?visible.map(task=>task.id):[])}/>Select matching tasks</label><span className="planner-note">{p.taskSelection(visible,selected).length} selected in current filters</span><button disabled={!p.taskSelection(visible,selected).length} onClick={()=>{if(planner.update(data=>p.completeTasks(data,p.taskSelection(visible,selected).map(task=>task.id),workspace.records.map(record=>record.id)),'Selected review tasks completed.'))setSelected([]);}}>Complete selected tasks</button></div>
     <p className="planner-note" role="status">{visible.length} matching review tasks</p>
     <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
-      <div className="planner-task-main"><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span>
+      <div className="planner-task-main"><label className="planner-check"><input type="checkbox" aria-label={`Select review task ${task.title}`} checked={selected.includes(task.id)} onChange={()=>setSelected(current=>current.includes(task.id)?current.filter(id=>id!==task.id):[...current,task.id])}/><span className="sr-only">Select task</span></label><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span>
 <span>{task.priority} priority</span>
 <span>{task.category}</span>
 <span>{task.completed?'Completed':'Open'}</span></div></div><div className="planner-actions"><button onClick={()=>planner.update(data=>p.updateTask(data,task.id,{completed:!task.completed}),task.completed?'Review task reopened.':'Review task completed.')}>{task.completed?'Reopen task':'Complete task'}</button>

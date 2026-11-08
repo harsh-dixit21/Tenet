@@ -83,3 +83,9 @@ export function taskAgenda(tasks:ReviewTask[],reference:string) {
   const labels=['Overdue','Today','Next 7 days','Later','No due date'];
   return labels.map(label=>({label,tasks:sortTasks(tasks.filter(task=>{const days=task.due?daysBetween(task.due,reference):NaN;return label==='No due date'?!task.due:label==='Overdue'?days<0:label==='Today'?days===0:label==='Next 7 days'?days>0&&days<=7:days>7;}),'due')})).filter(group=>group.tasks.length);
 }
+
+export function taskSelection(tasks:ReviewTask[],ids:string[]) {const selected=new Set(ids);return tasks.filter(task=>selected.has(task.id));}
+export function completeTasks(data:PlannerData,ids:string[],authorizedIds:string[],now=new Date().toISOString()) {
+  const selected=new Set(ids);const allowed=new Set(authorizedIds);
+  return {...data,tasks:data.tasks.map(task=>selected.has(task.id)&&allowed.has(task.recordId)?{...task,completed:true,updatedAt:now}:task)};
+}

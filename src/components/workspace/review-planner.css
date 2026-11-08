@@ -41,3 +41,28 @@
 .planner-progress {display:flex;align-items:center;gap:12px;font-size:12px;margin-top:12px;color:var(--muted-foreground);font-variant-numeric:tabular-nums;}.planner-progress progress {width:160px;max-width:50%;height:8px;accent-color:var(--foreground);}
 
 .planner-summary {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;padding:20px 0;border-block:1px solid var(--border);}.planner-summary span {display:block;font-size:13px;color:var(--muted-foreground);}.planner-summary strong {font-size:28px;font-weight:500;font-variant-numeric:tabular-nums;}@media(max-width:600px){.planner-summary {grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}}
+
+.planner-optional {flex:1 1 100%;}
+.planner-optional>.planner-form {padding:12px 0;}
+.planner-more-filters {border-block:1px solid var(--border);padding-bottom:12px;}
+.planner-more-filters>.planner-filters {padding-top:12px;}
+.planner-task-details {margin-top:8px;}
+.planner-task-detail-body {display:flex;flex-direction:column;gap:16px;padding-top:12px;}
+.planner-task-detail-body>.planner-actions {justify-content:start;}
+.planner-tools>h3 {flex:1 1 100%;font-size:14px;font-weight:500;margin-top:8px;}
+.planner-tool-note {flex:1 1 100%;}
+.planner-tools>.planner-form {flex:1 1 100%;}
+.planner-task-list .planner-panel {border-bottom:0;}
+.planner-task-list>article:focus {outline:2px solid var(--foreground);outline-offset:4px;}
+@media(max-width:600px){.planner-field {flex-basis:100%;}.planner-task-main>.planner-task-identity {flex-basis:calc(100% - 36px);}.planner-tools>.planner-form>* {flex-basis:100%;}}
+
+.planner-controls {display:flex;flex-wrap:wrap;gap:16px;border-block:1px solid var(--border);}
+.planner-controls>details {flex:1 1 180px;min-width:0;border:0;padding-bottom:0;}
+.planner-controls>details[open] {flex-basis:100%;padding-bottom:16px;}
+.planner-summary strong {font-size:24px;}
+.planner-summary>div:first-child strong {font-size:32px;}
+.planner-progress progress {appearance:none;background:var(--border);border:0;}
+.planner-progress progress::-webkit-progress-bar {background:var(--border);}
+.planner-progress progress::-webkit-progress-value {background:var(--foreground);}
+.planner-progress progress::-moz-progress-bar {background:var(--foreground);}
+@media(max-width:600px){.planner-controls>details {flex-basis:140px;}}

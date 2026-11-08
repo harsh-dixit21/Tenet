@@ -1,18 +1,20 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; checklist:ChecklistItem[]; pinned:boolean; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; checklist:ChecklistItem[]; pinned:boolean; archived:boolean; };
 export type PlannerEvent={id:string;taskId:string;recordId:string;action:string;at:string};
 export type PlannerData={version:1;tasks:ReviewTask[];events:PlannerEvent[]};
-export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; checklist?:ChecklistItem[]; pinned?:boolean; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; checklist?:ChecklistItem[]; pinned?:boolean; archived?:boolean; };
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[],events:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
-function timestamp(value:unknown) {if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(value)||!Number.isFinite(Date.parse(value)))throw new Error('Invalid task timestamp.');return value;}
+function taskBoolean(value:unknown) {if(value===undefined)return false;if(typeof value!=='boolean')throw new Error('Task state flags must be boolean values.');return value;}
+function timestamp(value:unknown) {if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(value)||!validDate(value.slice(0,10))||!Number.isFinite(Date.parse(value)))throw new Error('Invalid task timestamp.');return value;}
 export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
+  if(item.archived===true&&item.completed!==true)throw new Error('Only completed tasks can be archived.');
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), checklist:readChecklist(item.checklist), pinned:item.pinned===true, /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:taskBoolean(item.completed), origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), checklist:readChecklist(item.checklist), pinned:taskBoolean(item.pinned), archived:taskBoolean(item.archived), };
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();
@@ -32,7 +34,7 @@ export function addTask(data:PlannerData,input:TaskInput,id:string=crypto.random
 }
 export function updateTask(data:PlannerData,id:string,patch:Partial<TaskInput>,now=new Date().toISOString()):PlannerData {
   if(!data.tasks.some(task=>task.id===id))throw new Error('This task was removed. Refresh your planner.');
-  return {...data,tasks:data.tasks.map(task=>task.id===id?readTask({...task,...patch,id:task.id,recordId:task.recordId,createdAt:task.createdAt,updatedAt:now}):task)};
+  return {...data,tasks:data.tasks.map(task=>task.id===id?readTask({...task,...patch,...(patch.completed===false?{archived:false}:{}),id:task.id,recordId:task.recordId,createdAt:task.createdAt,updatedAt:now}):task)};
 }
 
 export function taskDue(value:unknown) {if(value===undefined||value==='')return '';if(typeof value!=='string'||(!validDate(value)||value>'9999-12-30'))throw new Error('Choose a valid task due date.');return value;}
@@ -50,7 +52,7 @@ export function taskNotes(value:unknown) {if(value===undefined)return '';if(type
 export function removeTask(data:PlannerData,id:string) {if(!data.tasks.some(task=>task.id===id))throw new Error('This task was already removed.');return {...data,tasks:data.tasks.filter(task=>task.id!==id)};}
 export function restoreTask(data:PlannerData,task:ReviewTask) {if(data.tasks.length>=200)throw new Error('Personal planner capacity is 200 tasks.');if(data.tasks.some(item=>item.id===task.id))throw new Error('This task already exists.');return {...data,tasks:[...data.tasks,readTask(task)]};}
 
-export type TaskFilters={query:string; recordId?:string; priority?:Priority; completion?:'open'|'completed'|'all'; horizon?:'all'|'overdue'|'today'|'week'|'unscheduled'; /* FILTER_FIELDS */};
+export type TaskFilters={query:string; recordId?:string; priority?:Priority; completion?:'open'|'completed'|'all'; horizon?:'all'|'overdue'|'today'|'week'|'unscheduled'; archive?:'active'|'archived'|'all'; };
 const searchText=(value:string)=>value.normalize('NFKD').replace(/\p{Diacritic}/gu,'').toLowerCase();
 export function filterTasks(tasks:ReviewTask[],filters:TaskFilters,reference:string) {
   const tokens=searchText(filters.query).trim().split(/\s+/).filter(Boolean);
@@ -60,7 +62,8 @@ export function filterTasks(tasks:ReviewTask[],filters:TaskFilters,reference:str
     if(filters.priority&&task.priority!==filters.priority)return false;
     if(filters.completion==='open'&&task.completed||filters.completion==='completed'&&!task.completed)return false;
     if(!dueMatches(task,filters.horizon,reference))return false;
-    /* FILTER_RULES */
+    if((filters.archive||'active')==='active'&&task.archived||filters.archive==='archived'&&!task.archived)return false;
+
     return true;
   });
 }
@@ -77,7 +80,7 @@ export type TaskSort='due'|'priority'|'created'|'title';
 export function sortTasks(tasks:ReviewTask[],sort:TaskSort) {
   return [...tasks].sort((a,b)=>{
     if(a.pinned!==b.pinned)return a.pinned?-1:1;
-    const result=sort==='priority'?priorities.indexOf(a.priority)-priorities.indexOf(b.priority):sort==='created'?b.createdAt.localeCompare(a.createdAt):sort==='title'?a.title.localeCompare(b.title):(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31');
+    const result=sort==='priority'?priorities.indexOf(a.priority)-priorities.indexOf(b.priority):sort==='created'?(Date.parse(b.createdAt)-Date.parse(a.createdAt)):sort==='title'?a.title.localeCompare(b.title):(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31');
     return result||a.id.localeCompare(b.id);
   });
 }
@@ -100,7 +103,7 @@ export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:stri
 
 export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.randomUUID(),now=new Date().toISOString()) {
   const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
-  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:'',pinned:false,checklist:task.checklist.map(item=>({...item,id:crypto.randomUUID(),done:false}))},newId,now);
+  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:'',pinned:false,archived:false,checklist:task.checklist.map(item=>({...item,id:crypto.randomUUID(),done:false}))},newId,now);
 }
 
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}
@@ -124,7 +127,7 @@ const taskCalendarEscape=(value:string)=>value.replaceAll(calendarSlash,calendar
 export function taskCalendar(tasks:ReviewTask[],reference:string) {
   if(!validDate(reference))throw new Error('Choose a valid reporting date.');
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Tenet//Personal Review Tasks//EN','CALSCALE:GREGORIAN'];
-  for(const task of tasks.filter(task=>!task.completed&&task.due)){
+  for(const task of tasks.filter(task=>!task.completed&&!task.archived&&task.due)){
     const end=new Date(Date.parse(task.due)+86400000).toISOString().slice(0,10).replaceAll('-','');
     lines.push('BEGIN:VEVENT',`UID:review-${task.id}@tenet.local`,`DTSTAMP:${reference.replaceAll('-','')}T000000Z`,`DTSTART;VALUE=DATE:${task.due.replaceAll('-','')}`,`DTEND;VALUE=DATE:${end}`,`SUMMARY:${taskCalendarEscape(task.title)}`,`DESCRIPTION:${taskCalendarEscape('Instrument '+task.recordId+'; '+task.category+'; '+task.priority+' priority')}`,'END:VEVENT');
   }
@@ -165,7 +168,7 @@ export function readPlannerEvents(value:unknown):PlannerEvent[] {
 }
 export function recordPlannerChanges(before:PlannerData,next:PlannerData,now=new Date().toISOString()):PlannerData {
   const previous=new Map(before.tasks.map(task=>[task.id,task]));const after=new Set(next.tasks.map(task=>task.id));const changes:PlannerEvent[]=[];
-  for(const task of next.tasks){const prior=previous.get(task.id);let action='';if(!prior)action='Created task';else if(task.completed!==prior.completed)action=task.completed?'Completed task':'Reopened task';else if(task.due!==prior.due)action='Rescheduled task';else if(JSON.stringify(task)!==JSON.stringify(prior))action='Edited task';if(action)changes.push({id:crypto.randomUUID(),taskId:task.id,recordId:task.recordId,action,at:now});}
+  for(const task of next.tasks){const prior=previous.get(task.id);let action='';if(!prior)action='Created task';else if(task.completed!==prior.completed)action=task.completed?'Completed task':'Reopened task';else if(task.archived!==prior.archived)action=task.archived?'Archived task':'Restored task';else if(task.pinned!==prior.pinned)action=task.pinned?'Pinned task':'Unpinned task';else if(task.due!==prior.due)action='Rescheduled task';else if(JSON.stringify(task.checklist)!==JSON.stringify(prior.checklist))action='Updated checklist';else if(JSON.stringify(task)!==JSON.stringify(prior))action='Edited task';if(action)changes.push({id:crypto.randomUUID(),taskId:task.id,recordId:task.recordId,action,at:now});}
   for(const task of before.tasks)if(!after.has(task.id))changes.push({id:crypto.randomUUID(),taskId:task.id,recordId:task.recordId,action:'Deleted task',at:now});
   return {...next,events:[...changes.reverse(),...before.events].slice(0,100)};
 }
@@ -191,13 +194,20 @@ export function toggleChecklist(data:PlannerData,taskId:string,itemId:string,now
 export function checklistProgress(task:ReviewTask) {const total=task.checklist.length;const done=task.checklist.filter(item=>item.done).length;return {total,done,percent:total?Math.round(done/total*100):0};}
 
 export function nextReviewTask(tasks:ReviewTask[]) {
-  return [...tasks].filter(task=>!task.completed).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||priorities.indexOf(a.priority)-priorities.indexOf(b.priority)||(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31')||a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))[0];
+  return [...tasks].filter(task=>!task.completed&&!task.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||priorities.indexOf(a.priority)-priorities.indexOf(b.priority)||(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31')||(Date.parse(a.createdAt)-Date.parse(b.createdAt))||a.id.localeCompare(b.id))[0];
 }
 export function focusQueue(tasks:ReviewTask[]) {const next=nextReviewTask(tasks);return next?[next]:[];}
 
 export function plannerSummary(tasks:ReviewTask[],reference:string) {
+  tasks=tasks.filter(task=>!task.archived);
   const open=tasks.filter(task=>!task.completed);
   return {open:open.length,overdue:open.filter(task=>task.due&&daysBetween(task.due,reference)<0).length,today:open.filter(task=>task.due===reference).length,completed:tasks.filter(task=>task.completed).length};
 }
 
 export const plannerStorageKeyMatches=(expected:string,incoming:string|null)=>incoming===expected||incoming===null;
+
+export function archiveTasks(data:PlannerData,ids:string[],authorizedIds:string[],archived=true,now=new Date().toISOString()) {
+  const selected=new Set(ids);const allowed=new Set(authorizedIds);
+  if(archived&&data.tasks.some(task=>selected.has(task.id)&&allowed.has(task.recordId)&&!task.completed))throw new Error('Complete tasks before archiving them.');
+  return {...data,tasks:data.tasks.map(task=>selected.has(task.id)&&allowed.has(task.recordId)?{...task,archived,updatedAt:now}:task)};
+}

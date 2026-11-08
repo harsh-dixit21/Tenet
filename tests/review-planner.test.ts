@@ -73,3 +73,29 @@ test('focus queue chooses one actionable task and skips completed work',()=>{let
 test('planner summary uses India date boundaries and excludes completed work from overdue counts',()=>{let data=p.updateTask(initial(),'task-a',{due:'2026-11-08'},now);data=p.addTask(data,{recordId:'A',title:'Today',due:'2026-11-09'},'task-b',now);data=p.addTask(data,{recordId:'A',title:'Done',due:'2026-11-01',completed:true},'task-c',now);assert.deepEqual(p.plannerSummary(data.tasks,'2026-11-09'),{open:2,overdue:1,today:1,completed:1});});
 
 test('cross-tab synchronization only accepts the same account key or a storage clear',()=>{const key=p.plannerKey('account-a');assert.equal(p.plannerStorageKeyMatches(key,key),true);assert.equal(p.plannerStorageKeyMatches(key,p.plannerKey('account-b')),false);assert.equal(p.plannerStorageKeyMatches(key,null),true);});
+
+test('archiving only accepts completed authorized tasks and reopening restores active visibility',()=>{assert.throws(()=>p.archiveTasks(initial(),['task-a'],['A']),/Complete tasks/);const done=p.updateTask(initial(),'task-a',{completed:true},now);const archived=p.archiveTasks(done,['task-a'],['A'],true,now);assert.equal(p.filterTasks(archived.tasks,{query:''},'2026-11-09').length,0);assert.equal(p.filterTasks(archived.tasks,{query:'',archive:'archived'},'2026-11-09').length,1);assert.equal(p.plannerSummary(archived.tasks,'2026-11-09').completed,0);assert.equal(p.updateTask(archived,'task-a',{completed:false},now).tasks[0].archived,false);assert.equal(p.archiveTasks(done,['task-a'],['foreign'],true,now).tasks[0].archived,false);});
+
+test('planner rejects corrupted flags timestamps duplicate IDs and capacity overflow',()=>{
+  const task=initial().tasks[0];
+  assert.throws(()=>p.readTask({...task,completed:'true'}),/boolean values/);
+  assert.throws(()=>p.readTask({...task,createdAt:'2026-02-30T09:00:00Z'}),/timestamp/);
+  assert.throws(()=>p.readPlanner(JSON.stringify({version:1,tasks:[task,task]})),/Duplicate task IDs/);
+  const full={version:1 as const,tasks:Array.from({length:200},(_,i)=>({...task,id:`task-${i}`})),events:[]};
+  assert.throws(()=>p.addTask(full,{recordId:'A',title:'New'},'new',now),/200 tasks/);
+  assert.throws(()=>p.previewTaskImport(JSON.stringify({version:1,tasks:[{...task,id:'incoming'}]}),full,['A']),/200-task capacity/);
+});
+test('suggestion batches fail atomically at capacity and histories retain only the newest hundred actions',()=>{
+  const task=initial().tasks[0];const almost={version:1 as const,tasks:Array.from({length:199},(_,i)=>({...task,id:`task-${i}`})),events:[]};let id=0;
+  assert.throws(()=>p.addSuggestedTasks(almost,[{recordId:'A',title:'First',origin:'first'},{recordId:'A',title:'Second',origin:'second'}],()=>`new-${++id}`,now),/200 tasks/);
+  assert.equal(almost.tasks.length,199);
+  let data=initial();for(let i=0;i<105;i++){const next=p.updateTask(data,'task-a',{notes:String(i)},now);data=p.recordPlannerChanges(data,next,now);}
+  assert.equal(data.events.length,100);assert.equal(p.readPlanner(JSON.stringify(data)).events.length,100);
+});
+test('recency and focus compare timestamp instants across timezone offsets',()=>{
+  const task=initial().tasks[0];
+  const older={...task,id:'older',createdAt:'2026-11-09T09:00:00+05:30'};
+  const newer={...task,id:'newer',createdAt:'2026-11-09T04:00:00Z'};
+  assert.equal(p.sortTasks([older,newer],'created')[0].id,'newer');
+  assert.equal(p.nextReviewTask([older,newer])?.id,'older');
+});

@@ -35,3 +35,5 @@ All records and verification evidence are synthetic. The reference date is 29 Oc
 UI UX Pro Max was installed into the user's Codex skills directory. Its spacing, accessibility, and restrained interaction guidance informed this interface; the requested black/off-white palette takes precedence over its suggested colors.
 
 Portfolio analysis is available from **Portfolio** in the authenticated or demo workspace. See [docs/PORTFOLIO.md](docs/PORTFOLIO.md) for its filters, selections, exports and analytical worklists.
+
+The **Review planner** adds personal browser-based follow-up tasks, checklists, review suggestions and portable task backups. See [docs/REVIEW_PLANNER.md](docs/REVIEW_PLANNER.md) for the full feature list and storage boundaries.

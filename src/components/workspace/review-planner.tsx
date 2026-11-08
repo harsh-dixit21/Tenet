@@ -44,7 +44,8 @@ export function ReviewPlanner() {
     <div className="planner-task-list">{visible.map(task=><article key={task.id} id={`review-task-${task.id}`} className="planner-task" tabIndex={-1}>
       <div className="planner-task-main"><div className="planner-task-identity"><h3>{task.title}</h3><p className="planner-note"><a href={`#instrument/${encodeURIComponent(task.recordId)}`}>{task.recordId}</a> · {recordNames.get(task.recordId)}</p><div className="planner-task-meta"><span>{task.due?`Due ${task.due}`:'No due date'}</span>
 <span>{task.priority} priority</span>
-<span>{task.category}</span></div></div><div className="planner-actions"></div></div>
+<span>{task.category}</span>
+<span>{task.completed?'Completed':'Open'}</span></div></div><div className="planner-actions"><button onClick={()=>planner.update(data=>p.updateTask(data,task.id,{completed:!task.completed}),task.completed?'Review task reopened.':'Review task completed.')}>{task.completed?'Reopen task':'Complete task'}</button></div></div>
 
       <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
       {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{  }),'Review task updated.'))setEditing('');}}>

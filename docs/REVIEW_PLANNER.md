@@ -9,3 +9,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 3. **Assign high medium or low review priorities.** Distinguish urgent reviews from routine follow-up without altering financial authorization.
 4. **Categorize personal reviews by workflow.** Label tasks as document, verification, maturity, request or general follow-up.
 5. **Keep private follow-up notes with review tasks.** Store bounded multiline personal notes locally and render them as plain text.
+6. **Complete and reopen personal review tasks.** Track personal completion separately from the linked instrument lifecycle.

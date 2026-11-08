@@ -1,8 +1,8 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; /* FIELDS */};
 export type PlannerData={version:1;tasks:ReviewTask[]};
-export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
@@ -11,7 +11,7 @@ export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, /* READ */};
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();

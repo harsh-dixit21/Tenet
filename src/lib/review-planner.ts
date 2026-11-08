@@ -1,8 +1,8 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; /* FIELDS */};
 export type PlannerData={version:1;tasks:ReviewTask[]};
-export type TaskInput={recordId:string;title:string; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
@@ -11,7 +11,7 @@ export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), /* READ */};
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();
@@ -32,3 +32,5 @@ export function updateTask(data:PlannerData,id:string,patch:Partial<TaskInput>,n
   if(!data.tasks.some(task=>task.id===id))throw new Error('This task was removed. Refresh your planner.');
   return {...data,tasks:data.tasks.map(task=>task.id===id?readTask({...task,...patch,id:task.id,recordId:task.recordId,createdAt:task.createdAt,updatedAt:now}):task)};
 }
+
+export function taskDue(value:unknown) {if(value===undefined||value==='')return '';if(typeof value!=='string'||!validDate(value))throw new Error('Choose a valid task due date.');return value;}

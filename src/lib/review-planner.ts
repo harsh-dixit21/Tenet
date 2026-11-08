@@ -144,3 +144,8 @@ export function evidenceSuggestions(records:Instrument[],reference:string):TaskI
   taskDue(reference);
   return records.filter(record=>['Verified','Release requested'].includes(record.status)&&(!record.evidence?.source?.trim()||!record.evidence.reference?.trim()||!validDate(record.evidence.date))).map(record=>({recordId:record.id,title:`Review evidence metadata for ${record.id}`,due:reference,priority:'High',category:'Verification',origin:`evidence:${record.id}`}));
 }
+
+export function maturitySuggestions(records:Instrument[],reference:string,horizon:number):TaskInput[] {
+  taskDue(reference);if(!Number.isInteger(horizon)||horizon<1||horizon>365)throw new Error('Maturity horizon must be 1 to 365 days.');
+  return records.filter(record=>activeReviewRecord(record)&&daysBetween(record.maturity,reference)>=0&&daysBetween(record.maturity,reference)<=horizon).map(record=>({recordId:record.id,title:`Review upcoming maturity for ${record.id}`,due:record.maturity,priority:daysBetween(record.maturity,reference)<=7?'High':'Medium',category:'Maturity',origin:`maturity:${record.id}:${record.maturity}`}));
+}

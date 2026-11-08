@@ -29,3 +29,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 23. **Export open scheduled review tasks to a calendar.** Generate all-day iCalendar events with escaped Unicode-safe lines, stable task IDs and no personal notes.
 24. **Generate deduplicated missing-document follow-up tasks.** Create one personal task per missing required category on active authorized instruments; repeated generation skips existing sources.
 25. **Generate personal reviews for incomplete verification evidence.** Suggest high-priority tasks for verified or release-requested records with incomplete evidence metadata.
+26. **Generate upcoming maturity-review tasks within a chosen horizon.** Suggest due-dated personal reviews for active maturities in the next 1–365 days, prioritizing the next week.

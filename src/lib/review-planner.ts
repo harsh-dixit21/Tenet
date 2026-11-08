@@ -44,3 +44,6 @@ export type TaskCategory=typeof categories[number];
 export function taskCategory(value:unknown):TaskCategory {if(value===undefined)return 'General';if(!categories.includes(value as TaskCategory))throw new Error('Choose a supported review category.');return value as TaskCategory;}
 
 export function taskNotes(value:unknown) {if(value===undefined)return '';if(typeof value!=='string'||value.length>1000||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value))throw new Error('Task notes must contain at most 1000 characters without unsafe controls.');return value.replaceAll('\r\n','\n');}
+
+export function removeTask(data:PlannerData,id:string) {if(!data.tasks.some(task=>task.id===id))throw new Error('This task was already removed.');return {...data,tasks:data.tasks.filter(task=>task.id!==id)};}
+export function restoreTask(data:PlannerData,task:ReviewTask) {if(data.tasks.length>=200)throw new Error('Personal planner capacity is 200 tasks.');if(data.tasks.some(item=>item.id===task.id))throw new Error('This task already exists.');return {...data,tasks:[...data.tasks,readTask(task)]};}

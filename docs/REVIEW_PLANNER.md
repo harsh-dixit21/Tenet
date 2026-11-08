@@ -12,3 +12,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 6. **Complete and reopen personal review tasks.** Track personal completion separately from the linked instrument lifecycle.
 7. **Edit existing review task titles.** Rename personal tasks while preserving identity, creation time and instrument linkage.
 8. **Reschedule and revise existing task follow-up details.** Edit due dates, priority, category and personal notes together, with the same validation as new tasks.
+9. **Delete review tasks with a recoverable undo action.** Confirm deletions and restore the most recently deleted task while it remains authorized and capacity permits.

@@ -16,7 +16,7 @@ export function ReviewPlanner() {
   const scoped=useMemo(()=>p.scopedTasks(planner.data.tasks,workspace.records.map(record=>record.id)),[planner.data.tasks,workspace.records]);
   const recordNames=useMemo(()=>new Map(workspace.records.map(record=>[record.id,record.institution])),[workspace.records]);
   const [editing,setEditing]=useState('');
-
+  const [deleted,setDeleted]=useState<p.ReviewTask|null>(null);
 
   const visible = scoped;
   function create(event:FormEvent<HTMLFormElement>) {
@@ -27,7 +27,7 @@ export function ReviewPlanner() {
     <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
     {planner.error&&<div role="alert" className="planner-note">{planner.error}{planner.blocked&&<button onClick={()=>{if(window.confirm('Remove unreadable personal planner data for this account in this browser?'))planner.reset();}}>Reset unreadable planner data</button>}</div>}
     {planner.notice&&<p role="status" className="planner-note">{planner.notice}</p>}
-
+    {deleted&&<div className="planner-actions"><p className="planner-note">Deleted task: {deleted.title}</p><button onClick={()=>{if(workspace.records.some(record=>record.id===deleted.recordId)&&planner.update(data=>p.restoreTask(data,deleted),'Task restored.'))setDeleted(null);}}>Undo task deletion</button></div>}
     <details className="planner-create" open><summary>Add a review task</summary><form onSubmit={create} className="planner-form">
       <Field label="Review task title"><input name="title" required maxLength={120} placeholder="Follow up on a deposit review"/></Field>
       <Field label="Linked instrument"><select name="recordId" required defaultValue=""><option value="" disabled>Choose an authorized instrument</option>{workspace.records.map(record=><option key={record.id} value={record.id}>{record.id} · {record.institution}</option>)}</select></Field>
@@ -46,7 +46,8 @@ export function ReviewPlanner() {
 <span>{task.priority} priority</span>
 <span>{task.category}</span>
 <span>{task.completed?'Completed':'Open'}</span></div></div><div className="planner-actions"><button onClick={()=>planner.update(data=>p.updateTask(data,task.id,{completed:!task.completed}),task.completed?'Review task reopened.':'Review task completed.')}>{task.completed?'Reopen task':'Complete task'}</button>
-<button onClick={()=>setEditing(task.id)}>Edit task</button></div></div>
+<button onClick={()=>setEditing(task.id)}>Edit task</button>
+<button onClick={()=>{if(window.confirm(`Delete personal task “${task.title}”?`)&&planner.update(data=>p.removeTask(data,task.id),'Task deleted. You can undo this deletion.'))setDeleted(task);}}>Delete task</button></div></div>
 
       <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
       {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||''),due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'') }),'Review task updated.'))setEditing('');}}>

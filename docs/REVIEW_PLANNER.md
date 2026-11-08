@@ -32,3 +32,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 26. **Generate upcoming maturity-review tasks within a chosen horizon.** Suggest due-dated personal reviews for active maturities in the next 1–365 days, prioritizing the next week.
 27. **Generate follow-up tasks for aging pending requests.** Suggest high-priority personal tasks for authorized pending requests past a configurable age threshold.
 28. **Keep a bounded personal task activity trail.** Record created, edited, rescheduled, completed, reopened and deleted task actions locally without copying note contents into the history.
+29. **Add bounded checklists to personal review tasks.** Create and edit up to ten named steps, preserve completion for unchanged labels, and toggle individual steps.

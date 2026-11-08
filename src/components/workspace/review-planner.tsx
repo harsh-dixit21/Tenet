@@ -29,7 +29,7 @@ export function ReviewPlanner() {
   const visible = p.sortTasks(p.filterTasks(scoped,taskFilters,reference),sort);
   function create(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();const form=event.currentTarget;const values=new FormData(form);
-    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'')}), 'Review task created.'))form.reset();
+    if(planner.update(data=>p.addTask(data,{title:String(values.get('title')||''),recordId:String(values.get('recordId')||'') ,due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||''),checklist:p.checklistFromLines([],String(values.get('checklist')||''))}), 'Review task created.'))form.reset();
   }
   return <section className="review-planner" aria-label="Personal review planner">
     <div className="planner-heading"><div><h2>Personal review tasks</h2><p className="planner-note">Saved for this account in this browser. Task changes do not change instrument decisions.</p></div><span className="planner-note">{scoped.length} tasks linked to authorized instruments</span></div>
@@ -43,6 +43,7 @@ export function ReviewPlanner() {
 <Field label="Task priority"><select name="priority" defaultValue="Medium">{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Review category"><select name="category" defaultValue="General">{p.categories.map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Personal task notes"><textarea name="notes" maxLength={1000} placeholder="Optional follow-up context"/></Field>
+<Field label="Initial checklist steps"><textarea name="checklist" maxLength={810} placeholder="One step per line, up to 10 steps"/></Field>
       <button className="planner-primary" type="submit" disabled={planner.blocked||!workspace.records.length}>Create review task</button>
     </form></details>
     <div className="planner-filters"><Field label="Search personal tasks"><input type="search" value={taskFilters.query} onChange={event=>setTaskFilters(current=>({...current,query:event.target.value}))} placeholder="Task title, notes, category or instrument"/></Field>
@@ -72,12 +73,14 @@ export function ReviewPlanner() {
 <button onClick={()=>planner.update(data=>p.duplicateTask(data,task.id),'Independent task copy created.')}>Duplicate task</button></div></div>
 
       <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
-      {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||''),due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'') }),'Review task updated.'))setEditing('');}}>
+<Panel title={`Checklist for ${task.title}`}>{task.checklist.length?<ul className="planner-checklist">{task.checklist.map(item=><li key={item.id}><label className="planner-check"><input type="checkbox" checked={item.done} onChange={()=>planner.update(data=>p.toggleChecklist(data,task.id,item.id),'Checklist step updated.')}/>{item.label}</label></li>)}</ul>:<p className="planner-note">No checklist steps yet. Use Edit task to add them.</p>}</Panel>
+      {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||''),due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||''),checklist:p.checklistFromLines(task.checklist,String(values.get('checklist')||'')) }),'Review task updated.'))setEditing('');}}>
         <Field label="Edit review task title"><input name="title" required maxLength={120} defaultValue={task.title}/></Field>
 <Field label="Edit task due date"><input name="due" type="date" max="9999-12-30" defaultValue={task.due}/></Field>
 <Field label="Edit task priority"><select name="priority" defaultValue={task.priority}>{p.priorities.map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Edit review category"><select name="category" defaultValue={task.category}>{p.categories.map(value=><option key={value}>{value}</option>)}</select></Field>
 <Field label="Edit personal notes"><textarea name="notes" maxLength={1000} defaultValue={task.notes}/></Field>
+<Field label="Edit checklist steps"><textarea name="checklist" maxLength={810} defaultValue={task.checklist.map(item=>item.label).join(String.fromCharCode(10))}/></Field>
         <button type="submit">Save task changes</button><button type="button" onClick={()=>setEditing('')}>Cancel editing</button>
       </form>}
     </article>)}</div>

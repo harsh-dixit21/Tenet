@@ -1,9 +1,9 @@
 import type {Instrument,RequestItem} from '../components/workspace/store.ts';
 import {validDate,daysBetween,missingKinds,foldCalendarLine} from './portfolio.ts';
-export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; /* FIELDS */};
+export type ReviewTask={id:string;recordId:string;title:string;createdAt:string;updatedAt:string; due:string; priority:Priority; category:TaskCategory; notes:string; completed:boolean; origin:string; checklist:ChecklistItem[]; /* FIELDS */};
 export type PlannerEvent={id:string;taskId:string;recordId:string;action:string;at:string};
 export type PlannerData={version:1;tasks:ReviewTask[];events:PlannerEvent[]};
-export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; /* INPUT */};
+export type TaskInput={recordId:string;title:string; due?:string; priority?:Priority; category?:TaskCategory; notes?:string; completed?:boolean; origin?:string; checklist?:ChecklistItem[]; /* INPUT */};
 export const plannerKey=(account:string)=>'tenet:review-planner:v1:'+encodeURIComponent(account);
 export const emptyPlanner=():PlannerData=>({version:1,tasks:[],events:[]});
 function text(value:unknown,label:string,max:number) {if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is missing, too long or contains control characters.`);return value.trim();}
@@ -12,7 +12,7 @@ export function readTask(value:unknown):ReviewTask {
   if(!value||typeof value!=='object')throw new Error('Invalid review task.');
   const item=value as Record<string,unknown>;
   const id=text(item.id,'Task ID',80);if(!/^[A-Za-z0-9_-]+$/.test(id))throw new Error('Invalid task ID.');
-  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), /* READ */};
+  return {id,recordId:text(item.recordId,'Instrument ID',120),title:text(item.title,'Task title',120),createdAt:timestamp(item.createdAt),updatedAt:timestamp(item.updatedAt), due:taskDue(item.due), priority:taskPriority(item.priority), category:taskCategory(item.category), notes:taskNotes(item.notes), completed:item.completed===true, origin:item.origin===undefined||item.origin===''?'':text(item.origin,'Task source key',240), checklist:readChecklist(item.checklist), /* READ */};
 }
 export function readPlanner(raw:string|null):PlannerData {
   if(raw===null)return emptyPlanner();
@@ -99,7 +99,7 @@ export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:stri
 
 export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.randomUUID(),now=new Date().toISOString()) {
   const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
-  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:''},newId,now);
+  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false,origin:'',checklist:task.checklist.map(item=>({...item,id:crypto.randomUUID(),done:false}))},newId,now);
 }
 
 export function taskCsvRows(tasks:ReviewTask[]):(string|number)[][] {return [['Task ID','Instrument ID','Title','Due date','Priority','Category','Completion','Personal notes'],...tasks.map(task=>[task.id,task.recordId,task.title,task.due,task.priority,task.category,task.completed?'Completed':'Open',task.notes])];}
@@ -169,3 +169,20 @@ export function recordPlannerChanges(before:PlannerData,next:PlannerData,now=new
   return {...next,events:[...changes.reverse(),...before.events].slice(0,100)};
 }
 export function scopedPlannerEvents(events:PlannerEvent[],authorizedIds:string[]) {const allowed=new Set(authorizedIds);return events.filter(event=>allowed.has(event.recordId));}
+
+export type ChecklistItem={id:string;label:string;done:boolean};
+export function readChecklist(value:unknown):ChecklistItem[] {
+  if(value===undefined)return [];if(!Array.isArray(value)||value.length>10)throw new Error('A task checklist supports at most 10 steps.');
+  const items=value.map(raw=>{if(!raw||typeof raw!=='object')throw new Error('Invalid checklist step.');const item=raw as Record<string,unknown>;if(item.done!==undefined&&typeof item.done!=='boolean')throw new Error('Invalid checklist completion state.');return {id:text(item.id,'Checklist ID',80),label:text(item.label,'Checklist label',80),done:item.done===true};});
+  if(new Set(items.map(item=>item.id)).size!==items.length||new Set(items.map(item=>item.label.toLowerCase())).size!==items.length)throw new Error('Checklist steps must have unique IDs and labels.');
+  return items;
+}
+export function checklistFromLines(existing:ChecklistItem[],source:string) {
+  const labels=source.replaceAll(String.fromCharCode(13),'').split(String.fromCharCode(10)).map(line=>line.trim()).filter(Boolean);
+  const previous=new Map(existing.map(item=>[item.label.toLowerCase(),item]));
+  return readChecklist(labels.map(label=>{const item=previous.get(label.toLowerCase());return {id:item?.id||crypto.randomUUID(),label,done:item?.done||false};}));
+}
+export function toggleChecklist(data:PlannerData,taskId:string,itemId:string,now=new Date().toISOString()) {
+  const task=data.tasks.find(task=>task.id===taskId);if(!task||!task.checklist.some(item=>item.id===itemId))throw new Error('This checklist step was removed.');
+  return updateTask(data,taskId,{checklist:task.checklist.map(item=>item.id===itemId?{...item,done:!item.done}:item)},now);
+}

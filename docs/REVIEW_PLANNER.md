@@ -22,3 +22,4 @@ Open **Review planner** from the workspace navigation. Tasks belong to this acco
 16. **Organize personal follow-up in a due-date agenda.** Group matching tasks into overdue, today, next seven days, later and unscheduled work without double-counting.
 17. **Complete selected personal review tasks in bulk.** Select matching tasks and complete them together, excluding hidden and unauthorized instruments.
 18. **Reschedule selected review tasks together.** Apply or clear one due date across the currently selected authorized tasks.
+19. **Duplicate a review task as independent open follow-up.** Copy task context to a new identity while resetting completion and creation timestamps.

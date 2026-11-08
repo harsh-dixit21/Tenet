@@ -56,7 +56,8 @@ export function ReviewPlanner() {
 <span>{task.category}</span>
 <span>{task.completed?'Completed':'Open'}</span></div></div><div className="planner-actions"><button onClick={()=>planner.update(data=>p.updateTask(data,task.id,{completed:!task.completed}),task.completed?'Review task reopened.':'Review task completed.')}>{task.completed?'Reopen task':'Complete task'}</button>
 <button onClick={()=>setEditing(task.id)}>Edit task</button>
-<button onClick={()=>{if(window.confirm(`Delete personal task “${task.title}”?`)&&planner.update(data=>p.removeTask(data,task.id),'Task deleted. You can undo this deletion.'))setDeleted(task);}}>Delete task</button></div></div>
+<button onClick={()=>{if(window.confirm(`Delete personal task “${task.title}”?`)&&planner.update(data=>p.removeTask(data,task.id),'Task deleted. You can undo this deletion.'))setDeleted(task);}}>Delete task</button>
+<button onClick={()=>planner.update(data=>p.duplicateTask(data,task.id),'Independent task copy created.')}>Duplicate task</button></div></div>
 
       <Panel title={`Notes for ${task.title}`}>{task.notes?<p className="planner-notes">{task.notes}</p>:<p className="planner-note">No personal notes added.</p>}</Panel>
       {editing===task.id&&<form className="planner-edit planner-form" onSubmit={event=>{event.preventDefault();const values=new FormData(event.currentTarget);if(planner.update(data=>p.updateTask(data,task.id,{ title:String(values.get('title')||''),due:String(values.get('due')||''),priority:String(values.get('priority')||'Medium') as p.Priority,category:String(values.get('category')||'General') as p.TaskCategory,notes:String(values.get('notes')||'') }),'Review task updated.'))setEditing('');}}>

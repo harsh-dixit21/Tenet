@@ -23,7 +23,7 @@ export function readPlanner(raw:string|null):PlannerData {
   return {version:1,tasks};
 }
 export function scopedTasks(tasks:ReviewTask[],authorizedIds:string[]) {const ids=new Set(authorizedIds);return tasks.filter(task=>ids.has(task.recordId));}
-export function addTask(data:PlannerData,input:TaskInput,id=crypto.randomUUID(),now=new Date().toISOString()):PlannerData {
+export function addTask(data:PlannerData,input:TaskInput,id:string=crypto.randomUUID(),now=new Date().toISOString()):PlannerData {
   if(data.tasks.length>=200)throw new Error('Personal planner capacity is 200 tasks.');
   if(data.tasks.some(task=>task.id===id))throw new Error('Task ID already exists.');
   const task=readTask({...input,id,createdAt:now,updatedAt:now});return {...data,tasks:[...data.tasks,task]};
@@ -93,4 +93,9 @@ export function completeTasks(data:PlannerData,ids:string[],authorizedIds:string
 export function rescheduleTasks(data:PlannerData,ids:string[],authorizedIds:string[],due:string,now=new Date().toISOString()) {
   const nextDue=taskDue(due);const selected=new Set(ids);const allowed=new Set(authorizedIds);
   return {...data,tasks:data.tasks.map(task=>selected.has(task.id)&&allowed.has(task.recordId)?{...task,due:nextDue,updatedAt:now}:task)};
+}
+
+export function duplicateTask(data:PlannerData,id:string,newId:string=crypto.randomUUID(),now=new Date().toISOString()) {
+  const task=data.tasks.find(task=>task.id===id);if(!task)throw new Error('This task was removed.');
+  return addTask(data,{...structuredClone(task),title:task.title.slice(0,113)+' (copy)',completed:false},newId,now);
 }

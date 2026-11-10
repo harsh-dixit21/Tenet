@@ -97,6 +97,7 @@ function Documents() {
     </div>
     <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={latestOnly} onChange={e=>setLatestOnly(e.target.checked)}/>Latest versions only</label>
     <Input aria-label="Search documents" placeholder="Search file, institution or instrument" value={q} onChange={e=>setQ(e.target.value)} className="mb-5"/>
+    <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     <div className="space-y-3">{rows.map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>

@@ -128,6 +128,7 @@ export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [showDetails,setShowDetails] = useState(true);
+  const [auditPage,setAuditPage] = useState(1);
   const [auditOrder,setAuditOrder] = useState('Newest');
   const [actorFilter,setActorFilter] = useState('All');
   const [scope,setScope] = useState('All');
@@ -136,6 +137,9 @@ export function Audit({recordId}:{recordId?:string}) {
   const rows = state.events.filter(event => (scope==='All'||(scope==='Workspace'?event.recordId==='workspace':event.recordId!=='workspace')) && (!auditTo || auditDay(event.date)<=auditTo) && (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
     (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q))
     .sort((a,b)=>auditOrder==='Oldest'?a.date.localeCompare(b.date):b.date.localeCompare(a.date));
+  const auditPages = Math.max(1,Math.ceil(rows.length/20));
+  const currentPage = Math.min(auditPage,auditPages);
+  useEffect(()=>setAuditPage(1),[q,actorFilter,auditFrom,auditTo,scope,auditOrder,recordId]);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
     <Button variant="outline" onClick={()=>download('tenet-audit.csv',csv([['Timestamp','Actor','Instrument','Action'],...rows.map(event=>[event.date,event.actor,event.recordId,event.action])]))}>Export history</Button>
   </div><CardDescription>{live?'Latest 200 server-recorded audit events.':"Timestamped actions in this browser's demo workspace."}</CardDescription></CardHeader>
@@ -149,11 +153,12 @@ export function Audit({recordId}:{recordId?:string}) {
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>
   <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
   <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match.</p>
-  <ol className="space-y-4">{rows.map(event=><li key={event.id} className="border-b pb-4 text-sm">
+  <ol className="space-y-4">{rows.slice((currentPage-1)*20,currentPage*20).map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}
     <p className="mt-2 text-xs text-muted-foreground">{event.actor} · {new Date(event.date).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST · {event.recordId==='workspace'?'Workspace':<a href={`#instrument/${event.recordId}`} className="hover:underline">{event.recordId}</a>}</p>
   </li>)}</ol>{!rows.length&&<Empty>No matching actions.</Empty>}
+  <div className="mt-4 flex flex-wrap items-center gap-3"><Button variant="outline" disabled={currentPage===1} onClick={()=>setAuditPage(currentPage-1)}>Previous actions</Button><span className="text-sm">Page {currentPage} of {auditPages}</span><Button variant="outline" disabled={currentPage===auditPages} onClick={()=>setAuditPage(currentPage+1)}>Next actions</Button></div>
   </CardContent></Card>;
 }
 export function getAlerts(state:ReturnType<typeof useWorkspace>['state']){if(state.serverAlerts)return state.serverAlerts;return state.records.flatMap(r=>{if(terminal(r)||r.status==='Draft')return [];const alerts:{id:string;recordId:string;title:string;detail:string}[]=[];if(days(r.maturity)<=state.settings.reminderDays)alerts.push({id:`maturity-${r.id}-${r.maturity}`,recordId:r.id,title:days(r.maturity)<0?'Maturity overdue':'Approaching maturity',detail:`${r.institution} · ${formatDate(r.maturity)}`});if(r.status==='Discrepancy')alerts.push({id:`correction-${r.id}-${r.correction}`,recordId:r.id,title:'Correction required',detail:r.correction||r.institution});const last=state.events.find(e=>e.recordId===r.id);if(last&&['Awaiting verification','Release requested'].includes(r.status)&&days(last.date.slice(0,10))<=-state.settings.escalationDays)alerts.push({id:`overdue-${r.id}-${last.id}`,recordId:r.id,title:'Pending action overdue',detail:`${r.institution} · ${r.status}`});return alerts})}

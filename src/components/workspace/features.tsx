@@ -174,8 +174,9 @@ function Alerts() {
   const [query,setQuery] = useState('');
   const [alertInstitution,setAlertInstitution] = useState('All');
   const [alertStatus,setAlertStatus] = useState('All');
+  const [alertSort,setAlertSort] = useState('Original');
   const [type,setType] = useState('All');
-  const rows = alerts.filter(alert => (alertInstitution==='All'||state.records.find(r=>r.id===alert.recordId)?.institution===alertInstitution) && (alertStatus==='All'||state.records.find(r=>r.id===alert.recordId)?.status===alertStatus) && (type==='All'||alert.title===type) && (!unread||!state.readAlerts.includes(alert.id)) && searchMatches(`${alert.title} ${alert.detail} ${alert.recordId}`,query));
+  const rows = alerts.filter(alert => (alertInstitution==='All'||state.records.find(r=>r.id===alert.recordId)?.institution===alertInstitution) && (alertStatus==='All'||state.records.find(r=>r.id===alert.recordId)?.status===alertStatus) && (type==='All'||alert.title===type) && (!unread||!state.readAlerts.includes(alert.id)) && searchMatches(`${alert.title} ${alert.detail} ${alert.recordId}`,query)).sort((a,b)=>alertSort==='Unread first'?Number(state.readAlerts.includes(a.id))-Number(state.readAlerts.includes(b.id)):alertSort==='Instrument'?a.recordId.localeCompare(b.recordId):0);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Alerts & reminders</CardTitle>
     <Button variant="outline" size="sm" onClick={()=>commit(s=>{s.readAlerts=alerts.map(a=>a.id);event(s,'workspace','All current alerts marked read')},{type:'markAlertsRead',ids:alerts.map(a=>a.id)})}>Mark all read</Button>
   </div><CardDescription>In-app reminders use the thresholds in Settings.</CardDescription></CardHeader><CardContent>
@@ -183,10 +184,11 @@ function Alerts() {
     <div className="mb-4 flex flex-wrap gap-3"><label className="flex flex-col gap-2 text-sm">Reminder type<select aria-label="Reminder type" className="workspace-select" value={type} onChange={e=>setType(e.target.value)}><option>All</option>{[...new Set(alerts.map(a=>a.title))].sort().map(value=><option key={value}>{value}</option>)}</select></label></div>
     <label className="mb-4 flex flex-col gap-2 text-sm">Institution<select aria-label="Alert institution" className="workspace-select max-w-full" value={alertInstitution} onChange={e=>setAlertInstitution(e.target.value)}><option>All</option>{[...new Set(state.records.map(r=>r.institution))].sort().map(name=><option key={name}>{name}</option>)}</select></label>
     <label className="mb-4 flex flex-col gap-2 text-sm">Instrument status<select aria-label="Alert instrument status" className="workspace-select" value={alertStatus} onChange={e=>setAlertStatus(e.target.value)}><option>All</option>{statuses.map(status=><option key={status}>{status}</option>)}</select></label>
+    <label className="mb-4 flex flex-col gap-2 text-sm">Reminder order<select aria-label="Reminder order" className="workspace-select" value={alertSort} onChange={e=>setAlertSort(e.target.value)}><option>Original</option><option>Unread first</option><option>Instrument</option></select></label>
     <label className="mb-5 flex items-center gap-2 text-sm"><input type="checkbox" checked={unread} onChange={e=>setUnread(e.target.checked)}/>Unread only</label>
     <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} reminders match · {rows.filter(a=>!state.readAlerts.includes(a.id)).length} unread</p>
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-reminders.csv',csv([['Instrument','Reminder','Details','Read'],...rows.map(a=>[a.recordId,a.title,a.detail,state.readAlerts.includes(a.id)?'Yes':'No'])]))}>Export filtered reminders</Button>
-    <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setType('All');setAlertInstitution('All');setAlertStatus('All');setUnread(false)}}>Reset alert filters</Button>
+    <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setType('All');setAlertInstitution('All');setAlertStatus('All');setUnread(false);setAlertSort('Original')}}>Reset alert filters</Button>
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.some(a=>!state.readAlerts.includes(a.id))} onClick={()=>{
       const ids=[...new Set([...state.readAlerts,...rows.map(a=>a.id)])];
       void commit(s=>{s.readAlerts=ids},{type:'markAlertsRead',ids});

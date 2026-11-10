@@ -112,6 +112,7 @@ function Documents() {
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
       </div>
       <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm"><a href={`#instrument/${r.id}`}>Open instrument</a></Button>
         {d.sha256&&<Button variant="ghost" size="sm" onClick={()=>navigator.clipboard.writeText(d.sha256!).then(()=>notify('SHA-256 checksum copied.')).catch(()=>notify('Clipboard access was blocked.'))}>Copy checksum</Button>}
         <DownloadFile recordId={r.id} documentId={d.id} name={d.name} data={d.data}/>
       </div>

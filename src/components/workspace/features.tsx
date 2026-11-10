@@ -69,6 +69,7 @@ function Documents() {
   const {state,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [latestOnly,setLatestOnly] = useState(true);
+  const [documentSort,setDocumentSort] = useState('Newest');
   const [category,setCategory] = useState('All');
   const [uploadedTo,setUploadedTo] = useState('');
   const [uploadedFrom,setUploadedFrom] = useState('');
@@ -77,7 +78,8 @@ function Documents() {
   const [recordStatus,setRecordStatus] = useState('All');
   const [institution,setInstitution] = useState('All');
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
-    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q));
+    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q))
+    .sort((a,b)=>documentSort==='File name'?a.d.name.localeCompare(b.d.name):documentSort==='Largest'?b.d.size-a.d.size:documentSort==='Oldest'?a.d.date.localeCompare(b.d.date):b.d.date.localeCompare(a.d.date));
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
     <CardDescription>{rows.length} matching files. Upload from an instrument's Documents tab.</CardDescription>
   </CardHeader><CardContent>
@@ -88,6 +90,7 @@ function Documents() {
       <label className="flex flex-col gap-2 text-sm">Checksum<select aria-label="Document checksum" className="workspace-select" value={checksum} onChange={e=>setChecksum(e.target.value)}>{['All','Recorded','Missing'].map(value=><option key={value}>{value}</option>)}</select></label>
       <Field label="Uploaded from"><Input type="date" value={uploadedFrom} onChange={e=>setUploadedFrom(e.target.value)}/></Field>
       <Field label="Uploaded through"><Input type="date" min={uploadedFrom||undefined} value={uploadedTo} onChange={e=>setUploadedTo(e.target.value)}/></Field>
+      <label className="flex flex-col gap-2 text-sm">Sort files<select aria-label="Document sort" className="workspace-select" value={documentSort} onChange={e=>setDocumentSort(e.target.value)}>{['Newest','Oldest','File name','Largest'].map(value=><option key={value}>{value}</option>)}</select></label>
       <label className="flex flex-col gap-2 text-sm">Category<select aria-label="Document category filter" className="workspace-select" value={category} onChange={e=>setCategory(e.target.value)}>
         <option>All</option>{docTypes.map(kind=><option key={kind}>{kind}</option>)}
       </select></label>

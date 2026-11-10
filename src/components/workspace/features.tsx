@@ -107,7 +107,7 @@ function Documents() {
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     {uploadedFrom&&uploadedTo&&uploadedFrom>uploadedTo&&<p role="alert" className="mb-3 text-sm text-amber-300">Uploaded from must precede or equal Uploaded through.</p>}
     <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
-      <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}</p>
+      <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}{!d.size&&<span className="ml-2 text-xs text-amber-300">Size unavailable</span>}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
       </div>

@@ -81,7 +81,7 @@ function Documents() {
     .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q))
     .sort((a,b)=>documentSort==='File name'?a.d.name.localeCompare(b.d.name):documentSort==='Largest'?b.d.size-a.d.size:documentSort==='Oldest'?a.d.date.localeCompare(b.d.date):b.d.date.localeCompare(a.d.date));
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
-    <CardDescription>{rows.length} matching files. Upload from an instrument's Documents tab.</CardDescription>
+    <CardDescription>{rows.length} matching files across {new Set(rows.map(({r})=>r.id)).size} instruments. Upload from an instrument's Documents tab.</CardDescription>
   </CardHeader><CardContent>
     <div className="mb-4 flex flex-wrap gap-3">
       <label className="flex min-w-0 flex-col gap-2 text-sm">Institution<select aria-label="Document institution" className="workspace-select max-w-full" value={institution} onChange={e=>setInstitution(e.target.value)}><option>All</option>{[...new Set(state.records.map(r=>r.institution))].sort().map(name=><option key={name}>{name}</option>)}</select></label>

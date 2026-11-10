@@ -153,7 +153,7 @@ export function Audit({recordId}:{recordId?:string}) {
   </div>
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>
   <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
-  <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match.</p>
+  <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match. {new Set(rows.filter(event=>event.recordId!=='workspace').map(event=>event.recordId)).size} instruments represented.</p>
   <label className="mb-4 block text-sm">Actions per page<select aria-label="Actions per page" className="workspace-select ml-2" value={auditPageSize} onChange={e=>setAuditPageSize(Number(e.target.value))}>{[20,50,100].map(size=><option key={size}>{size}</option>)}</select></label>
   <Button variant="ghost" className="mb-4" onClick={()=>{setQ('');setActorFilter('All');setAuditFrom('');setAuditTo('');setScope('All');setAuditOrder('Newest')}}>Reset audit filters</Button>
   <Button variant="outline" className="mb-4" disabled={!rows.length} onClick={()=>download('tenet-audit.json',JSON.stringify(rows,null,2),'application/json')}>Export detailed history</Button>

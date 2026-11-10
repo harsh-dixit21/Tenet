@@ -158,7 +158,7 @@ export function Audit({recordId}:{recordId?:string}) {
   <Button variant="ghost" className="mb-4" onClick={()=>{setQ('');setActorFilter('All');setAuditFrom('');setAuditTo('');setScope('All');setAuditOrder('Newest')}}>Reset audit filters</Button>
   <Button variant="outline" className="mb-4" disabled={!rows.length} onClick={()=>download('tenet-audit.json',JSON.stringify(rows,null,2),'application/json')}>Export detailed history</Button>
   <ol className="space-y-4">{rows.slice((currentPage-1)*20,currentPage*20).map(event=><li key={event.id} className="border-b pb-4 text-sm">
-    <p>{event.action}</p>
+    <p>{event.action}</p><Button size="sm" variant="ghost" onClick={()=>navigator.clipboard.writeText(event.id).then(()=>notify('Event ID copied.')).catch(()=>notify('Clipboard access was blocked.'))}>Copy event ID</Button>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}
     <p className="mt-2 text-xs text-muted-foreground">{event.actor} · {new Date(event.date).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST · {event.recordId==='workspace'?'Workspace':<a href={`#instrument/${event.recordId}`} className="hover:underline">{event.recordId}</a>}</p>
   </li>)}</ol>{!rows.length&&<Empty>No matching actions.</Empty>}

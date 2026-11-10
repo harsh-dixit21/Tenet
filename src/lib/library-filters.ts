@@ -5,3 +5,7 @@ export function documentFormat(name: string, mime?: string): string {
   if (mime === 'text/plain' || extension === 'txt') return 'Text';
   return 'Other';
 }
+export function auditDay(timestamp: string): string {
+  const date = new Date(timestamp);
+  return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'}) : '';
+}

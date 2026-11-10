@@ -1,4 +1,4 @@
-import {documentFormat} from '@/lib/library-filters';
+import {auditDay, documentFormat} from '@/lib/library-filters';
 import {lazy,Suspense} from 'react';
 const ReviewPlanner=lazy(()=>import('./review-planner').then(module=>({default:module.ReviewPlanner})));
 const Portfolio=lazy(()=>import('./portfolio').then(module=>({default:module.Portfolio})));
@@ -128,12 +128,14 @@ export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [actorFilter,setActorFilter] = useState('All');
-  const rows = state.events.filter(event => (actorFilter==='All'||event.actor===actorFilter) &&
+  const [auditFrom,setAuditFrom] = useState('');
+  const rows = state.events.filter(event => (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
     (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q));
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
     <Button variant="outline" onClick={()=>download('tenet-audit.csv',csv([['Timestamp','Actor','Instrument','Action'],...rows.map(event=>[event.date,event.actor,event.recordId,event.action])]))}>Export history</Button>
   </div><CardDescription>{live?'Latest 200 server-recorded audit events.':"Timestamped actions in this browser's demo workspace."}</CardDescription></CardHeader>
   <CardContent><div className="mb-4 flex flex-wrap gap-3">
+<Field label="Actions from"><Input type="date" value={auditFrom} onChange={e=>setAuditFrom(e.target.value)}/></Field>
     <label className="flex flex-col gap-2 text-sm">Actor role<select aria-label="Filter audit actor" className="workspace-select" value={actorFilter} onChange={e=>setActorFilter(e.target.value)}>{['All','Institution','Reviewer','Approver','Admin'].map(role=><option key={role}>{role}</option>)}</select></label>
   </div>
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>

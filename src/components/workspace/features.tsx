@@ -99,6 +99,7 @@ function Documents() {
     <Input aria-label="Search documents" placeholder="Search file, institution or instrument" value={q} onChange={e=>setQ(e.target.value)} className="mb-5"/>
     <div className="space-y-3">{rows.map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
       </div>
       <div className="flex flex-wrap gap-2">

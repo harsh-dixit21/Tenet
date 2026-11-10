@@ -70,13 +70,14 @@ function Documents() {
   const [q,setQ] = useState('');
   const [latestOnly,setLatestOnly] = useState(true);
   const [category,setCategory] = useState('All');
+  const [uploadedTo,setUploadedTo] = useState('');
   const [uploadedFrom,setUploadedFrom] = useState('');
   const [checksum,setChecksum] = useState('All');
   const [format,setFormat] = useState('All');
   const [recordStatus,setRecordStatus] = useState('All');
   const [institution,setInstitution] = useState('All');
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
-    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q));
+    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q));
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
     <CardDescription>{rows.length} matching files. Upload from an instrument's Documents tab.</CardDescription>
   </CardHeader><CardContent>
@@ -86,6 +87,7 @@ function Documents() {
       <label className="flex flex-col gap-2 text-sm">File format<select aria-label="Document format" className="workspace-select" value={format} onChange={e=>setFormat(e.target.value)}>{['All','PDF','Image','Text','Other'].map(value=><option key={value}>{value}</option>)}</select></label>
       <label className="flex flex-col gap-2 text-sm">Checksum<select aria-label="Document checksum" className="workspace-select" value={checksum} onChange={e=>setChecksum(e.target.value)}>{['All','Recorded','Missing'].map(value=><option key={value}>{value}</option>)}</select></label>
       <Field label="Uploaded from"><Input type="date" value={uploadedFrom} onChange={e=>setUploadedFrom(e.target.value)}/></Field>
+      <Field label="Uploaded through"><Input type="date" min={uploadedFrom||undefined} value={uploadedTo} onChange={e=>setUploadedTo(e.target.value)}/></Field>
       <label className="flex flex-col gap-2 text-sm">Category<select aria-label="Document category filter" className="workspace-select" value={category} onChange={e=>setCategory(e.target.value)}>
         <option>All</option>{docTypes.map(kind=><option key={kind}>{kind}</option>)}
       </select></label>

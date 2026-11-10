@@ -173,14 +173,16 @@ function Alerts() {
   const [unread,setUnread] = useState(false);
   const [query,setQuery] = useState('');
   const [alertInstitution,setAlertInstitution] = useState('All');
+  const [alertStatus,setAlertStatus] = useState('All');
   const [type,setType] = useState('All');
-  const rows = alerts.filter(alert => (alertInstitution==='All'||state.records.find(r=>r.id===alert.recordId)?.institution===alertInstitution) && (type==='All'||alert.title===type) && (!unread||!state.readAlerts.includes(alert.id)) && searchMatches(`${alert.title} ${alert.detail} ${alert.recordId}`,query));
+  const rows = alerts.filter(alert => (alertInstitution==='All'||state.records.find(r=>r.id===alert.recordId)?.institution===alertInstitution) && (alertStatus==='All'||state.records.find(r=>r.id===alert.recordId)?.status===alertStatus) && (type==='All'||alert.title===type) && (!unread||!state.readAlerts.includes(alert.id)) && searchMatches(`${alert.title} ${alert.detail} ${alert.recordId}`,query));
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Alerts & reminders</CardTitle>
     <Button variant="outline" size="sm" onClick={()=>commit(s=>{s.readAlerts=alerts.map(a=>a.id);event(s,'workspace','All current alerts marked read')},{type:'markAlertsRead',ids:alerts.map(a=>a.id)})}>Mark all read</Button>
   </div><CardDescription>In-app reminders use the thresholds in Settings.</CardDescription></CardHeader><CardContent>
     <Input className="mb-4" aria-label="Search alerts" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search reminder, instrument or institution"/>
     <div className="mb-4 flex flex-wrap gap-3"><label className="flex flex-col gap-2 text-sm">Reminder type<select aria-label="Reminder type" className="workspace-select" value={type} onChange={e=>setType(e.target.value)}><option>All</option>{[...new Set(alerts.map(a=>a.title))].sort().map(value=><option key={value}>{value}</option>)}</select></label></div>
     <label className="mb-4 flex flex-col gap-2 text-sm">Institution<select aria-label="Alert institution" className="workspace-select max-w-full" value={alertInstitution} onChange={e=>setAlertInstitution(e.target.value)}><option>All</option>{[...new Set(state.records.map(r=>r.institution))].sort().map(name=><option key={name}>{name}</option>)}</select></label>
+    <label className="mb-4 flex flex-col gap-2 text-sm">Instrument status<select aria-label="Alert instrument status" className="workspace-select" value={alertStatus} onChange={e=>setAlertStatus(e.target.value)}><option>All</option>{statuses.map(status=><option key={status}>{status}</option>)}</select></label>
     <label className="mb-5 flex items-center gap-2 text-sm"><input type="checkbox" checked={unread} onChange={e=>setUnread(e.target.checked)}/>Unread only</label>
     <div className="space-y-3">{rows.map(alert=><div key={alert.id} className="flex flex-wrap justify-between gap-3 rounded-md border p-4">
       <div><p className="text-sm font-medium">{alert.title}{!state.readAlerts.includes(alert.id)&&<span className="ml-2 text-xs text-amber-300">Unread</span>}</p><p className="mt-1 text-xs text-muted-foreground">{alert.detail}</p></div>

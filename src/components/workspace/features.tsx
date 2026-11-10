@@ -81,7 +81,7 @@ function Documents() {
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
     .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q))
     .sort((a,b)=>documentSort==='File name'?a.d.name.localeCompare(b.d.name):documentSort==='Largest'?b.d.size-a.d.size:documentSort==='Oldest'?a.d.date.localeCompare(b.d.date):b.d.date.localeCompare(a.d.date));
-  const documentPages = Math.max(1,Math.ceil(rows.length/20));
+  const documentPages = Math.max(1,Math.ceil(rows.length/auditPageSize));
   const currentPage = Math.min(documentPage,documentPages);
   useEffect(()=>setDocumentPage(1),[q,latestOnly,category,institution,recordStatus,format,checksum,uploadedFrom,uploadedTo,documentSort]);
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
@@ -107,7 +107,7 @@ function Documents() {
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     {uploadedFrom&&uploadedTo&&uploadedFrom>uploadedTo&&<p role="alert" className="mb-3 text-sm text-amber-300">Uploaded from must precede or equal Uploaded through.</p>}
     <p className="mb-3 text-xs text-muted-foreground">{docTypes.map(kind=>`${kind}: ${rows.filter(({d})=>d.kind===kind).length}`).join(' · ')}</p>
-    <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+    <div className="space-y-3">{rows.slice((currentPage-1)*auditPageSize,currentPage*auditPageSize).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}{!d.size&&<span className="ml-2 text-xs text-amber-300">Size unavailable</span>}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {d.sha256?'Checksum recorded':'Checksum unavailable'} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
@@ -128,6 +128,7 @@ export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [showDetails,setShowDetails] = useState(true);
+  const [auditPageSize,setAuditPageSize] = useState(20);
   const [auditPage,setAuditPage] = useState(1);
   const [auditOrder,setAuditOrder] = useState('Newest');
   const [actorFilter,setActorFilter] = useState('All');
@@ -139,7 +140,7 @@ export function Audit({recordId}:{recordId?:string}) {
     .sort((a,b)=>auditOrder==='Oldest'?a.date.localeCompare(b.date):b.date.localeCompare(a.date));
   const auditPages = Math.max(1,Math.ceil(rows.length/20));
   const currentPage = Math.min(auditPage,auditPages);
-  useEffect(()=>setAuditPage(1),[q,actorFilter,auditFrom,auditTo,scope,auditOrder,recordId]);
+  useEffect(()=>setAuditPage(1),[q,actorFilter,auditFrom,auditTo,scope,auditOrder,recordId,auditPageSize]);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
     <Button variant="outline" onClick={()=>download('tenet-audit.csv',csv([['Timestamp','Actor','Instrument','Action'],...rows.map(event=>[event.date,event.actor,event.recordId,event.action])]))}>Export history</Button>
   </div><CardDescription>{live?'Latest 200 server-recorded audit events.':"Timestamped actions in this browser's demo workspace."}</CardDescription></CardHeader>
@@ -153,6 +154,7 @@ export function Audit({recordId}:{recordId?:string}) {
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>
   <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
   <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match.</p>
+  <label className="mb-4 block text-sm">Actions per page<select aria-label="Actions per page" className="workspace-select ml-2" value={auditPageSize} onChange={e=>setAuditPageSize(Number(e.target.value))}>{[20,50,100].map(size=><option key={size}>{size}</option>)}</select></label>
   <ol className="space-y-4">{rows.slice((currentPage-1)*20,currentPage*20).map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}

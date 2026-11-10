@@ -106,6 +106,7 @@ function Documents() {
     <Button className="mb-4" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-document-index.json',JSON.stringify(rows.map(({r,d})=>({instrumentId:r.id,institution:r.institution,id:d.id,name:d.name,kind:d.kind,version:d.version,date:d.date,size:d.size,sha256:d.sha256})),null,2),'application/json')}>Export document metadata</Button>
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     {uploadedFrom&&uploadedTo&&uploadedFrom>uploadedTo&&<p role="alert" className="mb-3 text-sm text-amber-300">Uploaded from must precede or equal Uploaded through.</p>}
+    <p className="mb-3 text-xs text-muted-foreground">{docTypes.map(kind=>`${kind}: ${rows.filter(({d})=>d.kind===kind).length}`).join(' · ')}</p>
     <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}{!d.size&&<span className="ml-2 text-xs text-amber-300">Size unavailable</span>}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {d.sha256?'Checksum recorded':'Checksum unavailable'} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>

@@ -69,14 +69,16 @@ function Documents() {
   const [q,setQ] = useState('');
   const [latestOnly,setLatestOnly] = useState(true);
   const [category,setCategory] = useState('All');
+  const [recordStatus,setRecordStatus] = useState('All');
   const [institution,setInstitution] = useState('All');
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
-    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q));
+    .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q));
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
     <CardDescription>{rows.length} matching files. Upload from an instrument's Documents tab.</CardDescription>
   </CardHeader><CardContent>
     <div className="mb-4 flex flex-wrap gap-3">
       <label className="flex min-w-0 flex-col gap-2 text-sm">Institution<select aria-label="Document institution" className="workspace-select max-w-full" value={institution} onChange={e=>setInstitution(e.target.value)}><option>All</option>{[...new Set(state.records.map(r=>r.institution))].sort().map(name=><option key={name}>{name}</option>)}</select></label>
+      <label className="flex flex-col gap-2 text-sm">Instrument status<select aria-label="Document instrument status" className="workspace-select" value={recordStatus} onChange={e=>setRecordStatus(e.target.value)}><option>All</option>{statuses.map(status=><option key={status}>{status}</option>)}</select></label>
       <label className="flex flex-col gap-2 text-sm">Category<select aria-label="Document category filter" className="workspace-select" value={category} onChange={e=>setCategory(e.target.value)}>
         <option>All</option>{docTypes.map(kind=><option key={kind}>{kind}</option>)}
       </select></label>

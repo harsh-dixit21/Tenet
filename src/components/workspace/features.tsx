@@ -81,7 +81,7 @@ function Documents() {
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
     .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q))
     .sort((a,b)=>documentSort==='File name'?a.d.name.localeCompare(b.d.name):documentSort==='Largest'?b.d.size-a.d.size:documentSort==='Oldest'?a.d.date.localeCompare(b.d.date):b.d.date.localeCompare(a.d.date));
-  const documentPages = Math.max(1,Math.ceil(rows.length/auditPageSize));
+  const documentPages = Math.max(1,Math.ceil(rows.length/20));
   const currentPage = Math.min(documentPage,documentPages);
   useEffect(()=>setDocumentPage(1),[q,latestOnly,category,institution,recordStatus,format,checksum,uploadedFrom,uploadedTo,documentSort]);
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
@@ -107,7 +107,7 @@ function Documents() {
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     {uploadedFrom&&uploadedTo&&uploadedFrom>uploadedTo&&<p role="alert" className="mb-3 text-sm text-amber-300">Uploaded from must precede or equal Uploaded through.</p>}
     <p className="mb-3 text-xs text-muted-foreground">{docTypes.map(kind=>`${kind}: ${rows.filter(({d})=>d.kind===kind).length}`).join(' · ')}</p>
-    <div className="space-y-3">{rows.slice((currentPage-1)*auditPageSize,currentPage*auditPageSize).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+    <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}{!d.size&&<span className="ml-2 text-xs text-amber-300">Size unavailable</span>}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {d.sha256?'Checksum recorded':'Checksum unavailable'} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
@@ -138,7 +138,7 @@ export function Audit({recordId}:{recordId?:string}) {
   const rows = state.events.filter(event => (scope==='All'||(scope==='Workspace'?event.recordId==='workspace':event.recordId!=='workspace')) && (!auditTo || auditDay(event.date)<=auditTo) && (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
     (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q))
     .sort((a,b)=>auditOrder==='Oldest'?a.date.localeCompare(b.date):b.date.localeCompare(a.date));
-  const auditPages = Math.max(1,Math.ceil(rows.length/20));
+  const auditPages = Math.max(1,Math.ceil(rows.length/auditPageSize));
   const currentPage = Math.min(auditPage,auditPages);
   useEffect(()=>setAuditPage(1),[q,actorFilter,auditFrom,auditTo,scope,auditOrder,recordId,auditPageSize]);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
@@ -158,7 +158,7 @@ export function Audit({recordId}:{recordId?:string}) {
   <Button variant="ghost" className="mb-4" onClick={()=>{setQ('');setActorFilter('All');setAuditFrom('');setAuditTo('');setScope('All');setAuditOrder('Newest')}}>Reset audit filters</Button>
   <Button variant="outline" className="mb-4" disabled={!rows.length} onClick={()=>download('tenet-audit.json',JSON.stringify(rows,null,2),'application/json')}>Export detailed history</Button>
   <p className="mb-4 text-xs text-muted-foreground">{['Institution','Reviewer','Approver','Admin'].map(role=>`${role}: ${rows.filter(event=>event.actor===role).length}`).join(' · ')}</p>
-  <ol className="space-y-4">{rows.slice((currentPage-1)*20,currentPage*20).map(event=><li key={event.id} className="border-b pb-4 text-sm">
+  <ol className="space-y-4">{rows.slice((currentPage-1)*auditPageSize,currentPage*auditPageSize).map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p><Button size="sm" variant="ghost" onClick={()=>navigator.clipboard.writeText(event.id).then(()=>notify('Event ID copied.')).catch(()=>notify('Clipboard access was blocked.'))}>Copy event ID</Button>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}
     <p className="mt-2 text-xs text-muted-foreground">{event.actor} · {new Date(event.date).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST · {event.recordId==='workspace'?'Workspace':<a href={`#instrument/${event.recordId}`} className="hover:underline">{event.recordId}</a>}</p>

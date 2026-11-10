@@ -128,13 +128,15 @@ export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [actorFilter,setActorFilter] = useState('All');
+  const [auditTo,setAuditTo] = useState('');
   const [auditFrom,setAuditFrom] = useState('');
-  const rows = state.events.filter(event => (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
+  const rows = state.events.filter(event => (!auditTo || auditDay(event.date)<=auditTo) && (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
     (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q));
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
     <Button variant="outline" onClick={()=>download('tenet-audit.csv',csv([['Timestamp','Actor','Instrument','Action'],...rows.map(event=>[event.date,event.actor,event.recordId,event.action])]))}>Export history</Button>
   </div><CardDescription>{live?'Latest 200 server-recorded audit events.':"Timestamped actions in this browser's demo workspace."}</CardDescription></CardHeader>
   <CardContent><div className="mb-4 flex flex-wrap gap-3">
+<Field label="Actions through"><Input type="date" min={auditFrom||undefined} value={auditTo} onChange={e=>setAuditTo(e.target.value)}/></Field>
 <Field label="Actions from"><Input type="date" value={auditFrom} onChange={e=>setAuditFrom(e.target.value)}/></Field>
     <label className="flex flex-col gap-2 text-sm">Actor role<select aria-label="Filter audit actor" className="workspace-select" value={actorFilter} onChange={e=>setActorFilter(e.target.value)}>{['All','Institution','Reviewer','Approver','Admin'].map(role=><option key={role}>{role}</option>)}</select></label>
   </div>

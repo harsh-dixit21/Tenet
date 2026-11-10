@@ -127,6 +127,7 @@ function Institutions(){const{state,live}=useWorkspace();const[q,setQ]=useState(
 export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
+  const [showDetails,setShowDetails] = useState(true);
   const [auditOrder,setAuditOrder] = useState('Newest');
   const [actorFilter,setActorFilter] = useState('All');
   const [scope,setScope] = useState('All');
@@ -146,9 +147,10 @@ export function Audit({recordId}:{recordId?:string}) {
     <label className="flex flex-col gap-2 text-sm">Actor role<select aria-label="Filter audit actor" className="workspace-select" value={actorFilter} onChange={e=>setActorFilter(e.target.value)}>{['All','Institution','Reviewer','Approver','Admin'].map(role=><option key={role}>{role}</option>)}</select></label>
   </div>
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>
+  <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
   <ol className="space-y-4">{rows.map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p>
-    {event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}
+    {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}
     <p className="mt-2 text-xs text-muted-foreground">{event.actor} · {new Date(event.date).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST · {event.recordId==='workspace'?'Workspace':<a href={`#instrument/${event.recordId}`} className="hover:underline">{event.recordId}</a>}</p>
   </li>)}</ol>{!rows.length&&<Empty>No matching actions.</Empty>}
   </CardContent></Card>;

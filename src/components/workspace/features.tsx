@@ -99,6 +99,7 @@ function Documents() {
         <option>All</option>{docTypes.map(kind=><option key={kind}>{kind}</option>)}
       </select></label>
     </div>
+    <Button className="mb-4" variant="ghost" onClick={()=>{setQ('');setCategory('All');setInstitution('All');setRecordStatus('All');setFormat('All');setChecksum('All');setUploadedFrom('');setUploadedTo('');setDocumentSort('Newest');setLatestOnly(true)}}>Reset document filters</Button>
     <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={latestOnly} onChange={e=>setLatestOnly(e.target.checked)}/>Latest versions only</label>
     <Input aria-label="Search documents" placeholder="Search file, institution or instrument" value={q} onChange={e=>setQ(e.target.value)} className="mb-5"/>
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>

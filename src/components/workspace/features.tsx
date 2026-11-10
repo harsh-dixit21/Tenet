@@ -103,6 +103,7 @@ function Documents() {
     <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={latestOnly} onChange={e=>setLatestOnly(e.target.checked)}/>Latest versions only</label>
     <Input aria-label="Search documents" placeholder="Search file, institution or instrument" value={q} onChange={e=>setQ(e.target.value)} className="mb-5"/>
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-document-index.csv',csv([['Instrument','Institution','File','Category','Version','Date','Bytes','SHA256'],...rows.map(({r,d})=>[r.id,r.institution,d.name,d.kind,d.version,d.date,d.size,d.sha256||''])]))}>Export document index</Button>
+    <Button className="mb-4" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-document-index.json',JSON.stringify(rows.map(({r,d})=>({instrumentId:r.id,institution:r.institution,id:d.id,name:d.name,kind:d.kind,version:d.version,date:d.date,size:d.size,sha256:d.sha256})),null,2),'application/json')}>Export document metadata</Button>
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
     <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}</p>

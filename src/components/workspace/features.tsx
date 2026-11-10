@@ -148,6 +148,7 @@ export function Audit({recordId}:{recordId?:string}) {
   </div>
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>
   <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
+  <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match.</p>
   <ol className="space-y-4">{rows.map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}

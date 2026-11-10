@@ -155,6 +155,7 @@ export function Audit({recordId}:{recordId?:string}) {
   <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={showDetails} onChange={e=>setShowDetails(e.target.checked)}/>Show event details</label>
   <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.events.filter(event=>!recordId||event.recordId===recordId).length} loaded actions match.</p>
   <label className="mb-4 block text-sm">Actions per page<select aria-label="Actions per page" className="workspace-select ml-2" value={auditPageSize} onChange={e=>setAuditPageSize(Number(e.target.value))}>{[20,50,100].map(size=><option key={size}>{size}</option>)}</select></label>
+  <Button variant="ghost" className="mb-4" onClick={()=>{setQ('');setActorFilter('All');setAuditFrom('');setAuditTo('');setScope('All');setAuditOrder('Newest')}}>Reset audit filters</Button>
   <ol className="space-y-4">{rows.slice((currentPage-1)*20,currentPage*20).map(event=><li key={event.id} className="border-b pb-4 text-sm">
     <p>{event.action}</p>
     {showDetails&&event.details&&<pre className="mt-2 whitespace-pre-wrap break-all text-xs text-muted-foreground">{JSON.stringify(event.details,null,2)}</pre>}

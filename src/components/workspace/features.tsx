@@ -69,6 +69,7 @@ function Documents() {
   const {state,notify} = useWorkspace();
   const [q,setQ] = useState('');
   const [latestOnly,setLatestOnly] = useState(true);
+  const [documentPage,setDocumentPage] = useState(1);
   const [documentSort,setDocumentSort] = useState('Newest');
   const [category,setCategory] = useState('All');
   const [uploadedTo,setUploadedTo] = useState('');
@@ -80,6 +81,9 @@ function Documents() {
   const rows = state.records.flatMap(r => (latestOnly ? latestDocuments(r.docs) : r.docs).map(d => ({r,d})))
     .filter(({r,d}) => (institution === 'All' || r.institution === institution) && (recordStatus === 'All' || r.status === recordStatus) && (format === 'All' || documentFormat(d.name,d.mime) === format) && (checksum === 'All' || (checksum === 'Recorded' ? !!d.sha256 : !d.sha256)) && (!uploadedFrom || d.date >= uploadedFrom) && (!uploadedTo || d.date <= uploadedTo) && (category === 'All' || d.kind === category) && searchMatches(`${r.id} ${r.institution} ${d.name} ${d.kind}`,q))
     .sort((a,b)=>documentSort==='File name'?a.d.name.localeCompare(b.d.name):documentSort==='Largest'?b.d.size-a.d.size:documentSort==='Oldest'?a.d.date.localeCompare(b.d.date):b.d.date.localeCompare(a.d.date));
+  const documentPages = Math.max(1,Math.ceil(rows.length/20));
+  const currentPage = Math.min(documentPage,documentPages);
+  useEffect(()=>setDocumentPage(1),[q,latestOnly,category,institution,recordStatus,format,checksum,uploadedFrom,uploadedTo,documentSort]);
   return <Card><CardHeader><CardTitle>Document library</CardTitle>
     <CardDescription>{rows.length} matching files across {new Set(rows.map(({r})=>r.id)).size} instruments. Upload from an instrument's Documents tab.</CardDescription>
   </CardHeader><CardContent>
@@ -98,7 +102,7 @@ function Documents() {
     <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={latestOnly} onChange={e=>setLatestOnly(e.target.checked)}/>Latest versions only</label>
     <Input aria-label="Search documents" placeholder="Search file, institution or instrument" value={q} onChange={e=>setQ(e.target.value)} className="mb-5"/>
     <p className="mb-4 text-sm text-muted-foreground">Total matching size {byteSize(rows.reduce((sum,{d})=>sum+(Number.isFinite(d.size)?Math.max(0,d.size):0),0))}</p>
-    <div className="space-y-3">{rows.map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+    <div className="space-y-3">{rows.slice((currentPage-1)*20,currentPage*20).map(({r,d})=><div key={d.id} className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
       <div className="min-w-0"><p className="break-all text-sm">{d.name} · v{d.version}</p>
         <p className="mt-1 text-xs text-muted-foreground">{d.kind} · {documentFormat(d.name,d.mime)} · {byteSize(d.size)} · {formatDate(d.date)}</p>
         <a className="mt-1 block text-xs text-muted-foreground hover:underline" href={`#instrument/${r.id}`}>{r.institution} · {r.id}</a>
@@ -108,6 +112,7 @@ function Documents() {
         <DownloadFile recordId={r.id} documentId={d.id} name={d.name} data={d.data}/>
       </div>
     </div>)}{!rows.length&&<Empty>No documents match these filters.</Empty>}</div>
+    <div className="mt-4 flex flex-wrap items-center gap-3"><Button variant="outline" disabled={currentPage===1} onClick={()=>setDocumentPage(currentPage-1)}>Previous files</Button><span className="text-sm" aria-live="polite">Page {currentPage} of {documentPages}</span><Button variant="outline" disabled={currentPage===documentPages} onClick={()=>setDocumentPage(currentPage+1)}>Next files</Button></div>
   </CardContent></Card>;
 }
 

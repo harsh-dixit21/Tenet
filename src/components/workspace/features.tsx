@@ -127,12 +127,14 @@ function Institutions(){const{state,live}=useWorkspace();const[q,setQ]=useState(
 export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');
+  const [auditOrder,setAuditOrder] = useState('Newest');
   const [actorFilter,setActorFilter] = useState('All');
   const [scope,setScope] = useState('All');
   const [auditTo,setAuditTo] = useState('');
   const [auditFrom,setAuditFrom] = useState('');
   const rows = state.events.filter(event => (scope==='All'||(scope==='Workspace'?event.recordId==='workspace':event.recordId!=='workspace')) && (!auditTo || auditDay(event.date)<=auditTo) && (!auditFrom || auditDay(event.date)>=auditFrom) && (actorFilter==='All'||event.actor===actorFilter) &&
-    (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q));
+    (!recordId||event.recordId===recordId) && searchMatches(`${event.recordId} ${event.actor} ${event.action} ${JSON.stringify(event.details||{})}`,q))
+    .sort((a,b)=>auditOrder==='Oldest'?a.date.localeCompare(b.date):b.date.localeCompare(a.date));
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Audit history</CardTitle>
     <Button variant="outline" onClick={()=>download('tenet-audit.csv',csv([['Timestamp','Actor','Instrument','Action'],...rows.map(event=>[event.date,event.actor,event.recordId,event.action])]))}>Export history</Button>
   </div><CardDescription>{live?'Latest 200 server-recorded audit events.':"Timestamped actions in this browser's demo workspace."}</CardDescription></CardHeader>
@@ -140,6 +142,7 @@ export function Audit({recordId}:{recordId?:string}) {
 {!recordId&&<label className="flex flex-col gap-2 text-sm">Activity scope<select aria-label="Audit scope" className="workspace-select" value={scope} onChange={e=>setScope(e.target.value)}>{['All','Workspace','Instruments'].map(value=><option key={value}>{value}</option>)}</select></label>}
 <Field label="Actions through"><Input type="date" min={auditFrom||undefined} value={auditTo} onChange={e=>setAuditTo(e.target.value)}/></Field>
 <Field label="Actions from"><Input type="date" value={auditFrom} onChange={e=>setAuditFrom(e.target.value)}/></Field>
+    <label className="flex flex-col gap-2 text-sm">Order<select aria-label="Audit order" className="workspace-select" value={auditOrder} onChange={e=>setAuditOrder(e.target.value)}><option>Newest</option><option>Oldest</option></select></label>
     <label className="flex flex-col gap-2 text-sm">Actor role<select aria-label="Filter audit actor" className="workspace-select" value={actorFilter} onChange={e=>setActorFilter(e.target.value)}>{['All','Institution','Reviewer','Approver','Admin'].map(role=><option key={role}>{role}</option>)}</select></label>
   </div>
   <Input aria-label="Search audit history" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, details, roles or instruments" className="mb-5"/>

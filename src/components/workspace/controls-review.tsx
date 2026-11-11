@@ -1,13 +1,19 @@
-import {useMemo} from 'react';
-import {findingsFrom, reviewControls} from '@/lib/controls-review';
+import {useMemo, useState} from 'react';
+import {controls, findingsFrom, reviewControls} from '@/lib/controls-review';
 import {useWorkspace, today} from './store';
 
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
-  const results = useMemo(() => reviewControls({
+  const [filters, setFilters] = useState({category: ''});
+  function changeFilters(patch: Partial<typeof filters>) {
+    setFilters(current => ({...current, ...patch}));
+  }
+  const evaluated = useMemo(() => reviewControls({
     records: state.records, requests: state.requests, today: referenceDay, live,
   }), [state.records, state.requests, referenceDay, live]);
+  const results = useMemo(() => evaluated.filter(result =>
+    !filters.category || result.control.category === filters.category), [evaluated, filters]);
   const findings = useMemo(() => findingsFrom(results), [results]);
   const shown = findings.slice(0, 50);
 
@@ -23,6 +29,16 @@ export function ControlsReview() {
     <div className="flex flex-wrap gap-x-8 gap-y-3 border-y py-4 text-sm">
       <p><strong className="text-xl tabular-nums">{findings.length}</strong> findings</p>
       <p><strong className="text-xl tabular-nums">{state.records.length}</strong> instruments reviewed</p>
+    </div>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <label className="flex min-w-0 flex-col gap-2 text-sm">Category
+        <select className="workspace-select w-full" value={filters.category}
+          onChange={event => changeFilters({category: event.target.value})}>
+          <option value="">All categories</option>
+          {[...new Set(controls.map(control => control.category))].map(category =>
+            <option key={category}>{category}</option>)}
+        </select>
+      </label>
     </div>
     <div className="space-y-3">
       <h3 className="text-sm font-semibold">Findings</h3>

@@ -131,6 +131,14 @@ export const controls: Control[] = [
     description: 'The lifecycle indicates verification has occurred and the loaded record has no verifier identifier.',
     liveOnly: true,
   }, record => verifiedStates.has(record.status) && !record.verifiedBy?.trim()),
+  recordControl({
+    id: 'verification-before-issue',
+    title: 'Flag verification evidence dated before issue',
+    category: 'Verification',
+    level: 'Inconsistency',
+    description: 'The recorded verification date precedes the instrument issue date.',
+  }, record => Boolean(record.evidence && instrumentDate(record.evidence.date) &&
+    instrumentDate(record.issued) && record.evidence.date < record.issued)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

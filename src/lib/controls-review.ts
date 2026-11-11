@@ -1,5 +1,5 @@
 import {validDate} from './portfolio.ts';
-import type {Instrument, RequestItem} from '../components/workspace/store.ts';
+import type {DocumentItem, Instrument, RequestItem} from '../components/workspace/store.ts';
 
 export type ControlCategory = 'Instrument' | 'Verification' | 'Documents' | 'Requests' | 'Successors';
 export type ControlLevel = 'Inconsistency' | 'Review';
@@ -44,6 +44,26 @@ const verifiedStates = new Set(['Verified', 'Release requested', 'Released', 'Re
 function timestamp(value: string) {
   const validPrefix = /^\d{4}-\d{2}-\d{2}T/.test(value) && validDate(value.slice(0, 10));
   return validPrefix ? Date.parse(value) : NaN;
+}
+
+function documentControl(info: ControlInfo, matches: (document: DocumentItem, snapshot: ReviewSnapshot) => boolean): Control {
+  return {
+    ...info,
+    inspect: snapshot => snapshot.records.flatMap(record => record.docs
+      .filter(document => matches(document, snapshot))
+      .map(document => ({recordId: record.id, subject: document.id}))),
+  };
+}
+
+function duplicates<T>(values: readonly T[], key: (value: T) => string) {
+  const seen = new Set<string>();
+  const repeated = new Set<string>();
+  for (const value of values) {
+    const id = key(value);
+    if (seen.has(id)) repeated.add(id);
+    seen.add(id);
+  }
+  return repeated;
 }
 
 export const controls: Control[] = [
@@ -174,6 +194,13 @@ export const controls: Control[] = [
     level: 'Review',
     description: 'A returned instrument has no recorded correction note for the submitting institution.',
   }, record => record.status === 'Discrepancy' && !record.correction?.trim()),
+  recordControl({
+    id: 'duplicate-document-id',
+    title: 'Find repeated document identifiers within an instrument',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'Two or more entries on the same instrument use the same document identifier.',
+  }, record => duplicates(record.docs, document => document.id).size > 0),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

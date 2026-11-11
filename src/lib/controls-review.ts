@@ -83,6 +83,33 @@ const documentKinds = new Set(['Instrument copy', 'Bank letter', 'Declaration', 
 
 const checksumPattern = /^[a-f0-9]{64}$/i;
 
+function requestControl(info: ControlInfo, matches: (request: RequestItem, record: Instrument) => boolean): Control {
+  return {
+    ...info,
+    inspect: snapshot => {
+      const records = new Map(snapshot.records.map(record => [record.id, record]));
+      return snapshot.requests.flatMap(request => {
+        const record = records.get(request.recordId);
+        return record && matches(request, record) ? [{recordId: record.id, subject: request.id}] : [];
+      });
+    },
+  };
+}
+
+function pendingControl(info: ControlInfo, matches: (count: number, record: Instrument) => boolean): Control {
+  return {
+    ...info,
+    inspect: snapshot => {
+      const counts = new Map<string, number>();
+      for (const request of snapshot.requests) {
+        if (request.status === 'Pending') counts.set(request.recordId, (counts.get(request.recordId) ?? 0) + 1);
+      }
+      return snapshot.records.filter(record => matches(counts.get(record.id) ?? 0, record))
+        .map(record => ({recordId: record.id}));
+    },
+  };
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -275,6 +302,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The saved upload date is later than the current India calendar date.',
   }, (document, snapshot) => instrumentDate(document.date) && document.date > snapshot.today),
+  pendingControl({
+    id: 'parallel-pending-requests',
+    title: 'Find instruments with multiple pending closure requests',
+    category: 'Requests',
+    level: 'Inconsistency',
+    description: 'The loaded snapshot contains more than one pending request for this instrument.',
+  }, count => count > 1),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

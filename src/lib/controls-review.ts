@@ -39,6 +39,8 @@ function exceedsTextLimit(value: string, limit: number) {
   return typeof value !== 'string' || !value.trim() || value.trim().length > limit;
 }
 
+const verifiedStates = new Set(['Verified', 'Release requested', 'Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -121,6 +123,14 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The recorded creator and verifier have the same account identifier.',
   }, record => Boolean(record.createdBy && record.verifiedBy && record.createdBy === record.verifiedBy)),
+  recordControl({
+    id: 'verifier-identity',
+    title: 'Detect missing live verifier identities',
+    category: 'Verification',
+    level: 'Review',
+    description: 'The lifecycle indicates verification has occurred and the loaded record has no verifier identifier.',
+    liveOnly: true,
+  }, record => verifiedStates.has(record.status) && !record.verifiedBy?.trim()),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

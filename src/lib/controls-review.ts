@@ -201,6 +201,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'Two or more entries on the same instrument use the same document identifier.',
   }, record => duplicates(record.docs, document => document.id).size > 0),
+  documentControl({
+    id: 'document-version-number',
+    title: 'Identify invalid evidence version numbers',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'Document versions must be positive integers.',
+  }, document => !Number.isSafeInteger(document.version) || document.version < 1),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

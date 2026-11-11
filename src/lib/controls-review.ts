@@ -80,6 +80,8 @@ function hasVersionGap(record: Instrument) {
 
 const documentKinds = new Set(['Instrument copy', 'Bank letter', 'Declaration', 'Approval letter', 'Other']);
 
+const checksumPattern = /^[a-f0-9]{64}$/i;
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -251,6 +253,13 @@ export const controls: Control[] = [
     description: 'The recorded file size is outside the range of 1 byte to 1 MiB.',
   }, document => document.size !== undefined &&
     (!Number.isSafeInteger(document.size) || document.size < 1 || document.size > 1024 * 1024)),
+  documentControl({
+    id: 'checksum-format',
+    title: 'Validate recorded SHA-256 metadata format',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'A recorded checksum must contain 64 hexadecimal characters.',
+  }, document => Boolean(document.sha256 && !checksumPattern.test(document.sha256))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

@@ -41,6 +41,11 @@ function exceedsTextLimit(value: string, limit: number) {
 
 const verifiedStates = new Set(['Verified', 'Release requested', 'Released', 'Refunded', 'Discharged', 'Renewed', 'Replaced']);
 
+function timestamp(value: string) {
+  const validPrefix = /^\d{4}-\d{2}-\d{2}T/.test(value) && validDate(value.slice(0, 10));
+  return validPrefix ? Date.parse(value) : NaN;
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -147,6 +152,13 @@ export const controls: Control[] = [
     description: 'The recorded verification date is later than the current India calendar date.',
   }, (record, snapshot) => Boolean(record.evidence && instrumentDate(record.evidence.date) &&
     record.evidence.date > snapshot.today)),
+  recordControl({
+    id: 'verification-timestamp',
+    title: 'Validate recorded verification timestamps',
+    category: 'Verification',
+    level: 'Inconsistency',
+    description: 'The verification timestamp is present and does not represent a valid date and time.',
+  }, record => record.verifiedAt !== undefined && !Number.isFinite(timestamp(record.verifiedAt))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

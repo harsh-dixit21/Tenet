@@ -331,6 +331,14 @@ export const controls: Control[] = [
     description: 'Both institution identifiers are available and they disagree.',
   }, (request, record) => Boolean(request.institutionId && record.institutionId &&
     request.institutionId !== record.institutionId)),
+  requestControl({
+    id: 'decision-separation',
+    title: 'Flag closure decisions with overlapping actor identities',
+    category: 'Requests',
+    level: 'Inconsistency',
+    description: 'The recorded decision maker also created the instrument, verified it or requested closure.',
+  }, (request, record) => request.status !== 'Pending' && Boolean(request.decidedBy &&
+    [record.createdBy, record.verifiedBy, request.createdBy].includes(request.decidedBy))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

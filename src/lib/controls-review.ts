@@ -39,6 +39,20 @@ export const controls: Control[] = [
     description: 'Compare the saved INR value with the authoritative integer amount in paise.',
   }, record => Number.isSafeInteger(record.amountMinor) && Number.isFinite(record.amount) &&
     Math.round(record.amount * 100) !== record.amountMinor),
+  recordControl({
+    id: 'amount-validity',
+    title: 'Detect invalid instrument amounts',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'Review missing, nonpositive, out of range or sub-paise INR amounts and invalid stored paise.',
+  }, record => {
+    const scaled = record.amount * 100;
+    const invalidRupees = !Number.isFinite(record.amount) || record.amount <= 0 ||
+      record.amount > 1e12 || Math.abs(scaled - Math.round(scaled)) > 0.001;
+    const invalidPaise = record.amountMinor !== undefined &&
+      (!Number.isSafeInteger(record.amountMinor) || record.amountMinor <= 0 || record.amountMinor > 1e14);
+    return invalidRupees || invalidPaise;
+  }),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

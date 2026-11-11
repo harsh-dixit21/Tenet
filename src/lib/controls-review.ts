@@ -79,6 +79,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'Maturity must follow the issue date when both dates are valid.',
   }, record => instrumentDate(record.issued) && instrumentDate(record.maturity) && record.maturity <= record.issued),
+  recordControl({
+    id: 'future-issue',
+    title: 'Flag future instrument issue dates',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'The issue date is later than the current India calendar date.',
+  }, (record, snapshot) => instrumentDate(record.issued) && record.issued > snapshot.today),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

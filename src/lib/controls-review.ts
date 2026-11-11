@@ -1,3 +1,4 @@
+import {validateUpload} from './workspace-utils.ts';
 import {validDate} from './portfolio.ts';
 import type {DocumentItem, Instrument, RequestItem} from '../components/workspace/store.ts';
 
@@ -260,6 +261,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'A recorded checksum must contain 64 hexadecimal characters.',
   }, document => Boolean(document.sha256 && !checksumPattern.test(document.sha256))),
+  documentControl({
+    id: 'document-format',
+    title: 'Check stored evidence type against filename extension',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'The saved MIME type and filename do not match a supported upload format.',
+  }, document => Boolean(document.mime && validateUpload({name: document.name, type: document.mime, size: 1}))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

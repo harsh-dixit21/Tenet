@@ -159,6 +159,14 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The verification timestamp is present and does not represent a valid date and time.',
   }, record => record.verifiedAt !== undefined && !Number.isFinite(timestamp(record.verifiedAt))),
+  recordControl({
+    id: 'update-chronology',
+    title: 'Flag updates timestamped before record creation',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'The saved update time precedes the saved creation time.',
+  }, record => Boolean(record.createdAt && record.updatedAt &&
+    timestamp(record.updatedAt) < timestamp(record.createdAt))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

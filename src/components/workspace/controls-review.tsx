@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react';
-import {controls, findingCsvRows, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
+import {controls, controlSummaryRows, findingCsvRows, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
 import {controlsHref, readControlsCheck} from '@/lib/control-links';
 import {paginate} from '@/lib/portfolio';
 import {Button} from '../ui/button';
@@ -49,6 +49,10 @@ export function ControlsReview() {
         <Button variant="outline" disabled={!findings.length}
           onClick={() => download('tenet-control-findings.csv', csv(findingCsvRows(findings)))}>
           Export findings CSV
+        </Button>
+        <Button variant="outline" disabled={!results.length}
+          onClick={() => download('tenet-control-summary.csv', csv(controlSummaryRows(results)))}>
+          Export check summary
         </Button>
       </div>
     </div>

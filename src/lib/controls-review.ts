@@ -450,3 +450,13 @@ export function findingCsvRows(findings: readonly Finding[]) {
       [recordId, subject ?? '', control.title, control.category, control.level, control.description]),
   ];
 }
+
+export function controlSummaryRows(results: readonly ControlResult[]): (string | number)[][] {
+  return [
+    ['Check', 'Category', 'Finding type', 'Evaluation', 'Matching findings'],
+    ...results.map(({control, evaluated, observations}) => [
+      control.title, control.category, control.level, evaluated ? 'Evaluated' : 'Live data required',
+      evaluated ? observations.length : '',
+    ]),
+  ];
+}

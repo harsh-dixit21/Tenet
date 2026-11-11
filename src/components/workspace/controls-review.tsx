@@ -5,7 +5,7 @@ import {useWorkspace, today} from './store';
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
-  const [filters, setFilters] = useState({query: '', category: ''});
+  const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false});
   function changeFilters(patch: Partial<typeof filters>) {
     setFilters(current => ({...current, ...patch}));
   }
@@ -15,7 +15,8 @@ export function ControlsReview() {
   const names = useMemo(() => new Map(state.records.map(record => [record.id, record.institution])), [state.records]);
   const results = useMemo(() => {
     const byCategory = evaluated.filter(result => !filters.category || result.control.category === filters.category);
-    return searchControlResults(byCategory, filters.query, names);
+    const searched = searchControlResults(byCategory, filters.query, names);
+    return filters.findingsOnly ? searched.filter(result => result.observations.length > 0) : searched;
   }, [evaluated, filters, names]);
   const findings = useMemo(() => findingsFrom(results), [results]);
   const shown = findings.slice(0, 50);
@@ -48,6 +49,11 @@ export function ControlsReview() {
         </select>
       </label>
     </div>
+    <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
+      <input type="checkbox" checked={filters.findingsOnly}
+        onChange={event => changeFilters({findingsOnly: event.target.checked})}/>
+      Checks with findings only
+    </label>
     <div className="space-y-3">
       <h3 className="text-sm font-semibold">Findings</h3>
       {shown.length ? <div className="max-w-full overflow-x-auto" role="region" tabIndex={0} aria-label="Control findings">

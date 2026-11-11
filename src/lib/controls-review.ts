@@ -167,6 +167,13 @@ export const controls: Control[] = [
     description: 'The saved update time precedes the saved creation time.',
   }, record => Boolean(record.createdAt && record.updatedAt &&
     timestamp(record.updatedAt) < timestamp(record.createdAt))),
+  recordControl({
+    id: 'correction-note',
+    title: 'Detect returned instruments without correction instructions',
+    category: 'Verification',
+    level: 'Review',
+    description: 'A returned instrument has no recorded correction note for the submitting institution.',
+  }, record => record.status === 'Discrepancy' && !record.correction?.trim()),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

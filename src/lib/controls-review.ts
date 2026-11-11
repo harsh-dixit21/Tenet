@@ -139,6 +139,14 @@ export const controls: Control[] = [
     description: 'The recorded verification date precedes the instrument issue date.',
   }, record => Boolean(record.evidence && instrumentDate(record.evidence.date) &&
     instrumentDate(record.issued) && record.evidence.date < record.issued)),
+  recordControl({
+    id: 'future-verification',
+    title: 'Flag verification evidence dated in the future',
+    category: 'Verification',
+    level: 'Inconsistency',
+    description: 'The recorded verification date is later than the current India calendar date.',
+  }, (record, snapshot) => Boolean(record.evidence && instrumentDate(record.evidence.date) &&
+    record.evidence.date > snapshot.today)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

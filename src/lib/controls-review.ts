@@ -66,6 +66,18 @@ function duplicates<T>(values: readonly T[], key: (value: T) => string) {
   return repeated;
 }
 
+function hasVersionGap(record: Instrument) {
+  const versionsByKind = new Map<string, Set<number>>();
+  for (const document of record.docs) {
+    if (!Number.isSafeInteger(document.version) || document.version < 1) continue;
+    const versions = versionsByKind.get(document.kind) ?? new Set<number>();
+    versions.add(document.version);
+    versionsByKind.set(document.kind, versions);
+  }
+  return [...versionsByKind.values()].some(versions =>
+    [...versions].sort((a, b) => a - b).some((version, index) => version !== index + 1));
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -215,6 +227,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'An instrument has multiple document entries with the same category and version.',
   }, record => duplicates(record.docs, document => JSON.stringify([document.kind, document.version])).size > 0),
+  recordControl({
+    id: 'document-version-gap',
+    title: 'Find gaps in evidence version sequences',
+    category: 'Documents',
+    level: 'Review',
+    description: 'Review categories whose stored version sequence skips one or more numbers.',
+  }, hasVersionGap),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

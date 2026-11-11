@@ -208,6 +208,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'Document versions must be positive integers.',
   }, document => !Number.isSafeInteger(document.version) || document.version < 1),
+  recordControl({
+    id: 'document-version-duplicate',
+    title: 'Find duplicate evidence versions within a category',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'An instrument has multiple document entries with the same category and version.',
+  }, record => duplicates(record.docs, document => JSON.stringify([document.kind, document.version])).size > 0),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

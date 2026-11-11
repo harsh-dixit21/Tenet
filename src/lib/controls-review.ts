@@ -387,6 +387,13 @@ export const controls: Control[] = [
     description: 'The renewal maturity is on or before the maturity of its loaded predecessor.',
   }, (record, parent) => record.relation === 'Renewal' && instrumentDate(record.maturity) &&
     instrumentDate(parent.maturity) && record.maturity <= parent.maturity),
+  snapshotControl({
+    id: 'successor-cycle',
+    title: 'Detect circular predecessor chains',
+    category: 'Successors',
+    level: 'Inconsistency',
+    description: 'The instrument participates in a cycle among loaded predecessor links.',
+  }, snapshot => [...successorCycles(snapshot.records)].map(recordId => ({recordId}))),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

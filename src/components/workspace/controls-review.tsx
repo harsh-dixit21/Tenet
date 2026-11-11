@@ -1,19 +1,22 @@
 import {useMemo, useState} from 'react';
-import {controls, findingsFrom, reviewControls} from '@/lib/controls-review';
+import {controls, findingsFrom, reviewControls, searchControlResults} from '@/lib/controls-review';
 import {useWorkspace, today} from './store';
 
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
-  const [filters, setFilters] = useState({category: ''});
+  const [filters, setFilters] = useState({query: '', category: ''});
   function changeFilters(patch: Partial<typeof filters>) {
     setFilters(current => ({...current, ...patch}));
   }
   const evaluated = useMemo(() => reviewControls({
     records: state.records, requests: state.requests, today: referenceDay, live,
   }), [state.records, state.requests, referenceDay, live]);
-  const results = useMemo(() => evaluated.filter(result =>
-    !filters.category || result.control.category === filters.category), [evaluated, filters]);
+  const names = useMemo(() => new Map(state.records.map(record => [record.id, record.institution])), [state.records]);
+  const results = useMemo(() => {
+    const byCategory = evaluated.filter(result => !filters.category || result.control.category === filters.category);
+    return searchControlResults(byCategory, filters.query, names);
+  }, [evaluated, filters, names]);
   const findings = useMemo(() => findingsFrom(results), [results]);
   const shown = findings.slice(0, 50);
 
@@ -31,6 +34,11 @@ export function ControlsReview() {
       <p><strong className="text-xl tabular-nums">{state.records.length}</strong> instruments reviewed</p>
     </div>
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <label className="flex min-w-0 flex-col gap-2 text-sm">Search controls
+        <input className="workspace-select w-full" type="search" value={filters.query}
+          placeholder="Check, instrument or reference"
+          onChange={event => changeFilters({query: event.target.value})}/>
+      </label>
       <label className="flex min-w-0 flex-col gap-2 text-sm">Category
         <select className="workspace-select w-full" value={filters.category}
           onChange={event => changeFilters({category: event.target.value})}>

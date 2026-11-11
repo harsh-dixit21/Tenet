@@ -1,4 +1,4 @@
-import {validateUpload} from './workspace-utils.ts';
+import {searchMatches, validateUpload} from './workspace-utils.ts';
 import {validDate} from './portfolio.ts';
 import type {DocumentItem, Instrument, RequestItem} from '../components/workspace/store.ts';
 
@@ -405,4 +405,19 @@ export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {
 
 export function findingsFrom(results: readonly ControlResult[]): Finding[] {
   return results.flatMap(({control, observations}) => observations.map(observation => ({...observation, control})));
+}
+
+export function searchControlResults(
+  results: readonly ControlResult[], query: string, names: ReadonlyMap<string, string>,
+): ControlResult[] {
+  if (!query.trim()) return [...results];
+  return results.flatMap(result => {
+    const {control} = result;
+    const description = [control.title, control.description, control.category, control.level].join(' ');
+    if (searchMatches(description, query)) return [result];
+    const observations = result.observations.filter(observation => searchMatches([
+      description, observation.recordId, names.get(observation.recordId), observation.subject,
+    ].join(' '), query));
+    return observations.length ? [{...result, observations}] : [];
+  });
 }

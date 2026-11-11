@@ -268,6 +268,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The saved MIME type and filename do not match a supported upload format.',
   }, document => Boolean(document.mime && validateUpload({name: document.name, type: document.mime, size: 1}))),
+  documentControl({
+    id: 'future-document',
+    title: 'Flag future evidence upload dates',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'The saved upload date is later than the current India calendar date.',
+  }, (document, snapshot) => instrumentDate(document.date) && document.date > snapshot.today),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

@@ -110,6 +110,46 @@ function pendingControl(info: ControlInfo, matches: (count: number, record: Inst
   };
 }
 
+function predecessorControl(info: ControlInfo, matches: (record: Instrument, parent: Instrument) => boolean): Control {
+  return {
+    ...info,
+    inspect: snapshot => {
+      const records = new Map(snapshot.records.map(record => [record.id, record]));
+      return snapshot.records.flatMap(record => {
+        const parent = record.parent ? records.get(record.parent) : undefined;
+        return parent && matches(record, parent) ? [{recordId: record.id}] : [];
+      });
+    },
+  };
+}
+
+export function successorCycles(records: readonly Instrument[]) {
+  const predecessors = new Map(records.map(record => [record.id, record.parent]));
+  const visited = new Set<string>();
+  const members = new Set<string>();
+  for (const record of records) {
+    const path: string[] = [];
+    const positions = new Map<string, number>();
+    let current: string | undefined = record.id;
+    while (current && predecessors.has(current) && !visited.has(current)) {
+      const position = positions.get(current);
+      if (position !== undefined) {
+        for (const id of path.slice(position)) members.add(id);
+        break;
+      }
+      positions.set(current, path.length);
+      path.push(current);
+      current = predecessors.get(current);
+    }
+    for (const id of path) visited.add(id);
+  }
+  return members;
+}
+
+function snapshotControl(info: ControlInfo, inspect: Control['inspect']): Control {
+  return {...info, inspect};
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -339,6 +379,14 @@ export const controls: Control[] = [
     description: 'The recorded decision maker also created the instrument, verified it or requested closure.',
   }, (request, record) => request.status !== 'Pending' && Boolean(request.decidedBy &&
     [record.createdBy, record.verifiedBy, request.createdBy].includes(request.decidedBy))),
+  predecessorControl({
+    id: 'renewal-extension',
+    title: 'Flag renewals that fail to extend predecessor maturity',
+    category: 'Successors',
+    level: 'Inconsistency',
+    description: 'The renewal maturity is on or before the maturity of its loaded predecessor.',
+  }, (record, parent) => record.relation === 'Renewal' && instrumentDate(record.maturity) &&
+    instrumentDate(parent.maturity) && record.maturity <= parent.maturity),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

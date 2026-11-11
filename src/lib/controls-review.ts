@@ -35,6 +35,10 @@ function instrumentDate(value: string) {
   return validDate(value) && value >= '1900-01-01' && value <= '2199-12-31';
 }
 
+function exceedsTextLimit(value: string, limit: number) {
+  return typeof value !== 'string' || !value.trim() || value.trim().length > limit;
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -86,6 +90,14 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The issue date is later than the current India calendar date.',
   }, (record, snapshot) => instrumentDate(record.issued) && record.issued > snapshot.today),
+  recordControl({
+    id: 'instrument-identity',
+    title: 'Check bank branch and instrument identifiers',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'Review blank bank, branch or instrument-number fields and values above their submission limits.',
+  }, record => exceedsTextLimit(record.bank, 100) || exceedsTextLimit(record.branch, 100) ||
+    exceedsTextLimit(record.number, 60)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

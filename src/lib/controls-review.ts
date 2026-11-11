@@ -65,6 +65,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The issue date must be a real calendar date between 1900 and 2199.',
   }, record => !instrumentDate(record.issued)),
+  recordControl({
+    id: 'maturity-date',
+    title: 'Identify invalid instrument maturity dates',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'The maturity date must be a real calendar date between 1900 and 2199.',
+  }, record => !instrumentDate(record.maturity)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

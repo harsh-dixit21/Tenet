@@ -309,6 +309,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The loaded snapshot contains more than one pending request for this instrument.',
   }, count => count > 1),
+  requestControl({
+    id: 'pending-status',
+    title: 'Check pending requests against instrument lifecycle',
+    category: 'Requests',
+    level: 'Inconsistency',
+    description: 'The request is pending while its linked instrument is outside the Release requested state.',
+  }, (request, record) => request.status === 'Pending' && record.status !== 'Release requested'),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

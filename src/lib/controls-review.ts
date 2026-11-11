@@ -106,6 +106,14 @@ export const controls: Control[] = [
     description: 'The live instrument has no recorded institution identifier.',
     liveOnly: true,
   }, record => !record.institutionId?.trim()),
+  recordControl({
+    id: 'creator-identity',
+    title: 'Detect missing live submission creators',
+    category: 'Instrument',
+    level: 'Review',
+    description: 'The live instrument has no recorded submission creator.',
+    liveOnly: true,
+  }, record => !record.createdBy?.trim()),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

@@ -114,6 +114,13 @@ export const controls: Control[] = [
     description: 'The live instrument has no recorded submission creator.',
     liveOnly: true,
   }, record => !record.createdBy?.trim()),
+  recordControl({
+    id: 'self-verification',
+    title: 'Flag matching submission and verification identities',
+    category: 'Verification',
+    level: 'Inconsistency',
+    description: 'The recorded creator and verifier have the same account identifier.',
+  }, record => Boolean(record.createdBy && record.verifiedBy && record.createdBy === record.verifiedBy)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

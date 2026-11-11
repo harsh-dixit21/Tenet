@@ -1,9 +1,9 @@
 import {useMemo, useState} from 'react';
-import {controls, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
+import {controls, findingCsvRows, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
 import {controlsHref, readControlsCheck} from '@/lib/control-links';
 import {paginate} from '@/lib/portfolio';
 import {Button} from '../ui/button';
-import {useWorkspace, today} from './store';
+import {useWorkspace, today, csv, download} from './store';
 
 export function ControlsReview() {
   const {state, live} = useWorkspace();
@@ -44,6 +44,12 @@ export function ControlsReview() {
         <p className="mt-1 text-sm text-muted-foreground">
           {live ? 'Loaded workspace snapshot' : 'Demo workspace'} · {referenceDay}
         </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" disabled={!findings.length}
+          onClick={() => download('tenet-control-findings.csv', csv(findingCsvRows(findings)))}>
+          Export findings CSV
+        </Button>
       </div>
     </div>
     <div className="flex flex-wrap gap-x-8 gap-y-3 border-y py-4 text-sm">

@@ -442,3 +442,11 @@ export function scopeControlResults(results: readonly ControlResult[], recordIds
     observations: result.observations.filter(observation => recordIds.has(observation.recordId)),
   }));
 }
+
+export function findingCsvRows(findings: readonly Finding[]) {
+  return [
+    ['Instrument ID', 'Related reference', 'Check', 'Category', 'Finding type', 'Description'],
+    ...findings.map(({recordId, subject, control}) =>
+      [recordId, subject ?? '', control.title, control.category, control.level, control.description]),
+  ];
+}

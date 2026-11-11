@@ -1,11 +1,11 @@
 import {useMemo, useState} from 'react';
-import {controls, findingsFrom, reviewControls, searchControlResults} from '@/lib/controls-review';
+import {controls, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
 import {useWorkspace, today} from './store';
 
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
-  const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false});
+  const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false, institution: ''});
   function changeFilters(patch: Partial<typeof filters>) {
     setFilters(current => ({...current, ...patch}));
   }
@@ -13,11 +13,15 @@ export function ControlsReview() {
     records: state.records, requests: state.requests, today: referenceDay, live,
   }), [state.records, state.requests, referenceDay, live]);
   const names = useMemo(() => new Map(state.records.map(record => [record.id, record.institution])), [state.records]);
+  const institutions = useMemo(() => reviewInstitutions(state.records), [state.records]);
+  const scope = useMemo(() => state.records.filter(record =>
+    !filters.institution || institutionKey(record) === filters.institution), [state.records, filters.institution]);
   const results = useMemo(() => {
-    const byCategory = evaluated.filter(result => !filters.category || result.control.category === filters.category);
+    const scoped = filters.institution ? scopeControlResults(evaluated, new Set(scope.map(record => record.id))) : evaluated;
+    const byCategory = scoped.filter(result => !filters.category || result.control.category === filters.category);
     const searched = searchControlResults(byCategory, filters.query, names);
     return filters.findingsOnly ? searched.filter(result => result.observations.length > 0) : searched;
-  }, [evaluated, filters, names]);
+  }, [evaluated, filters, names, scope]);
   const findings = useMemo(() => findingsFrom(results), [results]);
   const shown = findings.slice(0, 50);
 
@@ -32,7 +36,7 @@ export function ControlsReview() {
     </div>
     <div className="flex flex-wrap gap-x-8 gap-y-3 border-y py-4 text-sm">
       <p><strong className="text-xl tabular-nums">{findings.length}</strong> findings</p>
-      <p><strong className="text-xl tabular-nums">{state.records.length}</strong> instruments reviewed</p>
+      <p><strong className="text-xl tabular-nums">{scope.length}</strong> instruments in scope</p>
     </div>
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <label className="flex min-w-0 flex-col gap-2 text-sm">Search controls
@@ -46,6 +50,13 @@ export function ControlsReview() {
           <option value="">All categories</option>
           {[...new Set(controls.map(control => control.category))].map(category =>
             <option key={category}>{category}</option>)}
+        </select>
+      </label>
+      <label className="flex min-w-0 flex-col gap-2 text-sm">Institution
+        <select className="workspace-select w-full" value={filters.institution}
+          onChange={event => changeFilters({institution: event.target.value})}>
+          <option value="">All institutions</option>
+          {institutions.map(institution => <option key={institution.key} value={institution.key}>{institution.label}</option>)}
         </select>
       </label>
     </div>

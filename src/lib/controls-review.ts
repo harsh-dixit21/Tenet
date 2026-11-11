@@ -421,3 +421,24 @@ export function searchControlResults(
     return observations.length ? [{...result, observations}] : [];
   });
 }
+
+export function institutionKey(record: Instrument) {
+  return record.institutionId ? 'id:' + record.institutionId : 'name:' + record.institution;
+}
+
+export function reviewInstitutions(records: readonly Instrument[]) {
+  const names = new Map(records.map(record => [institutionKey(record), record.institution]));
+  const counts = new Map<string, number>();
+  for (const name of names.values()) counts.set(name, (counts.get(name) ?? 0) + 1);
+  return [...names].map(([key, name]) => ({
+    key,
+    label: (counts.get(name) ?? 0) > 1 ? name + ' (' + key.slice(3) + ')' : name,
+  })).sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function scopeControlResults(results: readonly ControlResult[], recordIds: ReadonlySet<string>) {
+  return results.map(result => ({
+    ...result,
+    observations: result.observations.filter(observation => recordIds.has(observation.recordId)),
+  }));
+}

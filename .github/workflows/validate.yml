@@ -22,6 +22,7 @@ jobs:
       - run: npm ci
       - run: npm --prefix functions ci
       - run: npm run test:tooling
+      - run: npm run test:controls
       - run: npm run test:planner
       - run: npm run test:portfolio
       - run: npm run test:utils

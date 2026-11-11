@@ -13,3 +13,10 @@ export function readControlsCheck(hash: string) {
   const checks = params.getAll('check');
   return route === 'controls' && checks.length === 1 ? checks[0] : '';
 }
+
+export function readControlsRecord(hash: string): string | null | undefined {
+  const {params, route} = parseHash(hash);
+  const records = params.getAll('record');
+  if (route !== 'controls' || !records.length) return undefined;
+  return records.length === 1 && records[0] ? records[0] : null;
+}

@@ -1,13 +1,18 @@
 import {useMemo, useState} from 'react';
 import {controls, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
+import {paginate} from '@/lib/portfolio';
+import {Button} from '../ui/button';
 import {useWorkspace, today} from './store';
 
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
   const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false, institution: '', level: ''});
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   function changeFilters(patch: Partial<typeof filters>) {
     setFilters(current => ({...current, ...patch}));
+    setPage(1);
   }
   const evaluated = useMemo(() => reviewControls({
     records: state.records, requests: state.requests, today: referenceDay, live,
@@ -25,7 +30,8 @@ export function ControlsReview() {
     return filters.findingsOnly ? searched.filter(result => result.observations.length > 0) : searched;
   }, [evaluated, filters, names, scope]);
   const findings = useMemo(() => findingsFrom(results), [results]);
-  const shown = findings.slice(0, 50);
+  const pagination = paginate(findings, page, pageSize);
+  const shown = pagination.items;
 
   return <section aria-label="Workspace controls review" className="min-w-0 space-y-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -97,7 +103,25 @@ export function ControlsReview() {
           </tr>)}</tbody>
         </table>
       </div> : <p className="text-sm text-muted-foreground" role="status">No findings in the current results.</p>}
-      {findings.length > 50 && <p className="text-xs text-muted-foreground">Showing the first 50 findings.</p>}
+      {findings.length > 0 && <div className="flex flex-wrap items-end justify-between gap-3">
+        <p className="text-sm text-muted-foreground tabular-nums" role="status">
+          {pagination.start}–{pagination.end} of {findings.length} findings
+        </p>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1 text-xs">Findings per page
+            <select className="workspace-select" value={pageSize} onChange={event => {
+              setPageSize(Number(event.target.value));
+              setPage(1);
+            }}>
+              {[10, 25, 50].map(size => <option key={size}>{size}</option>)}
+            </select>
+          </label>
+          <Button variant="outline" disabled={pagination.page <= 1}
+            onClick={() => setPage(pagination.page - 1)}>Previous</Button>
+          <Button variant="outline" disabled={pagination.page >= pagination.pages}
+            onClick={() => setPage(pagination.page + 1)}>Next</Button>
+        </div>
+      </div>}
     </div>
     <details className="border-y py-3">
       <summary className="cursor-pointer text-sm font-medium">Check catalogue</summary>

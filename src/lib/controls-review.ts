@@ -98,6 +98,14 @@ export const controls: Control[] = [
     description: 'Review blank bank, branch or instrument-number fields and values above their submission limits.',
   }, record => exceedsTextLimit(record.bank, 100) || exceedsTextLimit(record.branch, 100) ||
     exceedsTextLimit(record.number, 60)),
+  recordControl({
+    id: 'institution-link',
+    title: 'Detect missing live institution identifiers',
+    category: 'Instrument',
+    level: 'Review',
+    description: 'The live instrument has no recorded institution identifier.',
+    liveOnly: true,
+  }, record => !record.institutionId?.trim()),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

@@ -1,3 +1,4 @@
+import {validDate} from './portfolio.ts';
 import type {Instrument, RequestItem} from '../components/workspace/store.ts';
 
 export type ControlCategory = 'Instrument' | 'Verification' | 'Documents' | 'Requests' | 'Successors';
@@ -30,6 +31,10 @@ function recordControl(info: ControlInfo, matches: (record: Instrument, snapshot
   };
 }
 
+function instrumentDate(value: string) {
+  return validDate(value) && value >= '1900-01-01' && value <= '2199-12-31';
+}
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -53,6 +58,13 @@ export const controls: Control[] = [
       (!Number.isSafeInteger(record.amountMinor) || record.amountMinor <= 0 || record.amountMinor > 1e14);
     return invalidRupees || invalidPaise;
   }),
+  recordControl({
+    id: 'issue-date',
+    title: 'Identify invalid instrument issue dates',
+    category: 'Instrument',
+    level: 'Inconsistency',
+    description: 'The issue date must be a real calendar date between 1900 and 2199.',
+  }, record => !instrumentDate(record.issued)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

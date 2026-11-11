@@ -78,6 +78,8 @@ function hasVersionGap(record: Instrument) {
     [...versions].sort((a, b) => a - b).some((version, index) => version !== index + 1));
 }
 
+const documentKinds = new Set(['Instrument copy', 'Bank letter', 'Declaration', 'Approval letter', 'Other']);
+
 export const controls: Control[] = [
   recordControl({
     id: 'paise-reconciliation',
@@ -234,6 +236,13 @@ export const controls: Control[] = [
     level: 'Review',
     description: 'Review categories whose stored version sequence skips one or more numbers.',
   }, hasVersionGap),
+  documentControl({
+    id: 'document-category',
+    title: 'Flag unrecognized evidence categories',
+    category: 'Documents',
+    level: 'Review',
+    description: 'The recorded document category is outside the current upload vocabulary.',
+  }, document => !documentKinds.has(document.kind)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

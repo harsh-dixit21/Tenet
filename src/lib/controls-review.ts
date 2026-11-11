@@ -316,6 +316,13 @@ export const controls: Control[] = [
     level: 'Inconsistency',
     description: 'The request is pending while its linked instrument is outside the Release requested state.',
   }, (request, record) => request.status === 'Pending' && record.status !== 'Release requested'),
+  pendingControl({
+    id: 'pending-link',
+    title: 'Find release-requested instruments without a pending request',
+    category: 'Requests',
+    level: 'Review',
+    description: 'The instrument is in Release requested state and no pending request appears in the loaded snapshot.',
+  }, (count, record) => record.status === 'Release requested' && count === 0),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

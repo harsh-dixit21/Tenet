@@ -323,6 +323,14 @@ export const controls: Control[] = [
     level: 'Review',
     description: 'The instrument is in Release requested state and no pending request appears in the loaded snapshot.',
   }, (count, record) => record.status === 'Release requested' && count === 0),
+  requestControl({
+    id: 'request-institution',
+    title: 'Check closure request and instrument institution identifiers',
+    category: 'Requests',
+    level: 'Inconsistency',
+    description: 'Both institution identifiers are available and they disagree.',
+  }, (request, record) => Boolean(request.institutionId && record.institutionId &&
+    request.institutionId !== record.institutionId)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

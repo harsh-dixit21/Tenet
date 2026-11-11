@@ -6,7 +6,7 @@ import {records as samples,readDemoUser,type Role} from '../ui/app-1-utils/app-1
 export type Status='Draft'|'Awaiting verification'|'Discrepancy'|'Verified'|'Release requested'|'Released'|'Refunded'|'Discharged'|'Renewed'|'Replaced';
 export type DocumentItem={id:string;name:string;kind:string;version:number;date:string;data:string;size:number;path?:string;mime?:string;sha256?:string};
 export type Instrument={institutionId?:string;createdBy?:string;verifiedBy?:string;verifiedAt?:string;createdAt?:string;updatedAt?:string;amountMinor?:number;id:string;institution:string;bank:string;branch:string;number:string;amount:number;issued:string;maturity:string;status:Status;docs:DocumentItem[];evidence?:{source:string;reference:string;date:string;note:string};correction?:string;parent?:string;relation?:'Renewal'|'Replacement'};
-export type RequestItem={id:string;recordId:string;type:'Release'|'Refund'|'Discharge';reason:string;status:'Pending'|'Approved'|'Rejected';date:string;decision?:string};
+export type RequestItem={id:string;recordId:string;institutionId?:string;createdBy?:string;decidedBy?:string;type:'Release'|'Refund'|'Discharge';reason:string;status:'Pending'|'Approved'|'Rejected';date:string;decision?:string};
 export type EventItem={id:string;recordId:string;action:string;actor:Role;date:string;details?:Record<string,unknown>};
 export type State={version:1;records:Instrument[];requests:RequestItem[];events:EventItem[];settings:{reminderDays:number;escalationDays:number};readAlerts:string[];serverAlerts?:{id:string;recordId:string;title:string;detail:string}[]};
 export const today=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});

@@ -5,7 +5,7 @@ import {useWorkspace, today} from './store';
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
-  const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false, institution: ''});
+  const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false, institution: '', level: ''});
   function changeFilters(patch: Partial<typeof filters>) {
     setFilters(current => ({...current, ...patch}));
   }
@@ -18,8 +18,10 @@ export function ControlsReview() {
     !filters.institution || institutionKey(record) === filters.institution), [state.records, filters.institution]);
   const results = useMemo(() => {
     const scoped = filters.institution ? scopeControlResults(evaluated, new Set(scope.map(record => record.id))) : evaluated;
-    const byCategory = scoped.filter(result => !filters.category || result.control.category === filters.category);
-    const searched = searchControlResults(byCategory, filters.query, names);
+    const matching = scoped.filter(({control}) =>
+      (!filters.category || control.category === filters.category) &&
+      (!filters.level || control.level === filters.level));
+    const searched = searchControlResults(matching, filters.query, names);
     return filters.findingsOnly ? searched.filter(result => result.observations.length > 0) : searched;
   }, [evaluated, filters, names, scope]);
   const findings = useMemo(() => findingsFrom(results), [results]);
@@ -57,6 +59,14 @@ export function ControlsReview() {
           onChange={event => changeFilters({institution: event.target.value})}>
           <option value="">All institutions</option>
           {institutions.map(institution => <option key={institution.key} value={institution.key}>{institution.label}</option>)}
+        </select>
+      </label>
+      <label className="flex min-w-0 flex-col gap-2 text-sm">Finding type
+        <select className="workspace-select w-full" value={filters.level}
+          onChange={event => changeFilters({level: event.target.value})}>
+          <option value="">All types</option>
+          <option>Inconsistency</option>
+          <option>Review</option>
         </select>
       </label>
     </div>

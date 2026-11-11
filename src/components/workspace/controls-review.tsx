@@ -1,5 +1,6 @@
 import {useMemo, useState} from 'react';
 import {controls, findingsFrom, reviewControls, searchControlResults, institutionKey, reviewInstitutions, scopeControlResults} from '@/lib/controls-review';
+import {controlsHref, readControlsCheck} from '@/lib/control-links';
 import {paginate} from '@/lib/portfolio';
 import {Button} from '../ui/button';
 import {useWorkspace, today} from './store';
@@ -7,6 +8,8 @@ import {useWorkspace, today} from './store';
 export function ControlsReview() {
   const {state, live} = useWorkspace();
   const referenceDay = today();
+  const linkedCheck = readControlsCheck(location.hash);
+  const selectedCheck = controls.find(control => control.id === linkedCheck);
   const [filters, setFilters] = useState({query: '', category: '', findingsOnly: false, institution: '', level: ''});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -25,10 +28,11 @@ export function ControlsReview() {
     const scoped = filters.institution ? scopeControlResults(evaluated, new Set(scope.map(record => record.id))) : evaluated;
     const matching = scoped.filter(({control}) =>
       (!filters.category || control.category === filters.category) &&
-      (!filters.level || control.level === filters.level));
+      (!filters.level || control.level === filters.level) &&
+      (!linkedCheck || control.id === linkedCheck));
     const searched = searchControlResults(matching, filters.query, names);
     return filters.findingsOnly ? searched.filter(result => result.observations.length > 0) : searched;
-  }, [evaluated, filters, names, scope]);
+  }, [evaluated, filters, linkedCheck, names, scope]);
   const findings = useMemo(() => findingsFrom(results), [results]);
   const pagination = paginate(findings, page, pageSize);
   const shown = pagination.items;
@@ -46,6 +50,10 @@ export function ControlsReview() {
       <p><strong className="text-xl tabular-nums">{findings.length}</strong> findings</p>
       <p><strong className="text-xl tabular-nums">{scope.length}</strong> instruments in scope</p>
     </div>
+    {linkedCheck && <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3 text-sm">
+      <span>{selectedCheck?.title ?? 'This check is unavailable.'}</span>
+      <a className="underline underline-offset-4" href={controlsHref()}>Show all checks</a>
+    </div>}
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <label className="flex min-w-0 flex-col gap-2 text-sm">Search controls
         <input className="workspace-select w-full" type="search" value={filters.query}
@@ -127,7 +135,8 @@ export function ControlsReview() {
       <summary className="cursor-pointer text-sm font-medium">Check catalogue</summary>
       <ul className="mt-3 divide-y">{results.map(result => <li key={result.control.id} className="py-3 text-sm">
         <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
-          <span>{result.control.title}</span>
+          <a className="underline underline-offset-4"
+            href={controlsHref({check: result.control.id})}>{result.control.title}</a>
           <span className="text-muted-foreground">{result.evaluated ? result.observations.length + ' findings' : 'Live data required'}</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{result.control.description}</p>

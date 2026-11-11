@@ -243,6 +243,14 @@ export const controls: Control[] = [
     level: 'Review',
     description: 'The recorded document category is outside the current upload vocabulary.',
   }, document => !documentKinds.has(document.kind)),
+  documentControl({
+    id: 'document-size',
+    title: 'Check stored evidence sizes against upload bounds',
+    category: 'Documents',
+    level: 'Inconsistency',
+    description: 'The recorded file size is outside the range of 1 byte to 1 MiB.',
+  }, document => document.size !== undefined &&
+    (!Number.isSafeInteger(document.size) || document.size < 1 || document.size > 1024 * 1024)),
 ];
 
 export function reviewControls(snapshot: ReviewSnapshot): ControlResult[] {

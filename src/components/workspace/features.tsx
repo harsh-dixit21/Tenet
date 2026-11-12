@@ -234,7 +234,8 @@ function Institutions() {
     const total = sumDeposits(active);
     const href = live&&institutionId ? '#records?institutionId='+encodeURIComponent(institutionId) : '#records?institution='+encodeURIComponent(name);
     const missing = active.filter(record=>missingDocuments(record).length>0).length;
-    return {key,name,records,active,pending,total,href,missing};
+    const nextMaturity = active.map(record=>record.maturity).filter(date=>date>=today()).sort()[0];
+    return {key,name,records,active,pending,total,href,missing,nextMaturity};
   }).filter(group=>searchMatches(group.name,query)&&(!missingOnly||group.missing>0)&&(!activeOnly||group.active.length>0)&&(!pendingOnly||group.pending>0)).sort((a,b)=>{
     if(order==='Active amount') return b.total-a.total||a.name.localeCompare(b.name);
     if(order==='Pending reviews') return b.pending-a.pending||a.name.localeCompare(b.name);
@@ -255,7 +256,7 @@ function Institutions() {
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.active.length} active · {group.pending} pending reviews</p></div>
-            <div className="text-sm tabular-nums"><p>{money(group.total/100)} active</p><p className="mt-1 text-xs text-muted-foreground">{group.missing} active instruments missing evidence</p></div>
+            <div className="text-sm tabular-nums"><p>{money(group.total/100)} active</p><p className="mt-1 text-xs text-muted-foreground">{group.missing} active instruments missing evidence</p>{group.nextMaturity&&<p className="mt-1 text-xs text-muted-foreground">Next maturity {formatDate(group.nextMaturity)}</p>}</div>
           </div>
         </article>)}
         {!rows.length&&<Empty>No institutions match these filters.</Empty>}

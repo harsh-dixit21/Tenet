@@ -363,6 +363,7 @@ function Reports() {
   const [activeOnly,setActiveOnly] = useState(false);
   const [maturityFrom,setMaturityFrom] = useState('');
   const [maturityThrough,setMaturityThrough] = useState('');
+  const [order,setOrder] = useState('Report order');
   const [query,setQuery] = useState('');
   const records = (activeOnly?activeDeposits(state.records):state.records).filter(record => (!maturityThrough||record.maturity<=maturityThrough) && (!maturityFrom||record.maturity>=maturityFrom) && (!institution||record.institution===institution) && (!bank||record.bank===bank) && searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
   let summaries: {label:string; count:number; amountMinor:number}[];
@@ -373,7 +374,11 @@ function Reports() {
     const group = records.filter(record=>record.institution===label);
     return {label,count:group.length,amountMinor:sumDeposits(group)};
   });
-  const rows = summaries;
+  const rows = [...summaries].sort((a,b)=>{
+    if(order==='Highest amount') return b.amountMinor-a.amountMinor||a.label.localeCompare(b.label);
+    if(order==='Most instruments') return b.count-a.count||a.label.localeCompare(b.label);
+    return order==='Category' ? a.label.localeCompare(b.label) : 0;
+  });
   const missing = state.records.filter(record=>!terminal(record)&&missingDocuments(record).length>0);
   return <>
     <Card>
@@ -394,6 +399,7 @@ function Reports() {
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
       <Field label="Report maturity from"><Input type="date" value={maturityFrom} onChange={event=>setMaturityFrom(event.target.value)}/></Field>
       <Field label="Report maturity through"><Input type="date" min={maturityFrom||undefined} value={maturityThrough} onChange={event=>setMaturityThrough(event.target.value)}/></Field>
+      <Field label="Summary order"><select aria-label="Summary order" className="workspace-select max-w-full" value={order} onChange={event=>setOrder(event.target.value)}>{['Report order', 'Highest amount', 'Most instruments', 'Category'].map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
         </div>
         {maturityFrom&&maturityThrough&&maturityFrom>maturityThrough&&<p role="alert" className="mb-4 text-sm text-amber-300">Maturity from must be on or before Maturity through.</p>}

@@ -255,7 +255,7 @@ function Institutions() {
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.active.length} active · {group.pending} pending reviews</p></div>
-            <p className="text-sm tabular-nums">{money(group.total/100)} active</p>
+            <div className="text-sm tabular-nums"><p>{money(group.total/100)} active</p><p className="mt-1 text-xs text-muted-foreground">{group.missing} active instruments missing evidence</p></div>
           </div>
         </article>)}
         {!rows.length&&<Empty>No institutions match these filters.</Empty>}

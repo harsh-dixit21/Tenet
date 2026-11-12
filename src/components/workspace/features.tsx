@@ -165,6 +165,7 @@ function Requests() {
       </div>
       {from&&through&&from>through&&<p role="alert" className="mb-4 text-sm text-amber-300">Requested from must be on or before Requested through.</p>}
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.requests.length} requests match.</p>
+      <p className="mb-4 text-xs text-muted-foreground">{['Pending','Approved','Rejected'].map(value=>`${value}: ${rows.filter(request=>request.status===value).length}`).join(' · ')}</p>
       <div className="space-y-4">
         {rows.map(request=>{
           const record = records.get(request.recordId);

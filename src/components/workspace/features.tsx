@@ -256,6 +256,7 @@ function Institutions() {
         ['Institution','Instruments','Active','Active amount INR','Pending reviews','Missing evidence','Active banks','Next maturity'],
         ...rows.map(group=>[group.name,group.records.length,group.active.length,group.total/100,group.pending,group.missing,group.banks,group.nextMaturity||'']),
       ]))}>Export filtered institutions</Button>
+      <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setActiveOnly(false);setPendingOnly(false);setMissingOnly(false);setOrder('Name')}}>Reset institution filters</Button>
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {byInstitution.size} institutions match.</p>
       <div className="space-y-4">
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">

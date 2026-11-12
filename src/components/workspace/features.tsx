@@ -219,6 +219,7 @@ function Institutions() {
   const [activeOnly,setActiveOnly] = useState(false);
   const [missingOnly,setMissingOnly] = useState(false);
   const [order,setOrder] = useState('Name');
+  const [page,setPage] = useState(1);
   const [query,setQuery] = useState('');
   const byInstitution = new Map<string,Instrument[]>();
   for(const record of state.records){
@@ -242,6 +243,9 @@ function Institutions() {
     if(order==='Pending reviews') return b.pending-a.pending||a.name.localeCompare(b.name);
     return a.name.localeCompare(b.name);
   });
+  const pages = Math.max(1,Math.ceil(rows.length/20));
+  const currentPage = Math.min(page,pages);
+  useEffect(()=>setPage(1),[query,activeOnly,pendingOnly,missingOnly,order]);
   return <Card>
     <CardHeader><CardTitle>Institutions</CardTitle><CardDescription>Deposits, records and pending review by institution.</CardDescription></CardHeader>
     <CardContent>
@@ -259,7 +263,7 @@ function Institutions() {
       <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setActiveOnly(false);setPendingOnly(false);setMissingOnly(false);setOrder('Name')}}>Reset institution filters</Button>
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {byInstitution.size} institutions match.</p>
       <div className="space-y-4">
-        {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
+        {rows.slice((currentPage-1)*20,currentPage*20).map(group=><article key={group.key} className="rounded-lg border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.active.length} active · {group.banks} active banks · {group.pending} pending reviews</p></div>
             <div className="text-sm tabular-nums"><p>{money(group.total/100)} active</p><p className="mt-1 text-xs text-muted-foreground">{group.missing} active instruments missing evidence</p>{group.nextMaturity&&<p className="mt-1 text-xs text-muted-foreground">Next maturity {formatDate(group.nextMaturity)}</p>}</div>
@@ -267,6 +271,11 @@ function Institutions() {
           {group.pending>0&&<Button className="mt-3" asChild variant="outline" size="sm"><a href={group.href.replace('#records','#review')}>Open review queue</a></Button>}
         </article>)}
         {!rows.length&&<Empty>No institutions match these filters.</Empty>}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button variant="outline" disabled={currentPage===1} onClick={()=>setPage(currentPage-1)}>Previous institutions</Button>
+        <span className="text-sm" aria-live="polite">Page {currentPage} of {pages}</span>
+        <Button variant="outline" disabled={currentPage===pages} onClick={()=>setPage(currentPage+1)}>Next institutions</Button>
       </div>
     </CardContent>
   </Card>;

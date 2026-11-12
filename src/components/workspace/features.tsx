@@ -254,7 +254,7 @@ function Institutions() {
       <div className="space-y-4">
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.pending} pending reviews</p></div>
+            <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.active.length} active · {group.pending} pending reviews</p></div>
             <p className="text-sm tabular-nums">{money(group.total/100)} active</p>
           </div>
         </article>)}

@@ -134,6 +134,7 @@ function Requests() {
   const [from,setFrom] = useState('');
   const [through,setThrough] = useState('');
   const [order,setOrder] = useState('Oldest');
+  const [page,setPage] = useState(1);
   const [query,setQuery] = useState('');
   const records = new Map(state.records.map(record=>[record.id,record]));
   const rows = state.requests.filter(request =>
@@ -147,6 +148,9 @@ function Requests() {
     if(order==='Highest amount') return (records.get(b.recordId)?.amount||0)-(records.get(a.recordId)?.amount||0);
     return order==='Newest' ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date);
   });
+  const pages = Math.max(1,Math.ceil(rows.length/20));
+  const currentPage = Math.min(page,pages);
+  useEffect(()=>setPage(1),[query,requestType,filter,institution,from,through,order]);
   async function decide(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected||!['Approver','Admin'].includes(role))return;const note=String(new FormData(e.currentTarget).get('note')).trim();if(!note)return;if(await commit(s=>{const request=s.requests.find(r=>r.id===selected.id)!;if(request.status!=='Pending')throw new Error('This request has already been decided.');const record=s.records.find(r=>r.id===request.recordId)!;request.status=decision as 'Approved'|'Rejected';request.decision=note;record.status=decision==='Rejected'?'Verified':request.type==='Refund'?'Refunded':request.type==='Discharge'?'Discharged':'Released';event(s,record.id,`${request.type} ${decision.toLowerCase()} · ${note}`)},{type:'decide',recordId:selected.recordId,requestId:selected.id,decision,note,eligibilityConfirmed:new FormData(e.currentTarget).get('eligibility')==='on'}))setSelected(null)}
   return <Card>
     <CardHeader>
@@ -167,7 +171,7 @@ function Requests() {
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.requests.length} requests match.</p>
       <p className="mb-4 text-xs text-muted-foreground">{['Pending','Approved','Rejected'].map(value=>`${value}: ${rows.filter(request=>request.status===value).length}`).join(' · ')}</p>
       <div className="space-y-4">
-        {rows.map(request=>{
+        {rows.slice((currentPage-1)*20,currentPage*20).map(request=>{
           const record = records.get(request.recordId);
           return <article key={request.id} className="rounded-lg border p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -186,6 +190,11 @@ function Requests() {
           </article>;
         })}
         {!rows.length&&<Empty>No requests match these filters.</Empty>}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button variant="outline" disabled={currentPage===1} onClick={()=>setPage(currentPage-1)}>Previous requests</Button>
+        <span className="text-sm" aria-live="polite">Page {currentPage} of {pages}</span>
+        <Button variant="outline" disabled={currentPage===pages} onClick={()=>setPage(currentPage+1)}>Next requests</Button>
       </div>
       {selected&&<Modal title={`${decision==='Approved'?'Approve':'Reject'} ${selected.type.toLowerCase()} request`} close={()=>setSelected(null)}><form onSubmit={decide} className="space-y-4"><p className="text-sm text-muted-foreground">{live?'Record an authorized administrative decision. Funds are not transferred automatically.':'This records a demo decision. No funds are transferred.'}</p>{live&&decision==='Approved'&&<label className="flex items-start gap-2 text-sm"><input name="eligibility" type="checkbox" required/>I have checked the applicable release conditions and supporting evidence.</label>}<Field label="Decision notes"><textarea name="note" required className="workspace-textarea"/></Field><Button type="submit">Record decision</Button></form></Modal>}
     </CardContent>

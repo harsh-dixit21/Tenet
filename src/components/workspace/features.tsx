@@ -170,6 +170,7 @@ function Requests() {
         <Field label="Request status"><select aria-label="Filter requests" className="workspace-select" value={filter} onChange={event=>setFilter(event.target.value)}>{['All','Pending','Approved','Rejected'].map(value=><option key={value}>{value}</option>)}</select></Field>
       </div>
       {from&&through&&from>through&&<p role="alert" className="mb-4 text-sm text-amber-300">Requested from must be on or before Requested through.</p>}
+      <Button variant="ghost" className="mb-4" onClick={()=>{setQuery('');setRequestType('All');setFilter('All');setInstitution('');setFrom('');setThrough('');setOrder('Oldest');setPage(1)}}>Reset request filters</Button>
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.requests.length} requests match.</p>
       <p className="mb-4 text-xs text-muted-foreground">{['Pending','Approved','Rejected'].map(value=>`${value}: ${rows.filter(request=>request.status===value).length}`).join(' · ')}</p>
       <div className="space-y-4">

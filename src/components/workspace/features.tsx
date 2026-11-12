@@ -130,9 +130,11 @@ function Requests() {
   const [filter,setFilter] = useState('All');
   const [selected,setSelected] = useState<RequestItem|null>(null);
   const [decision,setDecision] = useState('Approved');
+  const [institution,setInstitution] = useState('');
   const [query,setQuery] = useState('');
   const records = new Map(state.records.map(record=>[record.id,record]));
   const rows = state.requests.filter(request =>
+    (!institution||records.get(request.recordId)?.institution===institution) &&
     (requestType==='All'||request.type===requestType) &&
     (filter==='All'||request.status===filter) &&
     searchMatches([request.id,request.recordId,records.get(request.recordId)?.institution,request.reason,request.decision].join(' '),query)
@@ -146,7 +148,8 @@ function Requests() {
     <CardContent>
       <Input className="mb-4" aria-label="Search requests" placeholder="Search request, instrument, institution or notes" value={query} onChange={event=>setQuery(event.target.value)}/>
       <div className="mb-5 flex flex-wrap gap-3">
-        <Field label="Request type"><select aria-label="Filter request type" className="workspace-select" value={requestType} onChange={event=>setRequestType(event.target.value)}>{['All','Release','Refund','Discharge'].map(value=><option key={value}>{value}</option>)}</select></Field>
+        <Field label="Request institution"><select aria-label="Request institution" className="workspace-select max-w-full" value={institution} onChange={event=>setInstitution(event.target.value)}><option value="">All institutions</option>{[...new Set(state.records.map(record=>record.institution))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
+      <Field label="Request type"><select aria-label="Filter request type" className="workspace-select" value={requestType} onChange={event=>setRequestType(event.target.value)}>{['All','Release','Refund','Discharge'].map(value=><option key={value}>{value}</option>)}</select></Field>
         <Field label="Request status"><select aria-label="Filter requests" className="workspace-select" value={filter} onChange={event=>setFilter(event.target.value)}>{['All','Pending','Approved','Rejected'].map(value=><option key={value}>{value}</option>)}</select></Field>
       </div>
       <div className="space-y-4">

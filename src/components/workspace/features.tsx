@@ -258,6 +258,7 @@ function Institutions() {
             <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.active.length} active · {group.pending} pending reviews</p></div>
             <div className="text-sm tabular-nums"><p>{money(group.total/100)} active</p><p className="mt-1 text-xs text-muted-foreground">{group.missing} active instruments missing evidence</p>{group.nextMaturity&&<p className="mt-1 text-xs text-muted-foreground">Next maturity {formatDate(group.nextMaturity)}</p>}</div>
           </div>
+          {group.pending>0&&<Button className="mt-3" asChild variant="outline" size="sm"><a href={group.href.replace('#records','#review')}>Open review queue</a></Button>}
         </article>)}
         {!rows.length&&<Empty>No institutions match these filters.</Empty>}
       </div>

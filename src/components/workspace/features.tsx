@@ -409,8 +409,8 @@ function Reports() {
         {maturityFrom&&maturityThrough&&maturityFrom>maturityThrough&&<p role="alert" className="mb-4 text-sm text-amber-300">Maturity from must be on or before Maturity through.</p>}
         <p className="mb-4 text-sm tabular-nums" role="status">{count} instruments · {money(amountMinor/100)} total</p>
         <div className="overflow-auto"><table className="workspace-table">
-          <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th></tr></thead>
-          <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td></tr>)}</tbody>
+          <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th><th className="text-right">Share of amount</th></tr></thead>
+          <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td><td className="text-right tabular-nums">{amountMinor>0?(100*row.amountMinor/amountMinor).toFixed(1)+'%':'—'}</td></tr>)}</tbody>
         </table></div>
         {!rows.length&&<Empty>No summary groups match these filters.</Empty>}
         <p className="mt-4 text-xs text-muted-foreground">Maturity summaries include active deposits. Other summaries include lifecycle history unless Active deposits only is selected.</p>

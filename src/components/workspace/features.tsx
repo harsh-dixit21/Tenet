@@ -177,7 +177,7 @@ function Requests() {
               </div>
               <StatusTag status={request.status}/>
             </div>
-            {record&&<p className="mt-2 text-sm tabular-nums">Deposit {money(record.amount)}</p>}
+            {record&&<p className="mt-2 text-sm tabular-nums">Deposit {money(record.amount)} · Matures {formatDate(record.maturity)}</p>}
             <p className="my-3 text-sm text-muted-foreground">{request.reason}</p>
             {request.decision&&<p className="text-sm">Decision: {request.decision}</p>}
             {request.status==='Pending'&&['Approver','Admin'].includes(role)&&<div className="mt-3 flex flex-wrap gap-3">

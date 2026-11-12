@@ -252,6 +252,10 @@ function Institutions() {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={pendingOnly} onChange={event=>setPendingOnly(event.target.checked)}/>Pending review only</label>
       </div>
+      <Button className="mb-4 mr-3" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-institutions.csv',csv([
+        ['Institution','Instruments','Active','Active amount INR','Pending reviews','Missing evidence','Active banks','Next maturity'],
+        ...rows.map(group=>[group.name,group.records.length,group.active.length,group.total/100,group.pending,group.missing,group.banks,group.nextMaturity||'']),
+      ]))}>Export filtered institutions</Button>
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {byInstitution.size} institutions match.</p>
       <div className="space-y-4">
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">

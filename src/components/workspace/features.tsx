@@ -250,6 +250,7 @@ function Institutions() {
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={pendingOnly} onChange={event=>setPendingOnly(event.target.checked)}/>Pending review only</label>
       </div>
+      <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {byInstitution.size} institutions match.</p>
       <div className="space-y-4">
         {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">

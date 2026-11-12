@@ -186,7 +186,13 @@ function Requests() {
                 {record ? <a className="text-sm font-medium hover:underline" href={`#instrument/${request.recordId}`}>{record.institution}</a> : <p className="text-sm">Instrument {request.recordId} is unavailable in this workspace.</p>}
                 <p className="mt-1 text-xs text-muted-foreground">{request.id} · {request.type} · {formatDate(request.date)} · Submitted {ageDays(request.date)} days ago</p>
               </div>
-              <StatusTag status={request.status}/>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusTag status={request.status}/>
+                <Button variant="ghost" size="sm" onClick={async()=>{
+                  try { await navigator.clipboard.writeText(request.id); notify('Request ID copied.'); }
+                  catch { notify('Clipboard access was blocked.'); }
+                }}>Copy request ID</Button>
+              </div>
             </div>
             {record&&<p className="mt-2 text-sm tabular-nums">Deposit {money(record.amount)} · Matures {formatDate(record.maturity)}</p>}
             <p className="my-3 text-sm text-muted-foreground">{request.reason}</p>

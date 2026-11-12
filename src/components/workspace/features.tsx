@@ -171,6 +171,10 @@ function Requests() {
       </div>
       {from&&through&&from>through&&<p role="alert" className="mb-4 text-sm text-amber-300">Requested from must be on or before Requested through.</p>}
       <Button variant="ghost" className="mb-4" onClick={()=>{setQuery('');setRequestType('All');setFilter('All');setInstitution('');setFrom('');setThrough('');setOrder('Oldest');setPage(1)}}>Reset request filters</Button>
+      <Button variant="outline" className="mb-4" disabled={!rows.length} onClick={()=>download('tenet-requests.csv',csv([
+        ['Request','Instrument','Institution','Type','Status','Requested','Reason','Decision'],
+        ...rows.map(request=>[request.id,request.recordId,records.get(request.recordId)?.institution||'',request.type,request.status,request.date,request.reason,request.decision||'']),
+      ]))}>Export filtered requests</Button>
       <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.requests.length} requests match.</p>
       <p className="mb-4 text-xs text-muted-foreground">{['Pending','Approved','Rejected'].map(value=>`${value}: ${rows.filter(request=>request.status===value).length}`).join(' · ')}</p>
       <div className="space-y-4">

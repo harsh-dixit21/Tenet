@@ -380,6 +380,8 @@ function Reports() {
     if(order==='Most instruments') return b.count-a.count||a.label.localeCompare(b.label);
     return order==='Category' ? a.label.localeCompare(b.label) : 0;
   });
+  const count = rows.reduce((total,row)=>total+row.count,0);
+  const amountMinor = rows.reduce((total,row)=>total+row.amountMinor,0);
   const missing = state.records.filter(record=>!terminal(record)&&missingDocuments(record).length>0);
   return <>
     <Card>
@@ -405,6 +407,7 @@ function Reports() {
       <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
         </div>
         {maturityFrom&&maturityThrough&&maturityFrom>maturityThrough&&<p role="alert" className="mb-4 text-sm text-amber-300">Maturity from must be on or before Maturity through.</p>}
+        <p className="mb-4 text-sm tabular-nums" role="status">{count} instruments · {money(amountMinor/100)} total</p>
         <div className="overflow-auto"><table className="workspace-table">
           <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th></tr></thead>
           <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td></tr>)}</tbody>

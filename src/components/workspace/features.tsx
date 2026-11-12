@@ -164,6 +164,7 @@ function Requests() {
         <Field label="Request status"><select aria-label="Filter requests" className="workspace-select" value={filter} onChange={event=>setFilter(event.target.value)}>{['All','Pending','Approved','Rejected'].map(value=><option key={value}>{value}</option>)}</select></Field>
       </div>
       {from&&through&&from>through&&<p role="alert" className="mb-4 text-sm text-amber-300">Requested from must be on or before Requested through.</p>}
+      <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} of {state.requests.length} requests match.</p>
       <div className="space-y-4">
         {rows.map(request=>{
           const record = records.get(request.recordId);

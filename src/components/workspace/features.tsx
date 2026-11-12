@@ -213,7 +213,42 @@ function Requests() {
     </CardContent>
   </Card>;
 }
-function Institutions(){const{state,live}=useWorkspace();const[q,setQ]=useState('');const groups=[...new Map(state.records.map(r=>[live?r.institutionId||r.institution:r.institution,{id:r.institutionId||r.institution,name:r.institution}])).values()].filter(n=>n.name.toLowerCase().includes(q.toLowerCase()));return <Card><CardHeader><CardTitle>Institutions</CardTitle><CardDescription>Institution-wise deposits, records and pending work.</CardDescription></CardHeader><CardContent><Input aria-label="Search institutions" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search institution name" className="mb-5"/><div className="space-y-4">{groups.map(({id,name:n})=>{const rows=state.records.filter(r=>live?r.institutionId===id:r.institution===n);return <a key={id} href={live?`#records?institutionId=${encodeURIComponent(id)}`:`#records?institution=${encodeURIComponent(n)}`} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent"><div><h3 className="text-sm font-medium">{n}</h3><p className="mt-1 text-xs text-muted-foreground">{rows.length} instruments · {rows.filter(r=>['Discrepancy','Awaiting verification'].includes(r.status)).length} pending reviews</p></div><span className="text-sm tabular-nums">{money(sumDeposits(activeDeposits(rows))/100)}</span></a>})}{!groups.length&&<Empty>No institutions found. Submitting an instrument adds its institution here.</Empty>}</div></CardContent></Card>}
+function Institutions() {
+  const {state,live} = useWorkspace();
+  const [query,setQuery] = useState('');
+  const byInstitution = new Map<string,Instrument[]>();
+  for(const record of state.records){
+    const key = live ? record.institutionId||record.institution : record.institution;
+    const existing = byInstitution.get(key);
+    if(existing) existing.push(record);
+    else byInstitution.set(key,[record]);
+  }
+  const rows = [...byInstitution].map(([key,records])=>{
+    const {institution:name,institutionId} = records[0];
+    const active = activeDeposits(records);
+    const pending = records.filter(record=>['Discrepancy','Awaiting verification'].includes(record.status)).length;
+    const total = sumDeposits(active);
+    const href = live&&institutionId ? '#records?institutionId='+encodeURIComponent(institutionId) : '#records?institution='+encodeURIComponent(name);
+    return {key,name,records,active,pending,total,href};
+  }).filter(group=>searchMatches(group.name,query));
+  return <Card>
+    <CardHeader><CardTitle>Institutions</CardTitle><CardDescription>Deposits, records and pending review by institution.</CardDescription></CardHeader>
+    <CardContent>
+      <Input aria-label="Search institutions" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search institution name" className="mb-4"/>
+      <div className="mb-4 flex flex-wrap gap-3">
+      </div>
+      <div className="space-y-4">
+        {rows.map(group=><article key={group.key} className="rounded-lg border p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><a href={group.href} className="text-sm font-medium hover:underline">{group.name}</a><p className="mt-1 text-xs text-muted-foreground">{group.records.length} instruments · {group.pending} pending reviews</p></div>
+            <p className="text-sm tabular-nums">{money(group.total/100)} active</p>
+          </div>
+        </article>)}
+        {!rows.length&&<Empty>No institutions match these filters.</Empty>}
+      </div>
+    </CardContent>
+  </Card>;
+}
 export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();
   const [q,setQ] = useState('');

@@ -222,7 +222,7 @@ function Institutions() {
   const [query,setQuery] = useState('');
   const byInstitution = new Map<string,Instrument[]>();
   for(const record of state.records){
-    const key = live ? record.institutionId||record.institution : record.institution;
+    const key = live&&record.institutionId ? 'id:'+record.institutionId : 'name:'+record.institution;
     const existing = byInstitution.get(key);
     if(existing) existing.push(record);
     else byInstitution.set(key,[record]);

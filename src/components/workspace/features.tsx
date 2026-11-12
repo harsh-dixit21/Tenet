@@ -133,6 +133,7 @@ function Requests() {
   const [institution,setInstitution] = useState('');
   const [from,setFrom] = useState('');
   const [through,setThrough] = useState('');
+  const [order,setOrder] = useState('Oldest');
   const [query,setQuery] = useState('');
   const records = new Map(state.records.map(record=>[record.id,record]));
   const rows = state.requests.filter(request =>
@@ -142,7 +143,10 @@ function Requests() {
     (requestType==='All'||request.type===requestType) &&
     (filter==='All'||request.status===filter) &&
     searchMatches([request.id,request.recordId,records.get(request.recordId)?.institution,request.reason,request.decision].join(' '),query)
-  ).sort((a,b)=>a.date.localeCompare(b.date));
+  ).sort((a,b)=>{
+    if(order==='Highest amount') return (records.get(b.recordId)?.amount||0)-(records.get(a.recordId)?.amount||0);
+    return order==='Newest' ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date);
+  });
   async function decide(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected||!['Approver','Admin'].includes(role))return;const note=String(new FormData(e.currentTarget).get('note')).trim();if(!note)return;if(await commit(s=>{const request=s.requests.find(r=>r.id===selected.id)!;if(request.status!=='Pending')throw new Error('This request has already been decided.');const record=s.records.find(r=>r.id===request.recordId)!;request.status=decision as 'Approved'|'Rejected';request.decision=note;record.status=decision==='Rejected'?'Verified':request.type==='Refund'?'Refunded':request.type==='Discharge'?'Discharged':'Released';event(s,record.id,`${request.type} ${decision.toLowerCase()} · ${note}`)},{type:'decide',recordId:selected.recordId,requestId:selected.id,decision,note,eligibilityConfirmed:new FormData(e.currentTarget).get('eligibility')==='on'}))setSelected(null)}
   return <Card>
     <CardHeader>
@@ -155,6 +159,7 @@ function Requests() {
         <Field label="Request institution"><select aria-label="Request institution" className="workspace-select max-w-full" value={institution} onChange={event=>setInstitution(event.target.value)}><option value="">All institutions</option>{[...new Set(state.records.map(record=>record.institution))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="Requested from"><Input type="date" value={from} onChange={event=>setFrom(event.target.value)}/></Field>
       <Field label="Requested through"><Input type="date" min={from||undefined} value={through} onChange={event=>setThrough(event.target.value)}/></Field>
+      <Field label="Request order"><select aria-label="Request order" className="workspace-select max-w-full" value={order} onChange={event=>setOrder(event.target.value)}>{['Oldest', 'Newest', 'Highest amount'].map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="Request type"><select aria-label="Filter request type" className="workspace-select" value={requestType} onChange={event=>setRequestType(event.target.value)}>{['All','Release','Refund','Discharge'].map(value=><option key={value}>{value}</option>)}</select></Field>
         <Field label="Request status"><select aria-label="Filter requests" className="workspace-select" value={filter} onChange={event=>setFilter(event.target.value)}>{['All','Pending','Approved','Rejected'].map(value=><option key={value}>{value}</option>)}</select></Field>
       </div>

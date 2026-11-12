@@ -218,6 +218,7 @@ function Institutions() {
   const [pendingOnly,setPendingOnly] = useState(false);
   const [activeOnly,setActiveOnly] = useState(false);
   const [missingOnly,setMissingOnly] = useState(false);
+  const [order,setOrder] = useState('Name');
   const [query,setQuery] = useState('');
   const byInstitution = new Map<string,Instrument[]>();
   for(const record of state.records){
@@ -234,12 +235,17 @@ function Institutions() {
     const href = live&&institutionId ? '#records?institutionId='+encodeURIComponent(institutionId) : '#records?institution='+encodeURIComponent(name);
     const missing = active.filter(record=>missingDocuments(record).length>0).length;
     return {key,name,records,active,pending,total,href,missing};
-  }).filter(group=>searchMatches(group.name,query)&&(!missingOnly||group.missing>0)&&(!activeOnly||group.active.length>0)&&(!pendingOnly||group.pending>0));
+  }).filter(group=>searchMatches(group.name,query)&&(!missingOnly||group.missing>0)&&(!activeOnly||group.active.length>0)&&(!pendingOnly||group.pending>0)).sort((a,b)=>{
+    if(order==='Active amount') return b.total-a.total||a.name.localeCompare(b.name);
+    if(order==='Pending reviews') return b.pending-a.pending||a.name.localeCompare(b.name);
+    return a.name.localeCompare(b.name);
+  });
   return <Card>
     <CardHeader><CardTitle>Institutions</CardTitle><CardDescription>Deposits, records and pending review by institution.</CardDescription></CardHeader>
     <CardContent>
       <Input aria-label="Search institutions" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search institution name" className="mb-4"/>
       <div className="mb-4 flex flex-wrap gap-3">
+        <Field label="Institution order"><select aria-label="Institution order" className="workspace-select max-w-full" value={order} onChange={event=>setOrder(event.target.value)}>{['Name', 'Active amount', 'Pending reviews'].map(value=><option key={value}>{value}</option>)}</select></Field>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={missingOnly} onChange={event=>setMissingOnly(event.target.checked)}/>Missing evidence only</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={pendingOnly} onChange={event=>setPendingOnly(event.target.checked)}/>Pending review only</label>

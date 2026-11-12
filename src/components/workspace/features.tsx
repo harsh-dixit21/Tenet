@@ -360,8 +360,9 @@ function Reports() {
   const [report,setReport] = useState('Status summary');
   const [bank,setBank] = useState('');
   const [institution,setInstitution] = useState('');
+  const [activeOnly,setActiveOnly] = useState(false);
   const [query,setQuery] = useState('');
-  const records = state.records.filter(record => (!institution||record.institution===institution) && (!bank||record.bank===bank) && searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
+  const records = (activeOnly?activeDeposits(state.records):state.records).filter(record => (!institution||record.institution===institution) && (!bank||record.bank===bank) && searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
   let summaries: {label:string; count:number; amountMinor:number}[];
   if(report==='Status summary') summaries = statusSummary(records);
   else if(report==='Bank summary') summaries = bankSummary(records);
@@ -388,6 +389,7 @@ function Reports() {
         <div className="mb-4 flex flex-wrap gap-3">
           <Field label="Report bank"><select aria-label="Report bank" className="workspace-select max-w-full" value={bank} onChange={event=>setBank(event.target.value)}><option value="">All</option>{[...new Set(state.records.map(record=>record.bank))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="Report institution"><select aria-label="Report institution" className="workspace-select max-w-full" value={institution} onChange={event=>setInstitution(event.target.value)}><option value="">All</option>{[...new Set(state.records.map(record=>record.institution))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
       <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
         </div>
         <div className="overflow-auto"><table className="workspace-table">
@@ -395,7 +397,7 @@ function Reports() {
           <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td></tr>)}</tbody>
         </table></div>
         {!rows.length&&<Empty>No summary groups match these filters.</Empty>}
-        <p className="mt-4 text-xs text-muted-foreground">Maturity summaries include active deposits. Other summaries include lifecycle history.</p>
+        <p className="mt-4 text-xs text-muted-foreground">Maturity summaries include active deposits. Other summaries include lifecycle history unless Active deposits only is selected.</p>
       </CardContent>
     </Card>
     <Card><CardHeader><CardTitle>Missing required documents</CardTitle><CardDescription>{missing.length} instruments need attention</CardDescription></CardHeader><CardContent className="space-y-3">{missing.map(r=><a key={r.id} href={`#instrument/${r.id}`} className="block rounded-md border p-3 text-sm hover:bg-accent">{r.institution}<span className="mt-1 block text-xs text-muted-foreground">{r.id} · {['Instrument copy','Bank letter','Declaration'].filter(k=>!r.docs.some(d=>d.kind===k)).join(', ')}</span></a>)}{!missing.length&&<Empty>Every active record has the required document categories.</Empty>}</CardContent></Card>

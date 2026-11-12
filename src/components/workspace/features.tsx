@@ -355,7 +355,48 @@ function Alerts() {
     </div>)}{!rows.length&&<Empty>No alerts match these filters.</Empty>}</div>
   </CardContent></Card>;
 }
-function Reports(){const{state}=useWorkspace();const[report,setReport]=useState('Status summary');const groups=report==='Status summary'?statuses:[...new Set(state.records.map(r=>r.institution))];const aggregate=report==='Status summary'?statusSummary(state.records):report==='Bank summary'?bankSummary(state.records):report==='Maturity summary'?maturitySummary(state.records):null;const rows=aggregate?aggregate.map(r=>({label:r.label,count:r.count,total:r.amountMinor/100})):groups.map(g=>{const records=state.records.filter(r=>r.institution===g);return {label:g,count:records.length,total:sumDeposits(records)/100}});const missing=state.records.filter(r=>!terminal(r)&&!['Instrument copy','Bank letter','Declaration'].every(k=>r.docs.some(d=>d.kind===k)));return <><Card><CardHeader><div className="flex flex-wrap justify-between gap-3"><CardTitle>Management reports</CardTitle><Button size="sm" variant="outline" onClick={()=>download('tenet-summary.csv',csv([['Category','Instruments','Amount INR'],...rows.map(r=>[r.label,r.count,r.total])]))}><Download/>Export summary</Button></div><CardDescription>Computed from the same records used by the dashboard.</CardDescription></CardHeader><CardContent><select aria-label="Report type" className="workspace-select mb-5" value={report} onChange={e=>setReport(e.target.value)}><option>Status summary</option><option>Institution summary</option><option>Bank summary</option><option>Maturity summary</option></select><div className="overflow-auto"><table className="workspace-table"><thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th></tr></thead><tbody>{rows.map(r=><tr key={r.label}><td>{r.label}</td><td className="text-right tabular-nums">{r.count}</td><td className="text-right tabular-nums">{money(r.total)}</td></tr>)}</tbody></table></div><p className="mt-4 text-xs text-muted-foreground">Summary includes lifecycle history. Active deposit totals exclude renewed, replaced and closed instruments.</p></CardContent></Card><Card><CardHeader><CardTitle>Missing required documents</CardTitle><CardDescription>{missing.length} instruments need attention</CardDescription></CardHeader><CardContent className="space-y-3">{missing.map(r=><a key={r.id} href={`#instrument/${r.id}`} className="block rounded-md border p-3 text-sm hover:bg-accent">{r.institution}<span className="mt-1 block text-xs text-muted-foreground">{r.id} · {['Instrument copy','Bank letter','Declaration'].filter(k=>!r.docs.some(d=>d.kind===k)).join(', ')}</span></a>)}{!missing.length&&<Empty>Every active record has the required document categories.</Empty>}</CardContent></Card></>}
+function Reports() {
+  const {state} = useWorkspace();
+  const [report,setReport] = useState('Status summary');
+  const [query,setQuery] = useState('');
+  const records = state.records.filter(record => searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
+  let summaries: {label:string; count:number; amountMinor:number}[];
+  if(report==='Status summary') summaries = statusSummary(records);
+  else if(report==='Bank summary') summaries = bankSummary(records);
+  else if(report==='Maturity summary') summaries = maturitySummary(records);
+  else summaries = [...new Set(records.map(record=>record.institution))].map(label=>{
+    const group = records.filter(record=>record.institution===label);
+    return {label,count:group.length,amountMinor:sumDeposits(group)};
+  });
+  const rows = summaries;
+  const missing = state.records.filter(record=>!terminal(record)&&missingDocuments(record).length>0);
+  return <>
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap justify-between gap-3">
+          <CardTitle>Management reports</CardTitle>
+          <Button size="sm" variant="outline" onClick={()=>download('tenet-summary.csv',csv([
+            ['Category','Instruments','Amount INR'],...rows.map(row=>[row.label,row.count,row.amountMinor/100]),
+          ]))}><Download/>Export summary</Button>
+        </div>
+        <CardDescription>Summary of instruments available in this workspace.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Input aria-label="Search report instruments" className="mb-4" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search institution, bank or instrument"/>
+        <div className="mb-4 flex flex-wrap gap-3">
+          <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
+        </div>
+        <div className="overflow-auto"><table className="workspace-table">
+          <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th></tr></thead>
+          <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td></tr>)}</tbody>
+        </table></div>
+        {!rows.length&&<Empty>No summary groups match these filters.</Empty>}
+        <p className="mt-4 text-xs text-muted-foreground">Maturity summaries include active deposits. Other summaries include lifecycle history.</p>
+      </CardContent>
+    </Card>
+    <Card><CardHeader><CardTitle>Missing required documents</CardTitle><CardDescription>{missing.length} instruments need attention</CardDescription></CardHeader><CardContent className="space-y-3">{missing.map(r=><a key={r.id} href={`#instrument/${r.id}`} className="block rounded-md border p-3 text-sm hover:bg-accent">{r.institution}<span className="mt-1 block text-xs text-muted-foreground">{r.id} · {['Instrument copy','Bank letter','Declaration'].filter(k=>!r.docs.some(d=>d.kind===k)).join(', ')}</span></a>)}{!missing.length&&<Empty>Every active record has the required document categories.</Empty>}</CardContent></Card>
+  </>;
+}
 function Settings(){const{state,role,commit,event,reset,live}=useWorkspace();const[confirm,setConfirm]=useState(false);function save(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!['Approver','Admin'].includes(role))return;const f=new FormData(e.currentTarget);commit(s=>{s.settings={reminderDays:Number(f.get('reminder')),escalationDays:Number(f.get('escalation'))};event(s,'workspace','Reminder and escalation thresholds updated')},{type:'settings',settings:{reminderDays:Number(f.get('reminder')),escalationDays:Number(f.get('escalation'))}})}return <><Card className="max-w-2xl"><CardHeader><CardTitle>Reminder rules</CardTitle><CardDescription>Thresholds apply to in-app alerts and the maturity queue.</CardDescription></CardHeader><CardContent><form className="space-y-5" onSubmit={save}><Field label="Remind before maturity (days)"><Input name="reminder" type="number" min="1" max="365" required defaultValue={state.settings.reminderDays}/></Field><Field label="Escalate pending actions after (days)"><Input name="escalation" type="number" min="1" max="90" required defaultValue={state.settings.escalationDays}/></Field><Button disabled={!['Approver','Admin'].includes(role)}>Save rules</Button>{!['Approver','Admin'].includes(role)&&<p className="text-xs text-muted-foreground">Switch to Approver to change workspace rules.</p>}</form></CardContent></Card>{live?<AccountAccess/>:<Card className="max-w-2xl"><CardHeader><CardTitle>Demo workspace</CardTitle><CardDescription>Records and small attachments are saved in this browser. Demo roles control available UI actions; they are not server authorization.</CardDescription></CardHeader><CardContent><Button variant="outline" onClick={()=>setConfirm(true)}>Restore sample data</Button></CardContent></Card>}{confirm&&<Modal title="Restore sample data?" close={()=>setConfirm(false)}><p className="mb-5 text-sm text-muted-foreground">This removes the instruments, uploads and actions added in this browser and restores the sample workspace.</p><div className="flex gap-3"><Button onClick={()=>{reset();setConfirm(false)}}>Restore samples</Button><Button variant="outline" onClick={()=>setConfirm(false)}>Cancel</Button></div></Modal>}</>}
 
 function DownloadFile({recordId,documentId,name,data}:{recordId:string;documentId:string;name:string;data:string}){const{live,notify}=useWorkspace();const[busy,setBusy]=useState(false);async function get(){setBusy(true);try{const file=live?await callBackend<{data:string;name:string}>('downloadDocument',{recordId,documentId}):{data,name};const a=document.createElement('a');a.href=file.data;a.download=file.name;a.click()}catch(e){notify(e instanceof Error?e.message:'Download failed.')}finally{setBusy(false)}}return <Button variant="outline" size="sm" disabled={busy} onClick={get}><Download/>{busy?'Downloading...':'Download'}</Button>}

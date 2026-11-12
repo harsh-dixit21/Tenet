@@ -382,6 +382,17 @@ function Reports() {
   });
   const count = rows.reduce((total,row)=>total+row.count,0);
   const amountMinor = rows.reduce((total,row)=>total+row.amountMinor,0);
+  function groupLink(label: string) {
+    const params = new URLSearchParams({filters:'1'});
+    if(query) params.set('q',query.slice(0,200));
+    if(bank||report==='Bank summary') params.set('bank',report==='Bank summary'?label:bank);
+    if(institution||report==='Institution summary') params.set('institution',report==='Institution summary'?label:institution);
+    if(report==='Status summary') params.set('status',label);
+    if(activeOnly) params.set('active','1');
+    if(maturityFrom) params.set('from',maturityFrom);
+    if(maturityThrough) params.set('to',maturityThrough);
+    return '#records?'+params.toString();
+  }
   const missing = state.records.filter(record=>!terminal(record)&&missingDocuments(record).length>0);
   return <>
     <Card>
@@ -398,7 +409,7 @@ function Reports() {
         <CardDescription>Summary of instruments available in this workspace.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Input aria-label="Search report instruments" className="mb-4" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search institution, bank or instrument"/>
+        <Input aria-label="Search report instruments" maxLength={200} className="mb-4" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search institution, bank or instrument"/>
         <div className="mb-4 flex flex-wrap gap-3">
           <Field label="Report bank"><select aria-label="Report bank" className="workspace-select max-w-full" value={bank} onChange={event=>setBank(event.target.value)}><option value="">All</option>{[...new Set(state.records.map(record=>record.bank))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="Report institution"><select aria-label="Report institution" className="workspace-select max-w-full" value={institution} onChange={event=>setInstitution(event.target.value)}><option value="">All</option>{[...new Set(state.records.map(record=>record.institution))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
@@ -416,7 +427,7 @@ function Reports() {
         <p className="mb-4 text-sm tabular-nums" role="status">{count} instruments · {money(amountMinor/100)} total</p>
         <div className="overflow-auto"><table className="workspace-table">
           <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th><th className="text-right">Share of amount</th></tr></thead>
-          <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td><td className="text-right tabular-nums">{amountMinor>0?(100*row.amountMinor/amountMinor).toFixed(1)+'%':'—'}</td></tr>)}</tbody>
+          <tbody>{rows.map(row=><tr key={row.label}><td>{row.count>0&&report!=='Maturity summary'?<a className="underline underline-offset-4" href={groupLink(row.label)}>{row.label}</a>:row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td><td className="text-right tabular-nums">{amountMinor>0?(100*row.amountMinor/amountMinor).toFixed(1)+'%':'—'}</td></tr>)}</tbody>
         </table></div>
         {!rows.length&&<Empty>No summary groups match these filters.</Empty>}
         <p className="mt-4 text-xs text-muted-foreground">Maturity summaries include active deposits. Other summaries include lifecycle history unless Active deposits only is selected.</p>

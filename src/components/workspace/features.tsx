@@ -410,6 +410,9 @@ function Reports() {
       <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
         </div>
         {maturityFrom&&maturityThrough&&maturityFrom>maturityThrough&&<p role="alert" className="mb-4 text-sm text-amber-300">Maturity from must be on or before Maturity through.</p>}
+        <Button className="mb-4" variant="ghost" onClick={()=>{
+          setQuery('');setBank('');setInstitution('');setActiveOnly(false);setMaturityFrom('');setMaturityThrough('');setOrder('Report order');setHideEmpty(false);
+        }}>Reset report filters</Button>
         <p className="mb-4 text-sm tabular-nums" role="status">{count} instruments · {money(amountMinor/100)} total</p>
         <div className="overflow-auto"><table className="workspace-table">
           <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th><th className="text-right">Share of amount</th></tr></thead>

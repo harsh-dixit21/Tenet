@@ -362,8 +362,9 @@ function Reports() {
   const [institution,setInstitution] = useState('');
   const [activeOnly,setActiveOnly] = useState(false);
   const [maturityFrom,setMaturityFrom] = useState('');
+  const [maturityThrough,setMaturityThrough] = useState('');
   const [query,setQuery] = useState('');
-  const records = (activeOnly?activeDeposits(state.records):state.records).filter(record => (!maturityFrom||record.maturity>=maturityFrom) && (!institution||record.institution===institution) && (!bank||record.bank===bank) && searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
+  const records = (activeOnly?activeDeposits(state.records):state.records).filter(record => (!maturityThrough||record.maturity<=maturityThrough) && (!maturityFrom||record.maturity>=maturityFrom) && (!institution||record.institution===institution) && (!bank||record.bank===bank) && searchMatches([record.id,record.institution,record.bank,record.number].join(' '),query));
   let summaries: {label:string; count:number; amountMinor:number}[];
   if(report==='Status summary') summaries = statusSummary(records);
   else if(report==='Bank summary') summaries = bankSummary(records);
@@ -392,8 +393,10 @@ function Reports() {
       <Field label="Report institution"><select aria-label="Report institution" className="workspace-select max-w-full" value={institution} onChange={event=>setInstitution(event.target.value)}><option value="">All</option>{[...new Set(state.records.map(record=>record.institution))].sort().map(value=><option key={value}>{value}</option>)}</select></Field>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={event=>setActiveOnly(event.target.checked)}/>Active deposits only</label>
       <Field label="Report maturity from"><Input type="date" value={maturityFrom} onChange={event=>setMaturityFrom(event.target.value)}/></Field>
+      <Field label="Report maturity through"><Input type="date" min={maturityFrom||undefined} value={maturityThrough} onChange={event=>setMaturityThrough(event.target.value)}/></Field>
       <Field label="Report type"><select aria-label="Report type" className="workspace-select" value={report} onChange={event=>setReport(event.target.value)}>{['Status summary','Institution summary','Bank summary','Maturity summary'].map(value=><option key={value}>{value}</option>)}</select></Field>
         </div>
+        {maturityFrom&&maturityThrough&&maturityFrom>maturityThrough&&<p role="alert" className="mb-4 text-sm text-amber-300">Maturity from must be on or before Maturity through.</p>}
         <div className="overflow-auto"><table className="workspace-table">
           <thead><tr><th>Category</th><th className="text-right">Instruments</th><th className="text-right">Amount</th></tr></thead>
           <tbody>{rows.map(row=><tr key={row.label}><td>{row.label}</td><td className="text-right tabular-nums">{row.count}</td><td className="text-right tabular-nums">{money(row.amountMinor/100)}</td></tr>)}</tbody>

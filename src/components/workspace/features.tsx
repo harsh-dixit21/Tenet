@@ -172,7 +172,7 @@ function Requests() {
           return <article key={request.id} className="rounded-lg border p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <a className="text-sm font-medium hover:underline" href={`#instrument/${request.recordId}`}>{record?.institution}</a>
+                {record ? <a className="text-sm font-medium hover:underline" href={`#instrument/${request.recordId}`}>{record.institution}</a> : <p className="text-sm">Instrument {request.recordId} is unavailable in this workspace.</p>}
                 <p className="mt-1 text-xs text-muted-foreground">{request.id} · {request.type} · {formatDate(request.date)} · Submitted {ageDays(request.date)} days ago</p>
               </div>
               <StatusTag status={request.status}/>

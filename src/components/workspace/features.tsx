@@ -391,6 +391,9 @@ function Reports() {
           <Button size="sm" variant="outline" onClick={()=>download('tenet-summary.csv',csv([
             ['Category','Instruments','Amount INR'],...rows.map(row=>[row.label,row.count,row.amountMinor/100]),
           ]))}><Download/>Export summary</Button>
+          <Button size="sm" variant="outline" disabled={!count} onClick={()=>download('tenet-summary.json',JSON.stringify({
+            report,filters:{query,bank,institution,activeOnly,maturityFrom,maturityThrough},count,amountMinor,rows,
+          },null,2),'application/json')}>Export summary JSON</Button>
         </div>
         <CardDescription>Summary of instruments available in this workspace.</CardDescription>
       </CardHeader>

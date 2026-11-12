@@ -124,7 +124,55 @@ function Documents() {
   </CardContent></Card>;
 }
 
-function Requests(){const{state,role,commit,event,live}=useWorkspace();const[requestType,setRequestType]=useState('All');const[filter,setFilter]=useState('All'),[selected,setSelected]=useState<RequestItem|null>(null),[decision,setDecision]=useState('Approved');async function decide(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected||!['Approver','Admin'].includes(role))return;const note=String(new FormData(e.currentTarget).get('note')).trim();if(!note)return;if(await commit(s=>{const request=s.requests.find(r=>r.id===selected.id)!;if(request.status!=='Pending')throw new Error('This request has already been decided.');const record=s.records.find(r=>r.id===request.recordId)!;request.status=decision as 'Approved'|'Rejected';request.decision=note;record.status=decision==='Rejected'?'Verified':request.type==='Refund'?'Refunded':request.type==='Discharge'?'Discharged':'Released';event(s,record.id,`${request.type} ${decision.toLowerCase()} · ${note}`)},{type:'decide',recordId:selected.recordId,requestId:selected.id,decision,note,eligibilityConfirmed:new FormData(e.currentTarget).get('eligibility')==='on'}))setSelected(null)}return <Card><CardHeader><CardTitle>Release, refund & discharge</CardTitle><CardDescription>{pendingRequests(state.requests).length} pending requests. Institutions request from a verified record; approvers record the decision.</CardDescription></CardHeader><CardContent><select aria-label="Filter request type" className="workspace-select mb-5 mr-3" value={requestType} onChange={e=>setRequestType(e.target.value)}>{['All','Release','Refund','Discharge'].map(t=><option key={t}>{t}</option>)}</select><select aria-label="Filter requests" className="workspace-select mb-5" value={filter} onChange={e=>setFilter(e.target.value)}>{['All','Pending','Approved','Rejected'].map(s=><option key={s}>{s}</option>)}</select><div className="space-y-4">{state.requests.filter(r=>(requestType==='All'||r.type===requestType)&&(filter==='All'||r.status===filter)).sort((a,b)=>a.date.localeCompare(b.date)).map(req=><div key={req.id} className="rounded-lg border p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><a className="text-sm font-medium hover:underline" href={`#instrument/${req.recordId}`}>{state.records.find(r=>r.id===req.recordId)?.institution}</a><p className="mt-1 text-xs text-muted-foreground">{req.id} · {req.type} · {formatDate(req.date)} · Submitted {ageDays(req.date)} days ago</p></div><StatusTag status={req.status}/></div><p className="my-3 text-sm text-muted-foreground">{req.reason}</p>{req.decision&&<p className="text-sm">Decision: {req.decision}</p>}{req.status==='Pending'&&['Approver','Admin'].includes(role)&&<div className="flex gap-3">{['Approved','Rejected'].map(d=><Button key={d} size="sm" variant={d==='Approved'?'default':'outline'} onClick={()=>{setSelected(req);setDecision(d)}}>{d==='Approved'?'Approve request':'Reject request'}</Button>)}</div>}</div>)}{!state.requests.some(r=>filter==='All'||r.status===filter)&&<Empty>No requests in this category.</Empty>}</div>{selected&&<Modal title={`${decision==='Approved'?'Approve':'Reject'} ${selected.type.toLowerCase()} request`} close={()=>setSelected(null)}><form onSubmit={decide} className="space-y-4"><p className="text-sm text-muted-foreground">{live?'Record an authorized administrative decision. Funds are not transferred automatically.':'This records a demo decision. No funds are transferred.'}</p>{live&&decision==='Approved'&&<label className="flex items-start gap-2 text-sm"><input name="eligibility" type="checkbox" required/>I have checked the applicable release conditions and supporting evidence.</label>}<Field label="Decision notes"><textarea name="note" required className="workspace-textarea"/></Field><Button type="submit">Record decision</Button></form></Modal>}</CardContent></Card>}
+function Requests() {
+  const {state,role,commit,event,live,notify} = useWorkspace();
+  const [requestType,setRequestType] = useState('All');
+  const [filter,setFilter] = useState('All');
+  const [selected,setSelected] = useState<RequestItem|null>(null);
+  const [decision,setDecision] = useState('Approved');
+  const [query,setQuery] = useState('');
+  const records = new Map(state.records.map(record=>[record.id,record]));
+  const rows = state.requests.filter(request =>
+    (requestType==='All'||request.type===requestType) &&
+    (filter==='All'||request.status===filter) &&
+    searchMatches([request.id,request.recordId,records.get(request.recordId)?.institution,request.reason,request.decision].join(' '),query)
+  ).sort((a,b)=>a.date.localeCompare(b.date));
+  async function decide(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!selected||!['Approver','Admin'].includes(role))return;const note=String(new FormData(e.currentTarget).get('note')).trim();if(!note)return;if(await commit(s=>{const request=s.requests.find(r=>r.id===selected.id)!;if(request.status!=='Pending')throw new Error('This request has already been decided.');const record=s.records.find(r=>r.id===request.recordId)!;request.status=decision as 'Approved'|'Rejected';request.decision=note;record.status=decision==='Rejected'?'Verified':request.type==='Refund'?'Refunded':request.type==='Discharge'?'Discharged':'Released';event(s,record.id,`${request.type} ${decision.toLowerCase()} · ${note}`)},{type:'decide',recordId:selected.recordId,requestId:selected.id,decision,note,eligibilityConfirmed:new FormData(e.currentTarget).get('eligibility')==='on'}))setSelected(null)}
+  return <Card>
+    <CardHeader>
+      <CardTitle>Release, refund & discharge</CardTitle>
+      <CardDescription>{pendingRequests(state.requests).length} pending requests. Institutions request from a verified record; approvers record the decision.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <Input className="mb-4" aria-label="Search requests" placeholder="Search request, instrument, institution or notes" value={query} onChange={event=>setQuery(event.target.value)}/>
+      <div className="mb-5 flex flex-wrap gap-3">
+        <Field label="Request type"><select aria-label="Filter request type" className="workspace-select" value={requestType} onChange={event=>setRequestType(event.target.value)}>{['All','Release','Refund','Discharge'].map(value=><option key={value}>{value}</option>)}</select></Field>
+        <Field label="Request status"><select aria-label="Filter requests" className="workspace-select" value={filter} onChange={event=>setFilter(event.target.value)}>{['All','Pending','Approved','Rejected'].map(value=><option key={value}>{value}</option>)}</select></Field>
+      </div>
+      <div className="space-y-4">
+        {rows.map(request=>{
+          const record = records.get(request.recordId);
+          return <article key={request.id} className="rounded-lg border p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <a className="text-sm font-medium hover:underline" href={`#instrument/${request.recordId}`}>{record?.institution}</a>
+                <p className="mt-1 text-xs text-muted-foreground">{request.id} · {request.type} · {formatDate(request.date)} · Submitted {ageDays(request.date)} days ago</p>
+              </div>
+              <StatusTag status={request.status}/>
+            </div>
+            <p className="my-3 text-sm text-muted-foreground">{request.reason}</p>
+            {request.decision&&<p className="text-sm">Decision: {request.decision}</p>}
+            {request.status==='Pending'&&['Approver','Admin'].includes(role)&&<div className="mt-3 flex flex-wrap gap-3">
+              {['Approved','Rejected'].map(value=><Button key={value} size="sm" variant={value==='Approved'?'default':'outline'} onClick={()=>{setSelected(request);setDecision(value)}}>{value==='Approved'?'Approve request':'Reject request'}</Button>)}
+            </div>}
+          </article>;
+        })}
+        {!rows.length&&<Empty>No requests match these filters.</Empty>}
+      </div>
+      {selected&&<Modal title={`${decision==='Approved'?'Approve':'Reject'} ${selected.type.toLowerCase()} request`} close={()=>setSelected(null)}><form onSubmit={decide} className="space-y-4"><p className="text-sm text-muted-foreground">{live?'Record an authorized administrative decision. Funds are not transferred automatically.':'This records a demo decision. No funds are transferred.'}</p>{live&&decision==='Approved'&&<label className="flex items-start gap-2 text-sm"><input name="eligibility" type="checkbox" required/>I have checked the applicable release conditions and supporting evidence.</label>}<Field label="Decision notes"><textarea name="note" required className="workspace-textarea"/></Field><Button type="submit">Record decision</Button></form></Modal>}
+    </CardContent>
+  </Card>;
+}
 function Institutions(){const{state,live}=useWorkspace();const[q,setQ]=useState('');const groups=[...new Map(state.records.map(r=>[live?r.institutionId||r.institution:r.institution,{id:r.institutionId||r.institution,name:r.institution}])).values()].filter(n=>n.name.toLowerCase().includes(q.toLowerCase()));return <Card><CardHeader><CardTitle>Institutions</CardTitle><CardDescription>Institution-wise deposits, records and pending work.</CardDescription></CardHeader><CardContent><Input aria-label="Search institutions" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search institution name" className="mb-5"/><div className="space-y-4">{groups.map(({id,name:n})=>{const rows=state.records.filter(r=>live?r.institutionId===id:r.institution===n);return <a key={id} href={live?`#records?institutionId=${encodeURIComponent(id)}`:`#records?institution=${encodeURIComponent(n)}`} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent"><div><h3 className="text-sm font-medium">{n}</h3><p className="mt-1 text-xs text-muted-foreground">{rows.length} instruments · {rows.filter(r=>['Discrepancy','Awaiting verification'].includes(r.status)).length} pending reviews</p></div><span className="text-sm tabular-nums">{money(sumDeposits(activeDeposits(rows))/100)}</span></a>})}{!groups.length&&<Empty>No institutions found. Submitting an instrument adds its institution here.</Empty>}</div></CardContent></Card>}
 export function Audit({recordId}:{recordId?:string}) {
   const {state,live,notify} = useWorkspace();

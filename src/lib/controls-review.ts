@@ -422,11 +422,11 @@ export function searchControlResults(
   });
 }
 
-export function institutionKey(record: Instrument) {
+export function institutionKey(record: Pick<Instrument, 'institutionId' | 'institution'>) {
   return record.institutionId ? 'id:' + record.institutionId : 'name:' + record.institution;
 }
 
-export function reviewInstitutions(records: readonly Instrument[]) {
+export function reviewInstitutions(records: readonly Pick<Instrument, 'institutionId' | 'institution'>[]) {
   const names = new Map(records.map(record => [institutionKey(record), record.institution]));
   const counts = new Map<string, number>();
   for (const name of names.values()) counts.set(name, (counts.get(name) ?? 0) + 1);

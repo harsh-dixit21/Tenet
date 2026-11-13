@@ -1,5 +1,6 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
 import {comparableValueDelta, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
 import {Button} from '../ui/button';
 import {download, today, useWorkspace} from './store';
@@ -11,6 +12,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [institution, setInstitution] = useState('');
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState('');
   const [error, setError] = useState('');
@@ -43,7 +45,9 @@ export function SnapshotComparison() {
   const grouped = compared.map(row => group ? {...row, changes: row.changes.filter(change => change.group === group)} : row);
   const searched = grouped.filter(({record}) => searchMatches(
     [record.id, record.institution, record.bank, record.branch, record.number].join(' '), query));
-  const visible = searched.filter(row => row.changes.length);
+  const institutions = useMemo(() => reviewInstitutions(current.records), [current.records]);
+  const scoped = searched.filter(({record}) => !institution || institutionKey(record) === institution);
+  const visible = scoped.filter(row => row.changes.length);
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -77,10 +81,16 @@ export function SnapshotComparison() {
             {groups.map(name => <option key={name}>{name}</option>)}
           </select>
         </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm">Institution
+          <select className="workspace-select w-full" value={institution} onChange={event => setInstitution(event.target.value)}>
+            <option value="">All institutions</option>
+            {institutions.map(option => <option key={option.key} value={option.key}>{option.label}</option>)}
+          </select>
+        </label>
       </div>
       <p className="border-y py-3 text-sm" role="status">{visible.length} changed instruments</p>
       <p className="text-sm tabular-nums">
-        Comparable face value change <strong>{comparableValueDelta(compared).toLocaleString('en-IN')} paise</strong>
+        Comparable face value change <strong>{comparableValueDelta(scoped).toLocaleString('en-IN')} paise</strong>
       </p>
       <p className="text-sm text-muted-foreground">{unavailableBaselineCount(baseline, current)} baseline instruments unavailable in the current scope</p>
       {!visible.length && <p className="text-sm text-muted-foreground">No differences found in the current scope.</p>}

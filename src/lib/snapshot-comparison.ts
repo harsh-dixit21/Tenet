@@ -1,5 +1,5 @@
 import type {Instrument, RequestItem} from '../components/workspace/store.ts';
-import {amountMinor} from './workspace-utils.ts';
+import {activeDeposits, amountMinor} from './workspace-utils.ts';
 
 const statuses = [
   'Draft', 'Awaiting verification', 'Discrepancy', 'Verified', 'Release requested',
@@ -164,7 +164,10 @@ type Comparison = {
   label: string;
   value(record: SnapshotRecord, referenceDay: string): Change['before'];
 };
+const activeStatuses = new Set(activeDeposits(statuses.map(status => ({status} as Instrument))).map(record => record.status));
+
 const comparisons: Comparison[] = [
+  {id: 'active', group: 'Lifecycle', label: 'Active exposure', value: record => activeStatuses.has(record.status) ? 'Active' : 'Outside active exposure'},
   {id: 'rejected-requests', group: 'Requests', label: 'Rejected closure requests', value: record => record.requests.filter(request => request.status === 'Rejected').length},
   {id: 'approved-requests', group: 'Requests', label: 'Approved closure requests', value: record => record.requests.filter(request => request.status === 'Approved').length},
   {id: 'pending-requests', group: 'Requests', label: 'Pending closure requests', value: record => record.requests.filter(request => request.status === 'Pending').length},

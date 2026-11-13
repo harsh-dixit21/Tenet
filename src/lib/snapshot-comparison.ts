@@ -222,7 +222,7 @@ export function unavailableBaselineCount(baseline: WorkspaceSnapshot, current: W
   return baseline.records.filter(record => !currentIds.has(record.id)).length;
 }
 
-function requestChanges(before: SnapshotRecord, after: SnapshotRecord): Change[] {
+function requestStatusChanges(before: SnapshotRecord, after: SnapshotRecord): Change[] {
   const earlier = new Map(before.requests.map(request => [request.id, request]));
   return after.requests.flatMap(request => {
     const previous = earlier.get(request.id);
@@ -235,4 +235,23 @@ function requestChanges(before: SnapshotRecord, after: SnapshotRecord): Change[]
       after: request.status,
     }];
   });
+}
+
+function requestChanges(before: SnapshotRecord, after: SnapshotRecord): Change[] {
+  const changes = requestStatusChanges(before, after);
+  const priorIds = new Set(before.requests.map(request => request.id));
+  const currentIds = new Set(after.requests.map(request => request.id));
+  for (const request of after.requests) {
+    if (!priorIds.has(request.id)) changes.push({
+      id: 'request-added:' + request.id, group: 'Requests', label: request.type + ' request ' + request.id,
+      before: 'Absent', after: request.status,
+    });
+  }
+  for (const request of before.requests) {
+    if (!currentIds.has(request.id)) changes.push({
+      id: 'request-unavailable:' + request.id, group: 'Requests', label: request.type + ' request ' + request.id,
+      before: request.status, after: 'Unavailable',
+    });
+  }
+  return changes;
 }

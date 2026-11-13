@@ -1,7 +1,7 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
-import {createSnapshot, readSnapshot, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {compareSnapshots, createSnapshot, readSnapshot, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
 import {Button} from '../ui/button';
-import {download, useWorkspace} from './store';
+import {download, today, useWorkspace} from './store';
 
 export function SnapshotComparison() {
   const {state, live} = useWorkspace();
@@ -33,6 +33,11 @@ export function SnapshotComparison() {
     }
   }
 
+  const referenceDay = today();
+  const compared = useMemo(() => baseline ? compareSnapshots(baseline, current, referenceDay) : [],
+    [baseline, current, referenceDay]);
+  const visible = compared.filter(row => row.changes.length);
+
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
@@ -53,5 +58,21 @@ export function SnapshotComparison() {
     {baseline && <p className="text-sm text-muted-foreground">
       Baseline captured {new Date(baseline.capturedAt).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
     </p>}
+    {baseline && <div className="space-y-3">
+      <p className="border-y py-3 text-sm" role="status">{visible.length} changed instruments</p>
+      {!visible.length && <p className="text-sm text-muted-foreground">No differences found in the current scope.</p>}
+      <div className="divide-y">{visible.map(row => <article key={row.record.id} className="min-w-0 space-y-2 py-3">
+        <h3 className="break-words text-sm font-medium">
+          <a className="underline underline-offset-4" href={'#instrument/' + encodeURIComponent(row.record.id)}>{row.record.id}</a>
+          <span className="ml-2 text-muted-foreground">{row.record.institution}</span>
+        </h3>
+        <dl className="grid gap-2 text-sm sm:grid-cols-2">
+          {row.changes.map(change => <div key={change.id} className="min-w-0 break-words">
+            <dt className="font-medium">{change.label}</dt>
+            <dd className="text-muted-foreground">{change.before === '' ? '—' : change.before} → {change.after === '' ? '—' : change.after}</dd>
+          </div>)}
+        </dl>
+      </article>)}</div>
+    </div>}
   </section>;
 }

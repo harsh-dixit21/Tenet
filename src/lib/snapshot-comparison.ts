@@ -145,3 +145,38 @@ export function readSnapshot(raw: string, mode: WorkspaceSnapshot['mode']): Work
   });
   return {version: 1, format: 'tenet-workspace-baseline', capturedAt, mode, records};
 }
+
+export type Change = {
+  id: string;
+  group: string;
+  label: string;
+  before: string | number;
+  after: string | number;
+};
+export type RecordComparison = {
+  record: SnapshotRecord;
+  previous?: SnapshotRecord;
+  changes: Change[];
+};
+type Comparison = {
+  id: string;
+  group: string;
+  label: string;
+  value(record: SnapshotRecord, referenceDay: string): Change['before'];
+};
+const comparisons: Comparison[] = [
+];
+
+export function compareSnapshots(baseline: WorkspaceSnapshot, current: WorkspaceSnapshot, referenceDay: string) {
+  const previous = new Map(baseline.records.map(record => [record.id, record]));
+  return current.records.map((record): RecordComparison => {
+    const old = previous.get(record.id);
+    if (!old) return {record, changes: [{id: 'added', group: 'Membership', label: 'New in current snapshot', before: 'Absent', after: 'Present'}]};
+    const changes = comparisons.flatMap(comparison => {
+      const before = comparison.value(old, referenceDay);
+      const after = comparison.value(record, referenceDay);
+      return before === after ? [] : [{id: comparison.id, group: comparison.group, label: comparison.label, before, after}];
+    });
+    return {record, previous: old, changes};
+  });
+}

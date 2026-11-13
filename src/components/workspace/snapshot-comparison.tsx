@@ -1,5 +1,6 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
 import {comparableValueDelta, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {paginate} from '@/lib/portfolio';
 import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
 import {Button} from '../ui/button';
@@ -12,6 +13,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [page, setPage] = useState(1);
   const [sort, setSort] = useState<'instrument' | 'value'>('instrument');
   const [includeUnchanged, setIncludeUnchanged] = useState(false);
   const [institution, setInstitution] = useState('');
@@ -56,6 +58,8 @@ export function SnapshotComparison() {
       return (sort === 'value' ? valueChange(b) - valueChange(a) : 0) || a.record.id.localeCompare(b.record.id);
     });
 
+  const pagination = paginate(visible, page, 10);
+
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
@@ -80,29 +84,29 @@ export function SnapshotComparison() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <label className="flex min-w-0 flex-col gap-2 text-sm">Search current instruments
           <input className="workspace-select w-full" type="search" value={query}
-            onChange={event => setQuery(event.target.value)}/>
+            onChange={event => { setQuery(event.target.value); setPage(1); }}/>
         </label>
         <label className="flex min-w-0 flex-col gap-2 text-sm">Change group
-          <select className="workspace-select w-full" value={group} onChange={event => setGroup(event.target.value)}>
+          <select className="workspace-select w-full" value={group} onChange={event => { setGroup(event.target.value); setPage(1); }}>
             <option value="">All change groups</option>
             {groups.map(name => <option key={name}>{name}</option>)}
           </select>
         </label>
         <label className="flex min-w-0 flex-col gap-2 text-sm">Institution
-          <select className="workspace-select w-full" value={institution} onChange={event => setInstitution(event.target.value)}>
+          <select className="workspace-select w-full" value={institution} onChange={event => { setInstitution(event.target.value); setPage(1); }}>
             <option value="">All institutions</option>
             {institutions.map(option => <option key={option.key} value={option.key}>{option.label}</option>)}
           </select>
         </label>
         <label className="flex min-w-0 flex-col gap-2 text-sm">Sort comparison
-          <select className="workspace-select w-full" value={sort} onChange={event => setSort(event.target.value === 'value' ? 'value' : 'instrument')}>
+          <select className="workspace-select w-full" value={sort} onChange={event => { setSort(event.target.value === 'value' ? 'value' : 'instrument'); setPage(1); }}>
             <option value="instrument">Instrument ID</option>
             <option value="value">Largest face value change</option>
           </select>
         </label>
       </div>
       <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
-        <input type="checkbox" checked={includeUnchanged} onChange={event => setIncludeUnchanged(event.target.checked)}/>
+        <input type="checkbox" checked={includeUnchanged} onChange={event => { setIncludeUnchanged(event.target.checked); setPage(1); }}/>
         Include unchanged instruments
       </label>
       <p className="border-y py-3 text-sm" role="status">{visible.length} matching instruments</p>
@@ -111,7 +115,7 @@ export function SnapshotComparison() {
       </p>
       <p className="text-sm text-muted-foreground">{unavailableBaselineCount(baseline, current)} baseline instruments unavailable in the current scope</p>
       {!visible.length && <p className="text-sm text-muted-foreground">No differences found in the current scope.</p>}
-      <div className="divide-y">{visible.map(row => <article key={row.record.id} className="min-w-0 space-y-2 py-3">
+      <div className="divide-y">{pagination.items.map(row => <article key={row.record.id} className="min-w-0 space-y-2 py-3">
         <h3 className="break-words text-sm font-medium">
           <a className="underline underline-offset-4" href={'#instrument/' + encodeURIComponent(row.record.id)}>{row.record.id}</a>
           <span className="ml-2 text-muted-foreground">{row.record.institution}</span>
@@ -124,6 +128,17 @@ export function SnapshotComparison() {
           </div>)}
         </dl>
       </article>)}</div>
+      {visible.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm tabular-nums text-muted-foreground" role="status">
+          {pagination.start}–{pagination.end} of {visible.length} instruments
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" disabled={pagination.page <= 1}
+            onClick={() => setPage(pagination.page - 1)}>Previous</Button>
+          <Button variant="outline" disabled={pagination.page >= pagination.pages}
+            onClick={() => setPage(pagination.page + 1)}>Next</Button>
+        </div>
+      </div>}
     </div>}
   </section>;
 }

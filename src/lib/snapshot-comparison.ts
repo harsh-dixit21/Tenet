@@ -165,6 +165,7 @@ type Comparison = {
   value(record: SnapshotRecord, referenceDay: string): Change['before'];
 };
 const comparisons: Comparison[] = [
+  {id: 'instrument-copy-version', group: 'Evidence', label: 'Instrument copy version', value: record => record.documentVersions['Instrument copy'] ?? 0},
   {id: 'document-count', group: 'Evidence', label: 'Evidence entries', value: record => record.documentCount},
   {id: 'relation', group: 'Lifecycle', label: 'Successor classification', value: record => record.relation},
   {id: 'parent', group: 'Lifecycle', label: 'Predecessor', value: record => record.parent},

@@ -263,3 +263,12 @@ export function comparableValueDelta(rows: readonly RecordComparison[]): bigint 
   }
   return total;
 }
+
+export function comparisonCsvRows(rows: readonly RecordComparison[]) {
+  return [
+    ['Instrument ID', 'Institution', 'Change group', 'Field', 'Baseline', 'Current'],
+    ...rows.flatMap(({record, changes}) => changes.length
+      ? changes.map(change => [record.id, record.institution, change.group, change.label, change.before, change.after])
+      : [[record.id, record.institution, '', 'Unchanged', '', '']]),
+  ];
+}

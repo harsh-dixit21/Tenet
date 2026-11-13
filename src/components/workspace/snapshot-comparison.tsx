@@ -1,10 +1,10 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
-import {comparableValueDelta, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {comparableValueDelta, comparisonCsvRows, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
 import {paginate} from '@/lib/portfolio';
 import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
 import {Button} from '../ui/button';
-import {download, today, useWorkspace} from './store';
+import {csv, download, today, useWorkspace} from './store';
 
 export function SnapshotComparison() {
   const {state, live} = useWorkspace();
@@ -109,6 +109,10 @@ export function SnapshotComparison() {
         <input type="checkbox" checked={includeUnchanged} onChange={event => { setIncludeUnchanged(event.target.checked); setPage(1); }}/>
         Include unchanged instruments
       </label>
+      <Button variant="outline" disabled={!visible.length}
+        onClick={() => download('tenet-snapshot-changes.csv', csv(comparisonCsvRows(visible)))}>
+        Export changes CSV
+      </Button>
       <p className="border-y py-3 text-sm" role="status">{visible.length} matching instruments</p>
       <p className="text-sm tabular-nums">
         Comparable face value change <strong>{comparableValueDelta(scoped).toLocaleString('en-IN')} paise</strong>

@@ -70,3 +70,78 @@ export function createSnapshot(
     }),
   };
 }
+
+function object(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid baseline structure.');
+  return value as Record<string, unknown>;
+}
+function text(value: unknown, required = false): string {
+  if (typeof value !== 'string' || value.length > 1024 || (required && !value.trim())) {
+    throw new Error('Invalid text field in the baseline.');
+  }
+  return value;
+}
+function integer(value: unknown, minimum: number, maximum: number): number {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new Error('Invalid numeric field in the baseline.');
+  }
+  return value;
+}
+function member<T extends string>(value: unknown, choices: readonly T[]): T {
+  const matching = choices.find(choice => choice === value);
+  if (matching === undefined) throw new Error('Unsupported value in the baseline.');
+  return matching;
+}
+function list(value: unknown, maximum: number): unknown[] {
+  if (!Array.isArray(value) || value.length > maximum) throw new Error('Baseline exceeds its supported collection limits.');
+  return value;
+}
+
+export function readSnapshot(raw: string, mode: WorkspaceSnapshot['mode']): WorkspaceSnapshot {
+  if (raw.length > 8 * 1024 * 1024) throw new Error('Choose a baseline of 8 MB or less.');
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(raw);
+  } catch {
+    throw new Error('The baseline is not valid JSON.');
+  }
+  const value = object(decoded);
+  if (value.version !== 1 || value.format !== 'tenet-workspace-baseline') {
+    throw new Error('Choose a supported Tenet workspace baseline.');
+  }
+  if (value.mode !== mode) throw new Error('Choose a baseline from the same workspace mode.');
+  const capturedAt = text(value.capturedAt, true);
+  if (!Number.isFinite(Date.parse(capturedAt))) throw new Error('The baseline capture time is invalid.');
+  const recordIds = new Set<string>();
+  const requestIds = new Set<string>();
+  const records = list(value.records, 500).map(rawRecord => {
+    const row = object(rawRecord);
+    const id = text(row.id, true);
+    if (recordIds.has(id)) throw new Error('The baseline repeats an instrument ID.');
+    recordIds.add(id);
+    const documentVersions: SnapshotRecord['documentVersions'] = {};
+    const versions = object(row.documentVersions);
+    for (const kind of documentKinds) {
+      if (Object.hasOwn(versions, kind)) documentVersions[kind] = integer(versions[kind], 1, Number.MAX_SAFE_INTEGER);
+    }
+    const requests = list(row.requests, 500).map(rawRequest => {
+      const request = object(rawRequest);
+      const requestId = text(request.id, true);
+      if (requestIds.has(requestId)) throw new Error('The baseline repeats a request ID.');
+      requestIds.add(requestId);
+      if (requestIds.size > 500) throw new Error('Baseline exceeds its supported request limit.');
+      return {id: requestId, type: member(request.type, ['Release', 'Refund', 'Discharge'] as const),
+        status: member(request.status, requestStates)};
+    });
+    return {
+      id, institution: text(row.institution), institutionId: text(row.institutionId),
+      bank: text(row.bank), branch: text(row.branch), number: text(row.number),
+      amountMinor: integer(row.amountMinor, 0, 1e14),
+      issued: text(row.issued), maturity: text(row.maturity), status: member(row.status, statuses),
+      parent: text(row.parent), relation: member(row.relation, ['', 'Renewal', 'Replacement'] as const),
+      documentCount: integer(row.documentCount, 0, 100), documentVersions,
+      verifiedDate: text(row.verifiedDate), requests,
+    };
+  });
+  return {version: 1, format: 'tenet-workspace-baseline', capturedAt, mode, records};
+}

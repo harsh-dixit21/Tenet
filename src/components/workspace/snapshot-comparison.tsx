@@ -1,6 +1,6 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
 import {comparableValueDelta, comparisonCsvRows, comparisonReport, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
-import {paginate} from '@/lib/portfolio';
+import {paginate, validDate} from '@/lib/portfolio';
 import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
 import {Button} from '../ui/button';
@@ -13,6 +13,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [reportingDate, setReportingDate] = useState('');
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<'instrument' | 'value'>('instrument');
   const [includeUnchanged, setIncludeUnchanged] = useState(false);
@@ -33,6 +34,7 @@ export function SnapshotComparison() {
     setInstitution('');
     setQuery('');
     setIncludeUnchanged(false);
+    setReportingDate('');
   }
 
   async function openBaseline(event: ChangeEvent<HTMLInputElement>) {
@@ -58,7 +60,7 @@ export function SnapshotComparison() {
     }
   }
 
-  const referenceDay = today();
+  const referenceDay = validDate(reportingDate) ? reportingDate : today();
   const compared = useMemo(() => baseline ? compareSnapshots(baseline, current, referenceDay) : [],
     [baseline, current, referenceDay]);
   const groups = [...new Set(compared.flatMap(row => row.changes.map(change => change.group)))].sort();
@@ -122,6 +124,13 @@ export function SnapshotComparison() {
           </select>
         </label>
       </div>
+      <label className="flex max-w-xs flex-col gap-2 text-sm">Maturity comparison date
+        <input type="date" className="workspace-select w-full" value={referenceDay} onChange={event => {
+          setReportingDate(event.target.value);
+          setGroup('');
+          setPage(1);
+        }}/>
+      </label>
       <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
         <input type="checkbox" checked={includeUnchanged} onChange={event => { setIncludeUnchanged(event.target.checked); setPage(1); }}/>
         Include unchanged instruments

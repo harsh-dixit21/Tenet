@@ -1,5 +1,5 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
-import {compareSnapshots, createSnapshot, readSnapshot, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
 import {Button} from '../ui/button';
 import {download, today, useWorkspace} from './store';
 
@@ -60,6 +60,7 @@ export function SnapshotComparison() {
     </p>}
     {baseline && <div className="space-y-3">
       <p className="border-y py-3 text-sm" role="status">{visible.length} changed instruments</p>
+      <p className="text-sm text-muted-foreground">{unavailableBaselineCount(baseline, current)} baseline instruments unavailable in the current scope</p>
       {!visible.length && <p className="text-sm text-muted-foreground">No differences found in the current scope.</p>}
       <div className="divide-y">{visible.map(row => <article key={row.record.id} className="min-w-0 space-y-2 py-3">
         <h3 className="break-words text-sm font-medium">

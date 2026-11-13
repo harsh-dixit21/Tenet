@@ -180,3 +180,8 @@ export function compareSnapshots(baseline: WorkspaceSnapshot, current: Workspace
     return {record, previous: old, changes};
   });
 }
+
+export function unavailableBaselineCount(baseline: WorkspaceSnapshot, current: WorkspaceSnapshot) {
+  const currentIds = new Set(current.records.map(record => record.id));
+  return baseline.records.filter(record => !currentIds.has(record.id)).length;
+}

@@ -1,5 +1,5 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
-import {comparableValueDelta, comparisonCsvRows, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {comparableValueDelta, comparisonCsvRows, comparisonReport, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
 import {paginate} from '@/lib/portfolio';
 import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
@@ -109,10 +109,16 @@ export function SnapshotComparison() {
         <input type="checkbox" checked={includeUnchanged} onChange={event => { setIncludeUnchanged(event.target.checked); setPage(1); }}/>
         Include unchanged instruments
       </label>
-      <Button variant="outline" disabled={!visible.length}
-        onClick={() => download('tenet-snapshot-changes.csv', csv(comparisonCsvRows(visible)))}>
-        Export changes CSV
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" disabled={!visible.length}
+          onClick={() => download('tenet-snapshot-changes.csv', csv(comparisonCsvRows(visible)))}>
+          Export changes CSV
+        </Button>
+        <Button variant="outline" disabled={!visible.length} onClick={() =>
+          download('tenet-snapshot-changes.json', JSON.stringify(comparisonReport(visible, baseline, referenceDay), null, 2), 'application/json')}>
+          Export changes JSON
+        </Button>
+      </div>
       <p className="border-y py-3 text-sm" role="status">{visible.length} matching instruments</p>
       <p className="text-sm tabular-nums">
         Comparable face value change <strong>{comparableValueDelta(scoped).toLocaleString('en-IN')} paise</strong>

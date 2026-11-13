@@ -272,3 +272,15 @@ export function comparisonCsvRows(rows: readonly RecordComparison[]) {
       : [[record.id, record.institution, '', 'Unchanged', '', '']]),
   ];
 }
+
+export function comparisonReport(rows: readonly RecordComparison[], baseline: WorkspaceSnapshot, referenceDay: string) {
+  return {
+    format: 'tenet-snapshot-comparison',
+    version: 1,
+    baselineCapturedAt: baseline.capturedAt,
+    mode: baseline.mode,
+    referenceDay,
+    comparableValueDeltaMinor: comparableValueDelta(rows).toString(),
+    instruments: rows.map(({record, changes}) => ({id: record.id, institution: record.institution, changes})),
+  };
+}

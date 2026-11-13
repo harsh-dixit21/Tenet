@@ -165,7 +165,7 @@ type Comparison = {
   label: string;
   value(record: SnapshotRecord, referenceDay: string): Change['before'];
 };
-const activeStatuses = new Set(activeDeposits(statuses.map(status => ({status} as Instrument))).map(record => record.status));
+const activeStatuses = new Set(activeDeposits(statuses.map(status => ({status}))).map(record => record.status));
 
 function maturityWindow(record: SnapshotRecord, referenceDay: string) {
   const remaining = daysBetween(record.maturity, referenceDay);
@@ -254,4 +254,12 @@ function requestChanges(before: SnapshotRecord, after: SnapshotRecord): Change[]
     });
   }
   return changes;
+}
+
+export function comparableValueDelta(rows: readonly RecordComparison[]): bigint {
+  let total = 0n;
+  for (const {record, previous} of rows) {
+    if (previous) total += BigInt(record.amountMinor) - BigInt(previous.amountMinor);
+  }
+  return total;
 }

@@ -6,7 +6,7 @@ export function byteSize(bytes:number){if(!Number.isFinite(bytes)||bytes<0)retur
 export function latestDocuments(docs:DocumentItem[]){return docs.filter(d=>!docs.some(other=>other.kind===d.kind&&other.version>d.version));}
 export function missingDocuments(record:Instrument){return requiredKinds.filter(kind=>!latestDocuments(record.docs).some(d=>d.kind===kind));}
 export function completeness(record:Instrument){return Math.round((requiredKinds.length-missingDocuments(record).length)/requiredKinds.length*100);}
-export function activeDeposits(records:Instrument[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}
+export function activeDeposits<T extends Pick<Instrument,'status'>>(records:readonly T[]){return records.filter(r=>r.status!=='Draft'&&!terminalStatuses.has(r.status));}
 export function amountMinor(record:Pick<Instrument,'amount'|'amountMinor'>){const n=record.amountMinor??Math.round(record.amount*100);return Number.isSafeInteger(n)?n:0;}
 export function sumDeposits(records:Instrument[]){return records.reduce((total,r)=>total+amountMinor(r),0);}
 export function statusSummary(records:Instrument[]){return ['Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'].map(label=>{const rows=records.filter(r=>r.status===label);return {label,count:rows.length,amountMinor:sumDeposits(rows)};});}

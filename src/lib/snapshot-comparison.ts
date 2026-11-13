@@ -213,11 +213,26 @@ export function compareSnapshots(baseline: WorkspaceSnapshot, current: Workspace
       const after = comparison.value(record, referenceDay);
       return before === after ? [] : [{id: comparison.id, group: comparison.group, label: comparison.label, before, after}];
     });
-    return {record, previous: old, changes};
+    return {record, previous: old, changes: [...changes, ...requestChanges(old, record)]};
   });
 }
 
 export function unavailableBaselineCount(baseline: WorkspaceSnapshot, current: WorkspaceSnapshot) {
   const currentIds = new Set(current.records.map(record => record.id));
   return baseline.records.filter(record => !currentIds.has(record.id)).length;
+}
+
+function requestChanges(before: SnapshotRecord, after: SnapshotRecord): Change[] {
+  const earlier = new Map(before.requests.map(request => [request.id, request]));
+  return after.requests.flatMap(request => {
+    const previous = earlier.get(request.id);
+    if (!previous || previous.status === request.status) return [];
+    return [{
+      id: 'request-status:' + request.id,
+      group: 'Requests',
+      label: request.type + ' request ' + request.id,
+      before: previous.status,
+      after: request.status,
+    }];
+  });
 }

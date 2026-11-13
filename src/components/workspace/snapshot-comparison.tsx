@@ -10,6 +10,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [group, setGroup] = useState('');
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
   const loadSequence = useRef(0);
@@ -36,7 +37,9 @@ export function SnapshotComparison() {
   const referenceDay = today();
   const compared = useMemo(() => baseline ? compareSnapshots(baseline, current, referenceDay) : [],
     [baseline, current, referenceDay]);
-  const visible = compared.filter(row => row.changes.length);
+  const groups = [...new Set(compared.flatMap(row => row.changes.map(change => change.group)))].sort();
+  const grouped = compared.map(row => group ? {...row, changes: row.changes.filter(change => change.group === group)} : row);
+  const visible = grouped.filter(row => row.changes.length);
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -59,6 +62,14 @@ export function SnapshotComparison() {
       Baseline captured {new Date(baseline.capturedAt).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
     </p>}
     {baseline && <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <label className="flex min-w-0 flex-col gap-2 text-sm">Change group
+          <select className="workspace-select w-full" value={group} onChange={event => setGroup(event.target.value)}>
+            <option value="">All change groups</option>
+            {groups.map(name => <option key={name}>{name}</option>)}
+          </select>
+        </label>
+      </div>
       <p className="border-y py-3 text-sm" role="status">{visible.length} changed instruments</p>
       <p className="text-sm tabular-nums">
         Comparable face value change <strong>{comparableValueDelta(compared).toLocaleString('en-IN')} paise</strong>

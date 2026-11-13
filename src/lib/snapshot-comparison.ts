@@ -165,6 +165,7 @@ type Comparison = {
   value(record: SnapshotRecord, referenceDay: string): Change['before'];
 };
 const comparisons: Comparison[] = [
+  {id: 'rejected-requests', group: 'Requests', label: 'Rejected closure requests', value: record => record.requests.filter(request => request.status === 'Rejected').length},
   {id: 'approved-requests', group: 'Requests', label: 'Approved closure requests', value: record => record.requests.filter(request => request.status === 'Approved').length},
   {id: 'pending-requests', group: 'Requests', label: 'Pending closure requests', value: record => record.requests.filter(request => request.status === 'Pending').length},
   {id: 'request-count', group: 'Requests', label: 'Closure requests', value: record => record.requests.length},

@@ -23,6 +23,18 @@ export function SnapshotComparison() {
   const [reading, setReading] = useState(false);
   const loadSequence = useRef(0);
 
+  function clearBaseline() {
+    loadSequence.current++;
+    setBaseline(null);
+    setReading(false);
+    setError('');
+    setPage(1);
+    setGroup('');
+    setInstitution('');
+    setQuery('');
+    setIncludeUnchanged(false);
+  }
+
   async function openBaseline(event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget;
     const file = input.files?.[0];
@@ -34,7 +46,11 @@ export function SnapshotComparison() {
     try {
       if (file.size > 8 * 1024 * 1024) throw new Error('Choose a baseline of 8 MB or less.');
       const snapshot = readSnapshot(await file.text(), mode);
-      if (sequence === loadSequence.current) setBaseline(snapshot);
+      if (sequence === loadSequence.current) {
+        setBaseline(snapshot);
+        setGroup('');
+        setPage(1);
+      }
     } catch (failure) {
       if (sequence === loadSequence.current) setError(failure instanceof Error ? failure.message : 'Could not open the baseline.');
     } finally {
@@ -75,6 +91,7 @@ export function SnapshotComparison() {
       Open baseline JSON
       <input type="file" accept=".json,application/json" className="workspace-select max-w-full" onChange={openBaseline}/>
     </label>
+    {(baseline || reading) && <Button variant="outline" onClick={clearBaseline}>Clear baseline</Button>}
     {reading && <p role="status" className="text-sm">Reading baseline…</p>}
     {error && <p role="alert" className="text-sm">{error}</p>}
     {baseline && <p className="text-sm text-muted-foreground">

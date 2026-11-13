@@ -1,5 +1,6 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
 import {comparableValueDelta, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {searchMatches} from '@/lib/workspace-utils';
 import {Button} from '../ui/button';
 import {download, today, useWorkspace} from './store';
 
@@ -10,6 +11,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [query, setQuery] = useState('');
   const [group, setGroup] = useState('');
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
@@ -39,7 +41,9 @@ export function SnapshotComparison() {
     [baseline, current, referenceDay]);
   const groups = [...new Set(compared.flatMap(row => row.changes.map(change => change.group)))].sort();
   const grouped = compared.map(row => group ? {...row, changes: row.changes.filter(change => change.group === group)} : row);
-  const visible = grouped.filter(row => row.changes.length);
+  const searched = grouped.filter(({record}) => searchMatches(
+    [record.id, record.institution, record.bank, record.branch, record.number].join(' '), query));
+  const visible = searched.filter(row => row.changes.length);
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -63,6 +67,10 @@ export function SnapshotComparison() {
     </p>}
     {baseline && <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <label className="flex min-w-0 flex-col gap-2 text-sm">Search current instruments
+          <input className="workspace-select w-full" type="search" value={query}
+            onChange={event => setQuery(event.target.value)}/>
+        </label>
         <label className="flex min-w-0 flex-col gap-2 text-sm">Change group
           <select className="workspace-select w-full" value={group} onChange={event => setGroup(event.target.value)}>
             <option value="">All change groups</option>

@@ -12,6 +12,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [includeUnchanged, setIncludeUnchanged] = useState(false);
   const [institution, setInstitution] = useState('');
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState('');
@@ -47,7 +48,8 @@ export function SnapshotComparison() {
     [record.id, record.institution, record.bank, record.branch, record.number].join(' '), query));
   const institutions = useMemo(() => reviewInstitutions(current.records), [current.records]);
   const scoped = searched.filter(({record}) => !institution || institutionKey(record) === institution);
-  const visible = scoped.filter(row => row.changes.length);
+  const unchanged = new Set(compared.filter(row => !row.changes.length).map(row => row.record.id));
+  const visible = scoped.filter(row => row.changes.length || (includeUnchanged && unchanged.has(row.record.id)));
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -88,7 +90,11 @@ export function SnapshotComparison() {
           </select>
         </label>
       </div>
-      <p className="border-y py-3 text-sm" role="status">{visible.length} changed instruments</p>
+      <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
+        <input type="checkbox" checked={includeUnchanged} onChange={event => setIncludeUnchanged(event.target.checked)}/>
+        Include unchanged instruments
+      </label>
+      <p className="border-y py-3 text-sm" role="status">{visible.length} matching instruments</p>
       <p className="text-sm tabular-nums">
         Comparable face value change <strong>{comparableValueDelta(scoped).toLocaleString('en-IN')} paise</strong>
       </p>
@@ -99,6 +105,7 @@ export function SnapshotComparison() {
           <a className="underline underline-offset-4" href={'#instrument/' + encodeURIComponent(row.record.id)}>{row.record.id}</a>
           <span className="ml-2 text-muted-foreground">{row.record.institution}</span>
         </h3>
+        {!row.changes.length && <p className="text-sm text-muted-foreground">Unchanged</p>}
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           {row.changes.map(change => <div key={change.id} className="min-w-0 break-words">
             <dt className="font-medium">{change.label}</dt>

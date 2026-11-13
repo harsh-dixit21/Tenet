@@ -1,5 +1,8 @@
 import {useMemo, useRef, useState, type ChangeEvent} from 'react';
-import {comparableValueDelta, comparisonCsvRows, comparisonReport, compareSnapshots, createSnapshot, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot} from '@/lib/snapshot-comparison';
+import {
+  comparableValueDelta, comparisonCsvRows, comparisonReport, compareSnapshots, createSnapshot,
+  inActiveComparison, readSnapshot, unavailableBaselineCount, type WorkspaceSnapshot,
+} from '@/lib/snapshot-comparison';
 import {paginate, validDate} from '@/lib/portfolio';
 import {institutionKey, reviewInstitutions} from '@/lib/controls-review';
 import {searchMatches} from '@/lib/workspace-utils';
@@ -16,6 +19,7 @@ export function SnapshotComparison() {
   const [reportingDate, setReportingDate] = useState('');
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<'instrument' | 'value'>('instrument');
+  const [activeOnly, setActiveOnly] = useState(false);
   const [includeUnchanged, setIncludeUnchanged] = useState(false);
   const [institution, setInstitution] = useState('');
   const [query, setQuery] = useState('');
@@ -34,7 +38,9 @@ export function SnapshotComparison() {
     setInstitution('');
     setQuery('');
     setIncludeUnchanged(false);
+    setActiveOnly(false);
     setReportingDate('');
+    setSort('instrument');
   }
 
   async function openBaseline(event: ChangeEvent<HTMLInputElement>) {
@@ -64,11 +70,13 @@ export function SnapshotComparison() {
   const compared = useMemo(() => baseline ? compareSnapshots(baseline, current, referenceDay) : [],
     [baseline, current, referenceDay]);
   const groups = [...new Set(compared.flatMap(row => row.changes.map(change => change.group)))].sort();
-  const grouped = compared.map(row => group ? {...row, changes: row.changes.filter(change => change.group === group)} : row);
+  const selectedGroup = groups.includes(group) ? group : '';
+  const grouped = compared.map(row => selectedGroup ? {...row, changes: row.changes.filter(change => change.group === selectedGroup)} : row);
   const searched = grouped.filter(({record}) => searchMatches(
     [record.id, record.institution, record.bank, record.branch, record.number].join(' '), query));
   const institutions = useMemo(() => reviewInstitutions(current.records), [current.records]);
-  const scoped = searched.filter(({record}) => !institution || institutionKey(record) === institution);
+  const scoped = searched.filter(row =>
+    (!institution || institutionKey(row.record) === institution) && (!activeOnly || inActiveComparison(row)));
   const unchanged = new Set(compared.filter(row => !row.changes.length).map(row => row.record.id));
   const visible = scoped.filter(row => row.changes.length || (includeUnchanged && unchanged.has(row.record.id)))
     .sort((a, b) => {
@@ -77,6 +85,7 @@ export function SnapshotComparison() {
     });
 
   const pagination = paginate(visible, page, 10);
+  const unavailable = baseline ? unavailableBaselineCount(baseline, current) : 0;
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -89,24 +98,33 @@ export function SnapshotComparison() {
         Download current baseline
       </Button>
     </div>
-    <label className="flex max-w-full flex-col gap-2 text-sm">
+    <div className="flex flex-wrap items-end gap-3">
+    <label className="flex min-w-0 max-w-full flex-1 flex-col gap-2 text-sm sm:max-w-md">
       Open baseline JSON
       <input type="file" accept=".json,application/json" className="workspace-select max-w-full" onChange={openBaseline}/>
     </label>
     {(baseline || reading) && <Button variant="outline" onClick={clearBaseline}>Clear baseline</Button>}
+    </div>
     {reading && <p role="status" className="text-sm">Reading baseline…</p>}
     {error && <p role="alert" className="text-sm">{error}</p>}
     {baseline && <p className="text-sm text-muted-foreground">
       Baseline captured {new Date(baseline.capturedAt).toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}
     </p>}
     {baseline && <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <label className="flex min-w-0 flex-col gap-2 text-sm">Search current instruments
+      <div className="flex flex-wrap gap-x-6 gap-y-2 border-y py-3 text-sm" role="status">
+        <p><strong>{visible.length}</strong> matching instruments</p>
+        <p>Comparable face value change <strong className="tabular-nums">{comparableValueDelta(visible).toLocaleString('en-IN')} paise</strong></p>
+        {unavailable > 0 && <p className="text-muted-foreground">
+          {unavailable} baseline {unavailable === 1 ? 'instrument' : 'instruments'} unavailable in the current scope
+        </p>}
+      </div>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+        <label className="col-span-2 flex min-w-0 flex-col gap-2 text-sm sm:col-span-1">Search current instruments
           <input className="workspace-select w-full" type="search" value={query}
             onChange={event => { setQuery(event.target.value); setPage(1); }}/>
         </label>
         <label className="flex min-w-0 flex-col gap-2 text-sm">Change group
-          <select className="workspace-select w-full" value={group} onChange={event => { setGroup(event.target.value); setPage(1); }}>
+          <select className="workspace-select w-full" value={selectedGroup} onChange={event => { setGroup(event.target.value); setPage(1); }}>
             <option value="">All change groups</option>
             {groups.map(name => <option key={name}>{name}</option>)}
           </select>
@@ -123,18 +141,24 @@ export function SnapshotComparison() {
             <option value="value">Largest face value change</option>
           </select>
         </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm">Maturity comparison date
+          <input type="date" className="workspace-select w-full min-w-0" value={reportingDate} onChange={event => {
+            setReportingDate(event.target.value);
+            setGroup('');
+            setPage(1);
+          }}/>
+        </label>
       </div>
-      <label className="flex max-w-xs flex-col gap-2 text-sm">Maturity comparison date
-        <input type="date" className="workspace-select w-full" value={referenceDay} onChange={event => {
-          setReportingDate(event.target.value);
-          setGroup('');
-          setPage(1);
-        }}/>
-      </label>
+      <div className="flex flex-wrap items-center gap-x-4">
       <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
         <input type="checkbox" checked={includeUnchanged} onChange={event => { setIncludeUnchanged(event.target.checked); setPage(1); }}/>
         Include unchanged instruments
       </label>
+      <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
+        <input type="checkbox" checked={activeOnly} onChange={event => { setActiveOnly(event.target.checked); setPage(1); }}/>
+        Active in either snapshot
+      </label>
+      </div>
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" disabled={!visible.length}
           onClick={() => download('tenet-snapshot-changes.csv', csv(comparisonCsvRows(visible)))}>
@@ -145,12 +169,7 @@ export function SnapshotComparison() {
           Export changes JSON
         </Button>
       </div>
-      <p className="border-y py-3 text-sm" role="status">{visible.length} matching instruments</p>
-      <p className="text-sm tabular-nums">
-        Comparable face value change <strong>{comparableValueDelta(scoped).toLocaleString('en-IN')} paise</strong>
-      </p>
-      <p className="text-sm text-muted-foreground">{unavailableBaselineCount(baseline, current)} baseline instruments unavailable in the current scope</p>
-      {!visible.length && <p className="text-sm text-muted-foreground">No differences found in the current scope.</p>}
+      {!visible.length && <p className="text-sm text-muted-foreground">No instruments match the current comparison filters.</p>}
       <div className="divide-y">{pagination.items.map(row => <article key={row.record.id} className="min-w-0 space-y-2 py-3">
         <h3 className="break-words text-sm font-medium">
           <a className="underline underline-offset-4" href={'#instrument/' + encodeURIComponent(row.record.id)}>{row.record.id}</a>

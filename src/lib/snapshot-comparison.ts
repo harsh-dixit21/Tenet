@@ -284,3 +284,7 @@ export function comparisonReport(rows: readonly RecordComparison[], baseline: Wo
     instruments: rows.map(({record, changes}) => ({id: record.id, institution: record.institution, changes})),
   };
 }
+
+export function inActiveComparison({record, previous}: RecordComparison) {
+  return activeStatuses.has(record.status) || (previous !== undefined && activeStatuses.has(previous.status));
+}

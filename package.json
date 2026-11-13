@@ -16,6 +16,7 @@
     "check:size": "node scripts/check-size.mjs",
     "check:series": "node scripts/check-series.mjs",
     "check:dist": "node scripts/check-dist.mjs",
+    "test:snapshots": "node --experimental-strip-types --test tests/snapshot-comparison.test.ts",
     "test:controls": "node --experimental-strip-types --test tests/controls-review.test.ts",
     "test:planner": "node --experimental-strip-types --test tests/review-planner.test.ts",
     "test:portfolio": "node --experimental-strip-types --test tests/portfolio.test.ts",

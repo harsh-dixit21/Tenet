@@ -177,6 +177,7 @@ function maturityWindow(record: SnapshotRecord, referenceDay: string) {
 }
 
 const comparisons: Comparison[] = [
+  {id: 'document-completeness', group: 'Evidence', label: 'Required evidence categories present', value: record => ['Instrument copy', 'Bank letter', 'Declaration'].filter(kind => Object.hasOwn(record.documentVersions, kind)).length},
   {id: 'maturity-window', group: 'Dates', label: 'Maturity window', value: maturityWindow},
   {id: 'active', group: 'Lifecycle', label: 'Active exposure', value: record => activeStatuses.has(record.status) ? 'Active' : 'Outside active exposure'},
   {id: 'rejected-requests', group: 'Requests', label: 'Rejected closure requests', value: record => record.requests.filter(request => request.status === 'Rejected').length},

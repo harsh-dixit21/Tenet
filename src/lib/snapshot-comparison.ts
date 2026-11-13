@@ -165,6 +165,7 @@ type Comparison = {
   value(record: SnapshotRecord, referenceDay: string): Change['before'];
 };
 const comparisons: Comparison[] = [
+  {id: 'status', group: 'Lifecycle', label: 'Lifecycle state', value: record => record.status},
 ];
 
 export function compareSnapshots(baseline: WorkspaceSnapshot, current: WorkspaceSnapshot, referenceDay: string) {

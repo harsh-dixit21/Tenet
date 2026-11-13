@@ -1,5 +1,6 @@
 import type {Instrument, RequestItem} from '../components/workspace/store.ts';
 import {activeDeposits, amountMinor} from './workspace-utils.ts';
+import {daysBetween} from './portfolio.ts';
 
 const statuses = [
   'Draft', 'Awaiting verification', 'Discrepancy', 'Verified', 'Release requested',
@@ -166,7 +167,17 @@ type Comparison = {
 };
 const activeStatuses = new Set(activeDeposits(statuses.map(status => ({status} as Instrument))).map(record => record.status));
 
+function maturityWindow(record: SnapshotRecord, referenceDay: string) {
+  const remaining = daysBetween(record.maturity, referenceDay);
+  if (!Number.isFinite(remaining)) return 'Date unavailable';
+  if (remaining < 0) return 'Overdue';
+  if (remaining <= 7) return 'Within 7 days';
+  if (remaining <= 30) return 'Within 30 days';
+  return 'Beyond 30 days';
+}
+
 const comparisons: Comparison[] = [
+  {id: 'maturity-window', group: 'Dates', label: 'Maturity window', value: maturityWindow},
   {id: 'active', group: 'Lifecycle', label: 'Active exposure', value: record => activeStatuses.has(record.status) ? 'Active' : 'Outside active exposure'},
   {id: 'rejected-requests', group: 'Requests', label: 'Rejected closure requests', value: record => record.requests.filter(request => request.status === 'Rejected').length},
   {id: 'approved-requests', group: 'Requests', label: 'Approved closure requests', value: record => record.requests.filter(request => request.status === 'Approved').length},

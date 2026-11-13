@@ -12,6 +12,7 @@ export function SnapshotComparison() {
     [state.records, state.requests, mode]);
 
   const [baseline, setBaseline] = useState<WorkspaceSnapshot | null>(null);
+  const [sort, setSort] = useState<'instrument' | 'value'>('instrument');
   const [includeUnchanged, setIncludeUnchanged] = useState(false);
   const [institution, setInstitution] = useState('');
   const [query, setQuery] = useState('');
@@ -49,7 +50,11 @@ export function SnapshotComparison() {
   const institutions = useMemo(() => reviewInstitutions(current.records), [current.records]);
   const scoped = searched.filter(({record}) => !institution || institutionKey(record) === institution);
   const unchanged = new Set(compared.filter(row => !row.changes.length).map(row => row.record.id));
-  const visible = scoped.filter(row => row.changes.length || (includeUnchanged && unchanged.has(row.record.id)));
+  const visible = scoped.filter(row => row.changes.length || (includeUnchanged && unchanged.has(row.record.id)))
+    .sort((a, b) => {
+      const valueChange = (row: typeof a) => row.previous ? Math.abs(row.record.amountMinor - row.previous.amountMinor) : 0;
+      return (sort === 'value' ? valueChange(b) - valueChange(a) : 0) || a.record.id.localeCompare(b.record.id);
+    });
 
   return <section aria-label="Workspace snapshot comparison" className="min-w-0 space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -87,6 +92,12 @@ export function SnapshotComparison() {
           <select className="workspace-select w-full" value={institution} onChange={event => setInstitution(event.target.value)}>
             <option value="">All institutions</option>
             {institutions.map(option => <option key={option.key} value={option.key}>{option.label}</option>)}
+          </select>
+        </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm">Sort comparison
+          <select className="workspace-select w-full" value={sort} onChange={event => setSort(event.target.value === 'value' ? 'value' : 'instrument')}>
+            <option value="instrument">Instrument ID</option>
+            <option value="value">Largest face value change</option>
           </select>
         </label>
       </div>

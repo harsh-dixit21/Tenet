@@ -25,6 +25,13 @@ try{
  await deny(()=>command(reviewer,{type:'verify',recordId:record.id,evidence}),'Incomplete documents block verification');
  for(const kind of ['Instrument copy','Bank letter','Declaration'])await command(institution,{type:'uploadDocument',recordId:record.id,document:{name:'evidence.txt',kind,data:'data:text/plain;base64,'+Buffer.from('Private evidence for emulator QA.').toString('base64')}});
  state=(await call(institution,'getWorkspace')).state;check(state.records[0].docs.length===3,'Private documents stored and version metadata committed');
+ const upload={type:'uploadDocument',recordId:record.id,document:{name:'replay.txt',kind:'Other',data:'data:text/plain;base64,aGVsbG8='}};
+ const uploadId=randomUUID();
+ await command(institution,upload,uploadId);
+ await command(institution,upload,uploadId);
+ const replay=(await call(institution,'getWorkspace')).state;
+ check(replay.records[0].docs.filter(doc=>doc.kind==='Other').length===1,'Completed upload replay keeps exactly one evidence version');
+ await deny(()=>command(institution,upload),'Fresh command cannot duplicate identical evidence');
  const file=await call(institution,'downloadDocument',{recordId:record.id,documentId:state.records[0].docs[0].id});check(file.data.includes('base64,'),'Authenticated document download succeeds');
  await command(reviewer,{type:'correct',recordId:record.id,note:'Check branch details'});await command(institution,{type:'resubmit',recordId:record.id});
  const verified=await command(reviewer,{type:'verify',recordId:record.id,evidence});check(verified.state.records[0].status==='Verified','Correction, resubmission and verification complete');

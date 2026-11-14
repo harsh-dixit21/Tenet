@@ -41,7 +41,17 @@ export const executeCommand=callable(async req=>{
  if(!['saveInstrument','settings','uploadDocument','verify','correct','resubmit','request','decide'].includes(c.type))
    throw new HttpsError('invalid-argument','Unknown workflow command.');
  const recordId=c.type==='saveInstrument'?id(c.id):c.type==='settings'?null:id(c.recordId);if(c.type==='request')id(c.requestId);if(c.type==='decide')id(c.requestId);
- const actor=await profile(uid);let uploaded;
+ const actor=await profile(uid);
+ const receiptRef=db.doc(`users/${uid}/commands/${commandId}`);
+ function validateReceipt(receipt){
+   if(receipt.type!==c.type||receipt.recordId!==recordId||(receipt.fingerprint&&receipt.fingerprint!==fingerprint))
+     throw new HttpsError('already-exists','This command ID was used for another action.');
+ }
+ if(c.type==='uploadDocument'){
+   const existing=await receiptRef.get();
+   if(existing.exists){validateReceipt(existing.data());return {profile:actor,state:await snapshot(actor)};}
+ }
+ let uploaded;
  if(c.type==='uploadDocument'){
    const file=fileData(c.document);const r=(await db.doc(`instruments/${recordId}`).get()).data();canRead(actor,r);if(actor.role!=='Institution'||!['Draft','Awaiting verification','Discrepancy'].includes(r.status))throw new HttpsError('permission-denied','Document upload is not permitted.');
    const sha256=documentChecksum(file.bytes);
@@ -49,7 +59,7 @@ export const executeCommand=callable(async req=>{
  }
  try{
  await db.runTransaction(async tx=>{
-   const receipt=db.doc(`users/${uid}/commands/${commandId}`);const [receiptSnap,userSnap]=await Promise.all([tx.get(receipt),tx.get(db.doc(`users/${uid}`))]);if(receiptSnap.exists){if(receiptSnap.data().type!==c.type||receiptSnap.data().recordId!==recordId||receiptSnap.data().fingerprint&&receiptSnap.data().fingerprint!==fingerprint)throw new HttpsError('already-exists','This command ID was used for another action.');return;}
+   const receipt=receiptRef;const [receiptSnap,userSnap]=await Promise.all([tx.get(receipt),tx.get(db.doc(`users/${uid}`))]);if(receiptSnap.exists){validateReceipt(receiptSnap.data());return false;}
    const user={...userSnap.data(),uid};const recordRef=recordId?db.doc(`instruments/${recordId}`):null,record=recordRef?(await tx.get(recordRef)).data():null;
    const parentId=record?.parent||c.parent,parentRef=parentId?db.doc(`instruments/${id(parentId)}`):null,parent=parentRef?(await tx.get(parentRef)).data():null;
    const requestRef=c.type==='request'||c.type==='decide'?db.doc(`requests/${c.requestId}`):null,request=requestRef?(await tx.get(requestRef)).data():null;if(c.type==='request'&&request)throw new HttpsError('already-exists','Request ID already exists.');

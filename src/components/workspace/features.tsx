@@ -352,7 +352,7 @@ function Alerts() {
     }}>Mark filtered read</Button>
     <div className="space-y-3">{rows.map(alert=><div key={alert.id} className="flex flex-wrap justify-between gap-3 rounded-md border p-4">
       <div><p className="text-sm font-medium">{alert.title}{!state.readAlerts.includes(alert.id)&&<span className="ml-2 text-xs text-amber-300">Unread</span>}</p><p className="mt-1 text-xs text-muted-foreground">{alert.detail}</p></div>
-      <div className="flex items-center gap-2"><Button asChild variant="outline" size="sm"><a href={`#instrument/${alert.recordId}`}>Open record</a></Button>{!state.readAlerts.includes(alert.id)&&<Button variant="ghost" size="sm" onClick={()=>commit(s=>{s.readAlerts.push(alert.id)},{type:'markAlertsRead',ids:[...state.readAlerts,alert.id]})}>Mark read</Button>}</div>
+      <div className="flex items-center gap-2"><Button asChild variant="outline" size="sm"><a href={`#instrument/${alert.recordId}`}>Open record</a></Button>{!state.readAlerts.includes(alert.id)&&<Button variant="ghost" size="sm" onClick={()=>commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,alert.id])].slice(-2000)},{type:'markAlertsRead',ids:[alert.id]})}>Mark read</Button>}</div>
     </div>)}{!rows.length&&<Empty>No alerts match these filters.</Empty>}</div>
   </CardContent></Card>;
 }

@@ -38,6 +38,8 @@ function fileData(payload){
 }
 export const executeCommand=callable(async req=>{
  const c=req.data?.command;if(!c||typeof c!=='object'||Array.isArray(c))throw new HttpsError('invalid-argument','Workflow command is required.');const commandId=id(req.data.commandId,'command ID'),uid=req.auth.uid,fingerprint=commandFingerprint(c);
+ if(!['saveInstrument','settings','uploadDocument','verify','correct','resubmit','request','decide'].includes(c.type))
+   throw new HttpsError('invalid-argument','Unknown workflow command.');
  const recordId=c.type==='saveInstrument'?id(c.id):c.type==='settings'?null:id(c.recordId);if(c.type==='request')id(c.requestId);if(c.type==='decide')id(c.requestId);
  const actor=await profile(uid);let uploaded;
  if(c.type==='uploadDocument'){

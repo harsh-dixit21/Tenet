@@ -44,7 +44,8 @@ export const executeCommand=callable(async req=>{
  const actor=await profile(uid);let uploaded;
  if(c.type==='uploadDocument'){
    const file=fileData(c.document);const r=(await db.doc(`instruments/${recordId}`).get()).data();canRead(actor,r);if(actor.role!=='Institution'||!['Draft','Awaiting verification','Discrepancy'].includes(r.status))throw new HttpsError('permission-denied','Document upload is not permitted.');
-   const documentId=randomUUID(),path=`instruments/${recordId}/${documentId}`;await getStorage().bucket().file(path).save(file.bytes,{resumable:false,metadata:{contentType:file.mime,metadata:{sha256:documentChecksum(file.bytes)}}});uploaded={id:documentId,path,name:file.name,kind:file.kind,size:file.bytes.length,mime:file.mime,sha256:documentChecksum(file.bytes),data:''};
+   const sha256=documentChecksum(file.bytes);
+   const documentId=randomUUID(),path=`instruments/${recordId}/${documentId}`;await getStorage().bucket().file(path).save(file.bytes,{resumable:false,metadata:{contentType:file.mime,metadata:{sha256}}});uploaded={id:documentId,path,name:file.name,kind:file.kind,size:file.bytes.length,mime:file.mime,sha256,data:''};
  }
  try{
  await db.runTransaction(async tx=>{

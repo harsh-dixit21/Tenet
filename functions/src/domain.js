@@ -36,7 +36,7 @@ export function applyCommand({actor,command,record,parent,request,now=new Date()
     owns(actor,r);
     if(type==='uploadDocument'){
       requireRole(actor,'Institution');if(!['Draft','Awaiting verification','Discrepancy'].includes(r.status))fail('Documents are locked after verification.');if(r.docs.length>=100)fail('This instrument has reached its document-version limit.');
-      if(!document)fail('Document upload is missing.');const version=Math.max(0,...r.docs.filter(d=>d.kind===document.kind).map(d=>d.version))+1;r.docs.push({...document,version,date:day(now)});
+      if(!document)fail('Document upload is missing.');if(document.sha256&&r.docs.some(existing=>existing.kind===document.kind&&existing.sha256===document.sha256))fail('This file is already attached in this category.','already-exists');const version=Math.max(0,...r.docs.filter(d=>d.kind===document.kind).map(d=>d.version))+1;r.docs.push({...document,version,date:day(now)});
     }else if(type==='verify'){
       requireRole(actor,'Reviewer','Admin');if(r.status!=='Awaiting verification')fail('Only a submitted instrument can be verified.');if(r.createdBy===actor.uid)fail('You cannot verify your own submission.','permission-denied');if(!complete(r))fail('Instrument copy, bank letter and declaration are required.');
       const e=c.evidence||{};const verifiedDate=date(e.date,'Verification date');if(verifiedDate<r.issued)fail('Verification date cannot precede issue date.');if(verifiedDate>day(now))fail('Verification date cannot be in the future.');r.evidence={source:text(e.source,'Verification source',200),reference:text(e.reference,'Evidence reference',200),note:text(e.note,'Review note'),date:verifiedDate};r.status='Verified';r.verifiedBy=actor.uid;r.verifiedAt=now;delete r.correction;

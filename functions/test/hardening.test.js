@@ -1,3 +1,4 @@
+import {generateAlerts} from '../src/alerts.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {applyCommand,DomainError,text,date,uniqueKey} from '../src/domain.js';
@@ -53,4 +54,12 @@ test('Matching evidence bytes are rejected in the same category and allowed acro
   assert.throws(()=>applyCommand({actor,record,command,document,now}),error=>error.code==='already-exists');
   const result=applyCommand({actor,record,command,document:{...document,kind:'Other'},now});
   assert.equal(result.record.docs.length,4);
+});
+
+test('Pending reminders count Asia/Kolkata calendar dates across midnight',()=>{
+  const record={...pending(),updatedAt:'2026-10-30T18:30:00Z'};
+  const settings={reminderDays:0,escalationDays:1};
+  assert.equal(generateAlerts([record],settings,'2026-10-31T18:29:59Z').some(alert=>alert.title==='Pending action overdue'),false);
+  assert.equal(generateAlerts([record],settings,'2026-10-31T18:30:00Z').some(alert=>alert.title==='Pending action overdue'),true);
+  assert.doesNotThrow(()=>generateAlerts([{...record,updatedAt:undefined}],settings,now));
 });

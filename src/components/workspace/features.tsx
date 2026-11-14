@@ -347,8 +347,8 @@ function Alerts() {
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-reminders.csv',csv([['Instrument','Reminder','Details','Read'],...rows.map(a=>[a.recordId,a.title,a.detail,state.readAlerts.includes(a.id)?'Yes':'No'])]))}>Export filtered reminders</Button>
     <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setType('All');setAlertInstitution('All');setAlertStatus('All');setUnread(false);setAlertSort('Original')}}>Reset alert filters</Button>
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.some(a=>!state.readAlerts.includes(a.id))} onClick={()=>{
-      const ids=[...new Set([...state.readAlerts,...rows.map(a=>a.id)])];
-      void commit(s=>{s.readAlerts=ids},{type:'markAlertsRead',ids});
+      const ids=rows.filter(a=>!state.readAlerts.includes(a.id)).map(a=>a.id);
+      void commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,...ids])].slice(-2000)},{type:'markAlertsRead',ids});
     }}>Mark filtered read</Button>
     <div className="space-y-3">{rows.map(alert=><div key={alert.id} className="flex flex-wrap justify-between gap-3 rounded-md border p-4">
       <div><p className="text-sm font-medium">{alert.title}{!state.readAlerts.includes(alert.id)&&<span className="ml-2 text-xs text-amber-300">Unread</span>}</p><p className="mt-1 text-xs text-muted-foreground">{alert.detail}</p></div>

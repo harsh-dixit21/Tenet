@@ -1,6 +1,7 @@
 import {day,closed} from './domain.js';
 export function generateAlerts(records,settings,now=new Date().toISOString()){
- const difference=date=>Math.ceil((Date.parse(date)-Date.parse(day(now)))/86400000);
+ const today = Date.parse(day(now));
+ const difference=date=>Math.ceil((Date.parse(date)-today)/86400000);
  return records.flatMap(r=>{
   if(closed(r)||r.status==='Draft')return [];
   const alerts=[];

@@ -38,3 +38,9 @@ test('An unenrolled institution cannot read a legacy record without an assignmen
   const record={...pending(),institutionId:undefined};
   assert.throws(()=>applyCommand({actor:{...actor,institutionId:undefined},record,command:{type:'uploadDocument'},now}),error=>error.code==='permission-denied');
 });
+
+test('Existing standalone drafts cannot acquire a predecessor through an edit',()=>{
+  const record={...pending(),id:'DRAFT',status:'Draft'};
+  const parent=verified();
+  assert.throws(()=>applyCommand({actor,record,parent,command:{...save,id:record.id,parent:parent.id,relation:'Renewal'},now}), /predecessor link/);
+});

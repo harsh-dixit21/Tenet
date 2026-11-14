@@ -325,7 +325,7 @@ export function Audit({recordId}:{recordId?:string}) {
 }
 export function getAlerts(state:ReturnType<typeof useWorkspace>['state']){if(state.serverAlerts)return state.serverAlerts;return state.records.flatMap(r=>{if(terminal(r)||r.status==='Draft')return [];const alerts:{id:string;recordId:string;title:string;detail:string}[]=[];if(days(r.maturity)<=state.settings.reminderDays)alerts.push({id:`maturity-${r.id}-${r.maturity}`,recordId:r.id,title:days(r.maturity)<0?'Maturity overdue':'Approaching maturity',detail:`${r.institution} · ${formatDate(r.maturity)}`});if(r.status==='Discrepancy')alerts.push({id:`correction-${r.id}-${r.correction}`,recordId:r.id,title:'Correction required',detail:r.correction||r.institution});const last=state.events.find(e=>e.recordId===r.id);if(last&&['Awaiting verification','Release requested'].includes(r.status)&&days(last.date.slice(0,10))<=-state.settings.escalationDays)alerts.push({id:`overdue-${r.id}-${last.id}`,recordId:r.id,title:'Pending action overdue',detail:`${r.institution} · ${r.status}`});return alerts})}
 function Alerts() {
-  const {state,commit,event} = useWorkspace();
+  const {state,commit,event,busy} = useWorkspace();
   const alerts = getAlerts(state);
   const [unread,setUnread] = useState(false);
   const [query,setQuery] = useState('');
@@ -335,7 +335,7 @@ function Alerts() {
   const [type,setType] = useState('All');
   const rows = alerts.filter(alert => (alertInstitution==='All'||state.records.find(r=>r.id===alert.recordId)?.institution===alertInstitution) && (alertStatus==='All'||state.records.find(r=>r.id===alert.recordId)?.status===alertStatus) && (type==='All'||alert.title===type) && (!unread||!state.readAlerts.includes(alert.id)) && searchMatches(`${alert.title} ${alert.detail} ${alert.recordId}`,query)).sort((a,b)=>alertSort==='Unread first'?Number(state.readAlerts.includes(a.id))-Number(state.readAlerts.includes(b.id)):alertSort==='Instrument'?a.recordId.localeCompare(b.recordId):0);
   return <Card><CardHeader><div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Alerts & reminders</CardTitle>
-    <Button variant="outline" size="sm" onClick={()=>commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,...alerts.map(a=>a.id)])].slice(-2000);event(s,'workspace','All current alerts marked read')},{type:'markAlertsRead',ids:alerts.map(a=>a.id)})}>Mark all read</Button>
+    <Button variant="outline" size="sm" disabled={busy||!alerts.some(a=>!state.readAlerts.includes(a.id))} onClick={()=>commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,...alerts.map(a=>a.id)])].slice(-2000);event(s,'workspace','All current alerts marked read')},{type:'markAlertsRead',ids:alerts.map(a=>a.id)})}>Mark all read</Button>
   </div><CardDescription>In-app reminders use the thresholds in Settings.</CardDescription></CardHeader><CardContent>
     <Input className="mb-4" aria-label="Search alerts" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search reminder, instrument or institution"/>
     <div className="mb-4 flex flex-wrap gap-3"><label className="flex flex-col gap-2 text-sm">Reminder type<select aria-label="Reminder type" className="workspace-select" value={type} onChange={e=>setType(e.target.value)}><option>All</option>{[...new Set(alerts.map(a=>a.title))].sort().map(value=><option key={value}>{value}</option>)}</select></label></div>
@@ -346,13 +346,13 @@ function Alerts() {
     <p role="status" className="mb-4 text-sm text-muted-foreground">{rows.length} reminders match · {rows.filter(a=>!state.readAlerts.includes(a.id)).length} unread</p>
     <Button className="mb-4 mr-3" variant="outline" disabled={!rows.length} onClick={()=>download('tenet-reminders.csv',csv([['Instrument','Reminder','Details','Read'],...rows.map(a=>[a.recordId,a.title,a.detail,state.readAlerts.includes(a.id)?'Yes':'No'])]))}>Export filtered reminders</Button>
     <Button className="mb-4" variant="ghost" onClick={()=>{setQuery('');setType('All');setAlertInstitution('All');setAlertStatus('All');setUnread(false);setAlertSort('Original')}}>Reset alert filters</Button>
-    <Button className="mb-4 mr-3" variant="outline" disabled={!rows.some(a=>!state.readAlerts.includes(a.id))} onClick={()=>{
+    <Button className="mb-4 mr-3" variant="outline" disabled={busy||!rows.some(a=>!state.readAlerts.includes(a.id))} onClick={()=>{
       const ids=rows.filter(a=>!state.readAlerts.includes(a.id)).map(a=>a.id);
       void commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,...ids])].slice(-2000)},{type:'markAlertsRead',ids});
     }}>Mark filtered read</Button>
     <div className="space-y-3">{rows.map(alert=><div key={alert.id} className="flex flex-wrap justify-between gap-3 rounded-md border p-4">
       <div><p className="text-sm font-medium">{alert.title}{!state.readAlerts.includes(alert.id)&&<span className="ml-2 text-xs text-amber-300">Unread</span>}</p><p className="mt-1 text-xs text-muted-foreground">{alert.detail}</p></div>
-      <div className="flex items-center gap-2"><Button asChild variant="outline" size="sm"><a href={`#instrument/${alert.recordId}`}>Open record</a></Button>{!state.readAlerts.includes(alert.id)&&<Button variant="ghost" size="sm" onClick={()=>commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,alert.id])].slice(-2000)},{type:'markAlertsRead',ids:[alert.id]})}>Mark read</Button>}</div>
+      <div className="flex items-center gap-2"><Button asChild variant="outline" size="sm"><a href={`#instrument/${alert.recordId}`}>Open record</a></Button>{!state.readAlerts.includes(alert.id)&&<Button variant="ghost" size="sm" disabled={busy} onClick={()=>commit(s=>{s.readAlerts=[...new Set([...s.readAlerts,alert.id])].slice(-2000)},{type:'markAlertsRead',ids:[alert.id]})}>Mark read</Button>}</div>
     </div>)}{!rows.length&&<Empty>No alerts match these filters.</Empty>}</div>
   </CardContent></Card>;
 }

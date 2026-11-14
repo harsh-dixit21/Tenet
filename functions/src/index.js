@@ -84,7 +84,15 @@ export const executeCommand=callable(async req=>{
  const p=await profile(uid);return {profile:p,state:await snapshot(p)};
 });
 export const downloadDocument=callable(async req=>{const p=await profile(req.auth.uid),r=(await db.doc(`instruments/${id(req.data?.recordId)}`).get()).data();canRead(p,r);const documentId=id(req.data?.documentId);const doc=r.docs.find(d=>d.id===documentId);if(!doc?.path)throw new HttpsError('not-found','Document not found.');if(doc.path!==['instruments',r.id,doc.id].join('/'))throw new HttpsError('data-loss','The document storage reference is invalid.');const [buffer]=await getStorage().bucket().file(doc.path).download();if(doc.sha256&&documentChecksum(buffer)!==doc.sha256)throw new HttpsError('data-loss','The stored document failed its integrity check.');return {name:doc.name,data:`data:${doc.mime};base64,${buffer.toString('base64')}`}});
-export const markAlertsRead=callable(async req=>{await profile(req.auth.uid);const ids=alertIds(req.data?.ids);await db.doc(`alertReads/${req.auth.uid}`).set({ids:[...new Set(ids)]});const p=await profile(req.auth.uid);return {profile:p,state:await snapshot(p)}});
+export const markAlertsRead=callable(async req=>{await profile(req.auth.uid);
+ const ids=alertIds(req.data?.ids);
+ const ref=db.doc('alertReads/'+req.auth.uid);
+ await db.runTransaction(async tx=>{
+   const existing=(await tx.get(ref)).data()?.ids;
+   const previous=Array.isArray(existing)?existing.filter(value=>typeof value==='string'):[];
+   const updated=[...new Set([...previous.filter(value=>!ids.includes(value)),...ids])].slice(-2000);
+   tx.set(ref,{ids:updated});
+ });const p=await profile(req.auth.uid);return {profile:p,state:await snapshot(p)}});
 export const listUsers=callable(async req=>{if((await profile(req.auth.uid)).role!=='Admin')throw new HttpsError('permission-denied','Administrator access required.');return bounded(db.collection('users'))});
 export const assignUser=callable(async req=>{
  const uid=req.auth.uid,target=id(req.data?.uid,'user ID'),role=req.data?.role;if(target===uid||!['Institution','Reviewer','Approver','Admin'].includes(role)||typeof req.data.active!=='boolean')throw new HttpsError('invalid-argument','Select another user, a valid role and active state.');

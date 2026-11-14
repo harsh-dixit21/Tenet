@@ -9,7 +9,7 @@ export const closed=r=>['Released','Refunded','Discharged','Renewed','Replaced']
 export const requiredDocs=['Instrument copy','Bank letter','Declaration'];
 const complete=r=>requiredDocs.every(kind=>r.docs.some(d=>d.kind===kind));
 export const uniqueKey=(bank,number)=>createHash('sha256').update(bank.normalize('NFKC').trim().toLowerCase().replace(/\s+/g,' ')+'\0'+number.normalize('NFKC').trim().toLowerCase().replace(/\s+/g,'')).digest('hex');
-export function owns(actor,record){if(!record)fail('Instrument not found.','not-found');if(actor.role==='Institution'&&actor.institutionId!==record.institutionId)fail('This instrument belongs to another institution.','permission-denied')}
+export function owns(actor,record){if(!record)fail('Instrument not found.','not-found');if(actor.role==='Institution'&&(!actor.institutionId||actor.institutionId!==record.institutionId))fail('This instrument belongs to another institution.','permission-denied')}
 export function canRead(actor,record){owns(actor,record);requireRole(actor,'Institution','Reviewer','Approver','Admin')}
 export function applyCommand({actor,command,record,parent,request,now=new Date().toISOString(),document,successorExists=false}){
   if(typeof actor?.uid!=='string'||!actor.uid.trim())fail('A trusted actor identity is required.','permission-denied');

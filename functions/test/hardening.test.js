@@ -33,3 +33,8 @@ test('Test canonical base64 validation rejects malformed padding',()=>{assert.eq
 test('Test document checksums cover exact uploaded bytes',()=>{assert.equal(documentChecksum(Buffer.from('hello')),'2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824');assert.notEqual(documentChecksum(Buffer.from('hello')),documentChecksum(Buffer.from('hello ')));});
 test('Test payload limits count UTF-8 bytes rather than characters',()=>{assert.doesNotThrow(()=>assertPayloadSize({a:'😀'},12));denied(()=>assertPayloadSize({a:'😀'},8));});
 test('Test alert read marker validation and deduplication',()=>{assert.deepEqual(alertIds(['a','a','b']),['a','b']);for(const ids of [null,[''],['   '],[42],Array(2001).fill('a')])denied(()=>alertIds(ids));});
+
+test('An unenrolled institution cannot read a legacy record without an assignment',()=>{
+  const record={...pending(),institutionId:undefined};
+  assert.throws(()=>applyCommand({actor:{...actor,institutionId:undefined},record,command:{type:'uploadDocument'},now}),error=>error.code==='permission-denied');
+});

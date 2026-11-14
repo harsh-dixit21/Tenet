@@ -44,3 +44,13 @@ test('Existing standalone drafts cannot acquire a predecessor through an edit',(
   const parent=verified();
   assert.throws(()=>applyCommand({actor,record,parent,command:{...save,id:record.id,parent:parent.id,relation:'Renewal'},now}), /predecessor link/);
 });
+
+test('Matching evidence bytes are rejected in the same category and allowed across categories',()=>{
+  const record=pending();
+  const document={id:'new-doc',kind:'Instrument copy',sha256:documentChecksum(Buffer.from('evidence'))};
+  record.docs[0].sha256=document.sha256;
+  const command={type:'uploadDocument'};
+  assert.throws(()=>applyCommand({actor,record,command,document,now}),error=>error.code==='already-exists');
+  const result=applyCommand({actor,record,command,document:{...document,kind:'Other'},now});
+  assert.equal(result.record.docs.length,4);
+});

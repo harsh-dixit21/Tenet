@@ -58,7 +58,7 @@ export const executeCommand=callable(async req=>{
    const documentId=randomUUID(),path=`instruments/${recordId}/${documentId}`;await getStorage().bucket().file(path).save(file.bytes,{resumable:false,metadata:{contentType:file.mime,metadata:{sha256}}});uploaded={id:documentId,path,name:file.name,kind:file.kind,size:file.bytes.length,mime:file.mime,sha256,data:''};
  }
  try{
- await db.runTransaction(async tx=>{
+ const attached=await db.runTransaction(async tx=>{
    const receipt=receiptRef;const [receiptSnap,userSnap]=await Promise.all([tx.get(receipt),tx.get(db.doc(`users/${uid}`))]);if(receiptSnap.exists){validateReceipt(receiptSnap.data());return false;}
    const user={...userSnap.data(),uid};const recordRef=recordId?db.doc(`instruments/${recordId}`):null,record=recordRef?(await tx.get(recordRef)).data():null;
    const parentId=record?.parent||c.parent,parentRef=parentId?db.doc(`instruments/${id(parentId)}`):null,parent=parentRef?(await tx.get(parentRef)).data():null;
@@ -77,10 +77,10 @@ export const executeCommand=callable(async req=>{
    if(uniqueRef){tx.set(uniqueRef,{recordId});if(oldUniqueRef)tx.delete(oldUniqueRef);if(parentId)tx.set(successorRef,{recordId});}
    const auditId=randomUUID();tx.create(db.doc(`audit/${auditId}`),{...outcome.event,id:auditId});if(outcome.parent){const parentAudit=randomUUID();tx.create(db.doc(`audit/${parentAudit}`),{...outcome.event,id:parentAudit,recordId:outcome.parent.id,action:`${outcome.parent.status} by ${recordId}`})}
    tx.create(receipt,{type:c.type,recordId,fingerprint,createdAt:new Date().toISOString()});
+   return true;
  });
+ if(uploaded&&!attached)await getStorage().bucket().file(uploaded.path).delete({ignoreNotFound:true}).catch(()=>{});
  }catch(e){if(uploaded)await getStorage().bucket().file(uploaded.path).delete().catch(()=>{});throw e}
- // If a duplicate command uploaded another blob, remove that unattached copy.
- if(uploaded){const stored=(await db.doc(`instruments/${recordId}`).get()).data();if(!stored.docs.some(d=>d.id===uploaded.id))await getStorage().bucket().file(uploaded.path).delete().catch(()=>{})}
  const p=await profile(uid);return {profile:p,state:await snapshot(p)};
 });
 export const downloadDocument=callable(async req=>{const p=await profile(req.auth.uid),r=(await db.doc(`instruments/${id(req.data?.recordId)}`).get()).data();canRead(p,r);const doc=r.docs.find(d=>d.id===id(req.data?.documentId));if(!doc)throw new HttpsError('not-found','Document not found.');const [buffer]=await getStorage().bucket().file(doc.path).download();return {name:doc.name,data:`data:${doc.mime};base64,${buffer.toString('base64')}`}});

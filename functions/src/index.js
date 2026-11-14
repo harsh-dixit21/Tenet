@@ -37,7 +37,7 @@ function fileData(payload){
  if(!valid)throw new HttpsError('invalid-argument','The file content does not match its declared type.');return {name,kind,bytes,mime};
 }
 export const executeCommand=callable(async req=>{
- const c=req.data?.command;if(!c||typeof c!=='object')throw new HttpsError('invalid-argument','Workflow command is required.');const commandId=id(req.data.commandId,'command ID'),uid=req.auth.uid,fingerprint=commandFingerprint(c);
+ const c=req.data?.command;if(!c||typeof c!=='object'||Array.isArray(c))throw new HttpsError('invalid-argument','Workflow command is required.');const commandId=id(req.data.commandId,'command ID'),uid=req.auth.uid,fingerprint=commandFingerprint(c);
  const recordId=c.type==='saveInstrument'?id(c.id):c.type==='settings'?null:id(c.recordId);if(c.type==='request')id(c.requestId);if(c.type==='decide')id(c.requestId);
  const actor=await profile(uid);let uploaded;
  if(c.type==='uploadDocument'){

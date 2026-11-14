@@ -15,3 +15,9 @@ test('deep links handle malformed encoding safely',()=>{assert.equal(u.parseHash
 test('uploads enforce both size and MIME-extension pair',()=>{assert.equal(u.validateUpload({name:'a.pdf',type:'application/pdf',size:100}), '');assert.ok(u.validateUpload({name:'a.png',type:'application/pdf',size:100}));assert.ok(u.validateUpload({name:'a.pdf',type:'application/pdf',size:0}));assert.ok(u.validateUpload({name:'a.pdf',type:'application/pdf',size:1048577}))});
 test('readable bytes and Unicode initials handle empty inputs',()=>{assert.equal(u.byteSize(1024),'1.0 KB');assert.equal(u.byteSize(-1),'Unknown size');assert.equal(u.initials('  Harsh Dixit '),'HD');assert.equal(u.initials(''),'—')});
 test('renewal requires verification and no active successor',()=>{const r=record();assert.ok(u.canRenew(r,[]));assert.ok(!u.canRenew(record({status:'Draft'}),[]));assert.ok(!u.canRenew(r,[record({id:'B',parent:r.id})]));assert.ok(u.canRenew(r,[record({id:'B',parent:r.id,status:'Released'})]))});
+
+test('Evidence filename checks accept ordinary names and reject paths and controls',()=>{
+ const file=(name:string)=>({name,type:'application/pdf',size:42});
+ assert.equal(u.validateUpload(file('bank-confirmation 2026.pdf')), '');
+ for(const name of ['../file.pdf','dir'+String.fromCharCode(92)+'file.pdf','bad'+String.fromCharCode(10)+'name.pdf']) assert.match(u.validateUpload(file(name)), /supported name/);
+});

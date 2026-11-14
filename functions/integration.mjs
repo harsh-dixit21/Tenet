@@ -41,6 +41,10 @@ try{
  const decisions=await Promise.allSettled([command(approver,{type:'decide',recordId:record.id,requestId:'REQ-TEST-1',decision:'Approved',note:'Eligibility checked',eligibilityConfirmed:true}),command(approver,{type:'decide',recordId:record.id,requestId:'REQ-TEST-1',decision:'Rejected',note:'Competing decision'})]);check(decisions.filter(r=>r.status==='fulfilled').length===1,'Concurrent request decisions commit only once');
  const final=(await call(approver,'getWorkspace')).state;check(final.events.some(e=>e.actorUid===approver.uid),'Audit events capture trusted actor UID');
  await call(admin,'assignUser',{uid:institution.uid,role:'Institution',institutionId:institution.uid,active:false});await deny(()=>call(institution,'getWorkspace'),'Disabled account cannot read workspace');
+ const alertSets=await Promise.all([call(approver,'markAlertsRead',{ids:['qa-reminder-one']}),call(approver,'markAlertsRead',{ids:['qa-reminder-two']})]);
+ assert.equal(alertSets.length,2);
+ const reminders=(await call(approver,'getWorkspace')).state.readAlerts;
+ check(reminders.includes('qa-reminder-one')&&reminders.includes('qa-reminder-two'),'Concurrent alert acknowledgments both persist');
  const direct=await fetch(`http://127.0.0.1:8080/v1/projects/${project}/databases/(default)/documents/instruments/${record.id}`,{headers:{Authorization:`Bearer ${approver.token}`}});check(direct.status===403,'Firestore rules reject direct client reads');
  console.log(JSON.stringify({passed:results.length,checks:results}));
 }catch(e){console.error(e);process.exitCode=1}

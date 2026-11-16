@@ -64,4 +64,12 @@ export const scenarios = {
       s.assert.equal(request.type, 'Release');
     },
   },
+  'pending-refund': {
+    description: 'Open a Refund request for a matured and verified instrument.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: -1}), 'Refund');
+      s.assert.equal(request.status, 'Pending');
+      s.assert.equal(request.type, 'Refund');
+    },
+  },
 };

@@ -231,4 +231,12 @@ export const scenarios = {
         reject: {code: 'permission-denied', message: /different official must decide/}});
     },
   },
+  'short-renewal': {
+    description: 'Attempt a renewal with the same maturity as its verified predecessor.',
+    run(s) {
+      const parent = s.verified();
+      s.create({suffix: 'renewal', parent: parent.id, relation: 'Renewal',
+        reject: {code: 'failed-precondition', message: /must extend the original maturity/}});
+    },
+  },
 };

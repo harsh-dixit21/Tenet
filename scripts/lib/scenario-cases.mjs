@@ -56,4 +56,12 @@ export const scenarios = {
       s.assert.deepEqual(record.docs.map(document => document.version), [1, 2, 1]);
     },
   },
+  'pending-release': {
+    description: 'Open a Release request for a matured and verified instrument.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: -1}));
+      s.assert.equal(request.status, 'Pending');
+      s.assert.equal(request.type, 'Release');
+    },
+  },
 };

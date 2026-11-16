@@ -108,4 +108,13 @@ export const scenarios = {
       s.assert.equal(s.decide(request, 'Rejected').status, 'Verified');
     },
   },
+  'renewal-draft': {
+    description: 'Create a longer-dated renewal draft for a verified predecessor.',
+    run(s) {
+      const parent = s.verified();
+      const draft = s.create({suffix: 'renewal', parent: parent.id, relation: 'Renewal', maturity: 60});
+      s.assert.equal(draft.parent, parent.id);
+      s.assert.equal(draft.status, 'Draft');
+    },
+  },
 };

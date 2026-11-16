@@ -72,4 +72,12 @@ export const scenarios = {
       s.assert.equal(request.type, 'Refund');
     },
   },
+  'pending-discharge': {
+    description: 'Open a Discharge request for a verified instrument with future maturity.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: 30}), 'Discharge');
+      s.assert.equal(request.status, 'Pending');
+      s.assert.equal(request.type, 'Discharge');
+    },
+  },
 };

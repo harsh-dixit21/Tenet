@@ -117,4 +117,13 @@ export const scenarios = {
       s.assert.equal(draft.status, 'Draft');
     },
   },
+  'renewed': {
+    description: 'Verify a linked renewal and move its original instrument to Renewed.',
+    run(s) {
+      const parent = s.verified();
+      const successor = s.submitted({suffix: 'renewal', parent: parent.id, relation: 'Renewal', maturity: 60});
+      s.assert.equal(s.verify(s.documentAll(successor)).status, 'Verified');
+      s.assert.equal(s.finish('', '').snapshot.records.find(record => record.id === parent.id).status, 'Renewed');
+    },
+  },
 };

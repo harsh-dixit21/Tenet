@@ -150,4 +150,12 @@ export const scenarios = {
       s.verify(record, {reject: {code: 'failed-precondition', message: /declaration are required/}});
     },
   },
+  'self-verification': {
+    description: 'Attempt to verify a submission using its creator identity with the Reviewer role.',
+    run(s) {
+      const record = s.documentAll(s.submitted());
+      s.verify(record, {actor: {...s.reviewer, uid: s.institution.uid},
+        reject: {code: 'permission-denied', message: /verify your own submission/}});
+    },
+  },
 };

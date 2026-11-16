@@ -23,6 +23,7 @@
     "test:tooling": "node --test tests/tooling-*.test.mjs",
     "test:utils": "node --experimental-strip-types --test tests/workspace-utils.test.ts tests/saved-views.test.ts tests/register-links.test.ts tests/watchlists.test.ts tests/library-filters.test.ts",
     "fixtures": "node scripts/generate-fixtures.mjs",
+    "scenario": "node scripts/run-scenario.mjs",
     "release:manifest": "node scripts/release-manifest.mjs"
   },
   "dependencies": {

@@ -7,4 +7,10 @@ export const scenarios = {
       s.assert.equal(draft.amountMinor, 12_500_025);
     },
   },
+  'submitted': {
+    description: 'Submit a synthetic instrument to the review queue.',
+    run(s) {
+      s.assert.equal(s.submitted().status, 'Awaiting verification');
+    },
+  },
 };

@@ -158,4 +158,12 @@ export const scenarios = {
         reject: {code: 'permission-denied', message: /verify your own submission/}});
     },
   },
+  'foreign-edit': {
+    description: 'Attempt to edit a North institution draft from the South institution account.',
+    run(s) {
+      s.create();
+      s.create({actor: s.otherInstitution,
+        reject: {code: 'permission-denied', message: /belongs to another institution/}});
+    },
+  },
 };

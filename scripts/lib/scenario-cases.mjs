@@ -47,4 +47,13 @@ export const scenarios = {
       s.assert.notEqual(second.docs[0].sha256, second.docs[1].sha256);
     },
   },
+  'category-versions': {
+    description: 'Upload repeated versions in one category and the first version in another.',
+    run(s) {
+      let record = s.upload(s.create(), 'Instrument copy');
+      record = s.upload(record, 'Instrument copy', {tag: 'second'});
+      record = s.upload(record, 'Approval letter');
+      s.assert.deepEqual(record.docs.map(document => document.version), [1, 2, 1]);
+    },
+  },
 };

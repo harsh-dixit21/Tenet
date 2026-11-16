@@ -94,4 +94,11 @@ export const scenarios = {
       s.assert.equal(s.decide(request).status, 'Refunded');
     },
   },
+  'discharged': {
+    description: 'Approve a discharge without requiring prior maturity.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: 30}), 'Discharge');
+      s.assert.equal(s.decide(request).status, 'Discharged');
+    },
+  },
 };

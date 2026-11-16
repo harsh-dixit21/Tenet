@@ -1,5 +1,21 @@
 # Local validation and release tools
 
+## Synthetic workflow scenarios
+
+Use the scenario runner to reproduce deposit workflows in a local terminal. It runs the same domain command and reminder functions used by the backend. The results describe synthetic records and expected outcomes. Firebase transactions, authentication and file storage are covered separately by the emulator suite.
+
+```powershell
+npm run --silent scenario -- --list
+npm run --silent scenario -- renewed --date 2026-11-17
+npm run --silent scenario -- premature-release --format summary
+npm run --silent scenario -- verified --repeat 20 --format ndjson
+npm run --silent scenario -- pending-release --format workspace --output pending-release.json
+```
+
+Run `--catalog` for a JSON catalogue. By default, the runner emits versioned JSON with attempted steps and the resulting workspace snapshot. An expected rejection appears in the step log and counts as a successful reproduction. Unexpected outcomes cause a nonzero exit. A single run emits an object. Multiple runs emit a JSON array by default. `--format ndjson` emits one result per line, `--format summary` reports counts and rejection reasons, and `--format workspace` combines the runs into a fixture for an isolated demo browser profile. The demo fixture can seed the `tenet-workspace-v1` storage key in that profile before opening the portal.
+
+The default reference day is November 17, 2026. Choose `--date YYYY-MM-DD` for another day from April 1, 1900 through November 1, 2199. The date controls generated dates, timestamps and reminder calculation. `--repeat` accepts 1 to 100 copies and keeps record, request, evidence and audit references unique within a batch. `--compact` removes indentation from JSON. `--output` creates a new file in an existing directory and refuses to overwrite a file. By default, results go to standard output.
+
 Run commands at the checkout root with Node.js 22. These tools read local files; they do not deploy resources, contact a database, or verify Firebase connectivity.
 
 ## Environment validation

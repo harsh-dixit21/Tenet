@@ -1,3 +1,4 @@
+import {writeFileSync} from 'node:fs';
 import {parseArgs} from 'node:util';
 import {demoWorkspace, scenarioBatch, scenarioCatalog, summarizeScenario} from './lib/scenario-runner.mjs';
 
@@ -9,20 +10,25 @@ const options = {
   repeat: {type: 'string'},
   compact: {type: 'boolean'},
   format: {type: 'string'},
+  output: {type: 'string'},
 };
 
-function main(args) {
-  const {values, positionals} = parseArgs({args, options, allowPositionals: true});
+function render(args, values, positionals) {
   if (values.help || args.length === 0) {
     return 'Usage: npm run --silent scenario -- NAME [options]\n'
       + 'Set --date YYYY-MM-DD to move the synthetic reference day.\n'
       + 'Set --repeat COUNT to generate 1–100 independent copies.\n'
+      + 'Choose --format json|ndjson|summary|workspace. Use --compact for single-line JSON.\n'
+      + 'Pass --output FILE to create a new file without overwriting an existing file.\n'
       + 'Use --list for descriptions or --catalog for JSON. This command runs locally on synthetic data.';
   }
 
+  if ((values.catalog || values.list) && [values.date, values.repeat, values.format].some(value => value !== undefined)) {
+    throw Error('--date, --repeat and --format require a scenario name.');
+  }
   if (values.catalog) {
     if (positionals.length || values.list) throw Error('--catalog is a standalone catalogue mode.');
-    return JSON.stringify(scenarioCatalog(), null, 2);
+    return JSON.stringify(scenarioCatalog(), null, values.compact ? 0 : 2);
   }
 
   if (values.list) {
@@ -46,7 +52,15 @@ function main(args) {
 }
 
 try {
-  console.log(main(process.argv.slice(2)));
+  const args = process.argv.slice(2);
+  const {values, positionals} = parseArgs({args, options, allowPositionals: true});
+  if (values.output !== undefined && !values.output.trim()) throw Error('Choose a destination file for --output.');
+  const result = render(args, values, positionals) + '\n';
+  if (values.output !== undefined && !values.help) {
+    writeFileSync(values.output, result, {encoding: 'utf8', flag: 'wx'});
+  } else {
+    process.stdout.write(result);
+  }
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

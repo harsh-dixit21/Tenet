@@ -40,8 +40,9 @@ function createRun(prefix, referenceDay) {
     const parent = records.get(record?.parent ?? command.parent);
     const request = requests.get(command.requestId);
     const now = new Date(Date.parse(referenceDay + 'T06:00:00Z') + minute++ * 60_000).toISOString();
-    const successorExists = [...records.values()].some(candidate =>
-      candidate.id !== record?.id && candidate.parent === (command.type === 'saveInstrument' ? parent?.id : record?.id));
+    const predecessorId = command.type === 'saveInstrument' ? parent?.id : record?.id;
+    const successorExists = predecessorId !== undefined && [...records.values()].some(candidate =>
+      candidate.id !== record?.id && candidate.parent === predecessorId);
     try {
       const outcome = applyCommand({actor, command, record, parent, request, now, successorExists, document: options.document});
       if (options.reject) throw Error('Expected rejection: ' + options.reject.code);

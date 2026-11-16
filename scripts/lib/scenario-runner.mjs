@@ -187,3 +187,19 @@ export function summarizeScenario({name, referenceDay, steps, snapshot}) {
       .map(({action, code, message}) => ({action, code, message})),
   };
 }
+
+export function demoWorkspace(runs) {
+  const snapshots = runs.map(run => run.snapshot);
+  const events = snapshots.flatMap(snapshot => snapshot.events);
+  events.sort((left, right) => right.date.localeCompare(left.date) || left.id.localeCompare(right.id));
+  return {
+    version: 1,
+    synthetic: true,
+    records: snapshots.flatMap(snapshot => snapshot.records),
+    requests: snapshots.flatMap(snapshot => snapshot.requests),
+    events,
+    settings: {...initialSettings},
+    readAlerts: [],
+    serverAlerts: snapshots.flatMap(snapshot => snapshot.serverAlerts),
+  };
+}

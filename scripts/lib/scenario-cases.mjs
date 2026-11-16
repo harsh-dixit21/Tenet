@@ -201,4 +201,11 @@ export const scenarios = {
       s.upload(record, 'Bank letter', {reject: {code: 'already-exists', message: /already attached/}});
     },
   },
+  'locked-evidence': {
+    description: 'Attempt to upload more evidence after reviewing and verifying an instrument.',
+    run(s) {
+      const record = s.verified();
+      s.upload(record, 'Other', {reject: {code: 'failed-precondition', message: /locked after verification/}});
+    },
+  },
 };

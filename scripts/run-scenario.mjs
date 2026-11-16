@@ -1,11 +1,12 @@
 import {parseArgs} from 'node:util';
-import {runScenario, scenarioCatalog} from './lib/scenario-runner.mjs';
+import {scenarioBatch, scenarioCatalog} from './lib/scenario-runner.mjs';
 
 const options = {
   help: {type: 'boolean', short: 'h'},
   list: {type: 'boolean'},
   catalog: {type: 'boolean'},
   date: {type: 'string'},
+  repeat: {type: 'string'},
 };
 
 function main(args) {
@@ -13,6 +14,7 @@ function main(args) {
   if (values.help || args.length === 0) {
     return 'Usage: npm run --silent scenario -- NAME [options]\n'
       + 'Set --date YYYY-MM-DD to move the synthetic reference day.\n'
+      + 'Set --repeat COUNT to generate 1–100 independent copies.\n'
       + 'Use --list for descriptions or --catalog for JSON. This command runs locally on synthetic data.';
   }
 
@@ -27,7 +29,8 @@ function main(args) {
   }
 
   if (positionals.length !== 1) throw Error('Pass one scenario name. Use --list to see the available scenarios.');
-  return JSON.stringify(runScenario(positionals[0], {referenceDay: values.date}), null, 2);
+  const runs = scenarioBatch(positionals[0], values.repeat ?? '1', values.date);
+  return JSON.stringify(runs.length === 1 ? runs[0] : runs, null, 2);
 }
 
 try {

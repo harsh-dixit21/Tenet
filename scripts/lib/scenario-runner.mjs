@@ -160,3 +160,13 @@ export function scenarioCatalog() {
   return Object.entries(scenarios).map(([name, scenario]) => ({name, description: scenario.description}))
     .sort((left, right) => left.name.localeCompare(right.name));
 }
+
+export function scenarioBatch(name, count, referenceDay) {
+  if (!/^[1-9]\d*$/.test(String(count)) || Number(count) > 100) {
+    throw Error('Repeat count must be an integer from 1 to 100.');
+  }
+  return Array.from({length: Number(count)}, (_, index) => runScenario(name, {
+    referenceDay,
+    prefix: Number(count) === 1 ? undefined : 'synthetic-' + name + '-' + (index + 1),
+  }));
+}

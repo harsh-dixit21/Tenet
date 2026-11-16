@@ -29,4 +29,13 @@ export const scenarios = {
       s.assert.match(record.correction, /maturity date/);
     },
   },
+  'resubmitted': {
+    description: 'Add the required evidence to a returned record and resubmit it.',
+    run(s) {
+      const returned = s.correct(s.submitted());
+      const record = s.documentAll(returned);
+      const result = s.execute(s.institution, {type: 'resubmit', recordId: record.id});
+      s.assert.equal(result.status, 'Awaiting verification');
+    },
+  },
 };

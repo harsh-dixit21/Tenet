@@ -8,6 +8,7 @@ const options = {
   date: {type: 'string'},
   repeat: {type: 'string'},
   compact: {type: 'boolean'},
+  format: {type: 'string'},
 };
 
 function main(args) {
@@ -31,6 +32,9 @@ function main(args) {
 
   if (positionals.length !== 1) throw Error('Pass one scenario name. Use --list to see the available scenarios.');
   const runs = scenarioBatch(positionals[0], values.repeat ?? '1', values.date);
+  const format = values.format ?? 'json';
+  if (format === 'ndjson') return runs.map(run => JSON.stringify(run)).join('\n');
+  if (format !== 'json') throw Error('Unsupported output format. Choose json or ndjson.');
   return JSON.stringify(runs.length === 1 ? runs[0] : runs, null, values.compact ? 0 : 2);
 }
 

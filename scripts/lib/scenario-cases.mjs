@@ -135,4 +135,12 @@ export const scenarios = {
       s.assert.equal(s.finish('', '').snapshot.records.find(record => record.id === parent.id).status, 'Replaced');
     },
   },
+  'multi-institution': {
+    description: 'Create independently owned instruments from two synthetic institutions.',
+    run(s) {
+      const first = s.submitted();
+      const second = s.submitted({suffix: 'south', actor: s.otherInstitution});
+      s.assert.notEqual(first.institutionId, second.institutionId);
+    },
+  },
 };

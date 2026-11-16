@@ -187,4 +187,11 @@ export const scenarios = {
         reject: {code: 'invalid-argument', message: /earlier than maturity/}});
     },
   },
+  'fractional-paise': {
+    description: 'Attempt to save an INR amount with more than two decimal places.',
+    run(s) {
+      s.create({fields: {amount: 100.125},
+        reject: {code: 'invalid-argument', message: /at most two decimal places/}});
+    },
+  },
 };

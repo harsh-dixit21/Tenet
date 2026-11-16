@@ -239,4 +239,13 @@ export const scenarios = {
         reject: {code: 'failed-precondition', message: /must extend the original maturity/}});
     },
   },
+  'second-successor': {
+    description: 'Create a renewal draft and attempt another successor for the same original.',
+    run(s) {
+      const parent = s.verified();
+      s.create({suffix: 'renewal', parent: parent.id, relation: 'Renewal', maturity: 60});
+      s.create({suffix: 'replacement', parent: parent.id, relation: 'Replacement',
+        reject: {code: 'failed-precondition', message: /already has a successor/}});
+    },
+  },
 };

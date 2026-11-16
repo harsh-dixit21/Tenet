@@ -4,13 +4,19 @@ import {runScenario, scenarioCatalog} from './lib/scenario-runner.mjs';
 const options = {
   help: {type: 'boolean', short: 'h'},
   list: {type: 'boolean'},
+  catalog: {type: 'boolean'},
 };
 
 function main(args) {
   const {values, positionals} = parseArgs({args, options, allowPositionals: true});
   if (values.help || args.length === 0) {
     return 'Usage: npm run --silent scenario -- NAME [options]\n'
-      + 'Use --list to find scenarios. This command runs locally on synthetic data.';
+      + 'Use --list for descriptions or --catalog for JSON. This command runs locally on synthetic data.';
+  }
+
+  if (values.catalog) {
+    if (positionals.length || values.list) throw Error('--catalog is a standalone catalogue mode.');
+    return JSON.stringify(scenarioCatalog(), null, 2);
   }
 
   if (values.list) {

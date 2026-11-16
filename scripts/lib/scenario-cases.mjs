@@ -180,4 +180,11 @@ export const scenarios = {
         reject: {code: 'invalid-argument', message: /on\/before today/}});
     },
   },
+  'invalid-chronology': {
+    description: 'Attempt to save a deposit with maturity on its issue date.',
+    run(s) {
+      s.create({fields: {issued: s.shift(-1), maturity: s.shift(-1)},
+        reject: {code: 'invalid-argument', message: /earlier than maturity/}});
+    },
+  },
 };

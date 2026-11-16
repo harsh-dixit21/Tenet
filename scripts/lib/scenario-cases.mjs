@@ -223,4 +223,12 @@ export const scenarios = {
         reject: {code: 'failed-precondition', message: /Confirm that applicable release conditions/}});
     },
   },
+  'conflicted-approver': {
+    description: 'Attempt to approve a closure request using the original verifier identity.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: -1}));
+      s.decide(request, 'Approved', {actor: {...s.approver, uid: s.reviewer.uid},
+        reject: {code: 'permission-denied', message: /different official must decide/}});
+    },
+  },
 };

@@ -80,4 +80,11 @@ export const scenarios = {
       s.assert.equal(request.type, 'Discharge');
     },
   },
+  'released': {
+    description: 'Approve a release on the exact maturity date with independent actors.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: 0}));
+      s.assert.equal(s.decide(request).status, 'Released');
+    },
+  },
 };

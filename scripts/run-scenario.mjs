@@ -1,5 +1,5 @@
 import {parseArgs} from 'node:util';
-import {scenarioBatch, scenarioCatalog} from './lib/scenario-runner.mjs';
+import {scenarioBatch, scenarioCatalog, summarizeScenario} from './lib/scenario-runner.mjs';
 
 const options = {
   help: {type: 'boolean', short: 'h'},
@@ -34,7 +34,11 @@ function main(args) {
   const runs = scenarioBatch(positionals[0], values.repeat ?? '1', values.date);
   const format = values.format ?? 'json';
   if (format === 'ndjson') return runs.map(run => JSON.stringify(run)).join('\n');
-  if (format !== 'json') throw Error('Unsupported output format. Choose json or ndjson.');
+  if (format === 'summary') {
+    const summaries = runs.map(summarizeScenario);
+    return JSON.stringify(summaries.length === 1 ? summaries[0] : summaries, null, values.compact ? 0 : 2);
+  }
+  if (format !== 'json') throw Error('Unsupported output format. Choose json, ndjson or summary.');
   return JSON.stringify(runs.length === 1 ? runs[0] : runs, null, values.compact ? 0 : 2);
 }
 

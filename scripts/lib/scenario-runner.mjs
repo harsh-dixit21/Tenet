@@ -170,3 +170,20 @@ export function scenarioBatch(name, count, referenceDay) {
     prefix: Number(count) === 1 ? undefined : 'synthetic-' + name + '-' + (index + 1),
   }));
 }
+
+export function summarizeScenario({name, referenceDay, steps, snapshot}) {
+  const accepted = steps.filter(step => step.result === 'Accepted').length;
+  const instrumentsByStatus = {};
+  for (const record of snapshot.records) {
+    instrumentsByStatus[record.status] = (instrumentsByStatus[record.status] ?? 0) + 1;
+  }
+  return {
+    name, referenceDay, synthetic: true, accepted, rejected: steps.length - accepted,
+    instruments: snapshot.records.length, instrumentsByStatus,
+    requests: snapshot.requests.length, auditEvents: snapshot.events.length,
+    documents: snapshot.records.reduce((total, record) => total + record.docs.length, 0),
+    reminders: snapshot.serverAlerts.length,
+    rejections: steps.filter(step => step.result === 'Rejected')
+      .map(({action, code, message}) => ({action, code, message})),
+  };
+}

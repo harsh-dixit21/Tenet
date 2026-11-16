@@ -166,4 +166,11 @@ export const scenarios = {
         reject: {code: 'permission-denied', message: /belongs to another institution/}});
     },
   },
+  'disabled-maker': {
+    description: 'Attempt to save a draft with an inactive Institution account.',
+    run(s) {
+      s.create({actor: {...s.institution, active: false},
+        reject: {code: 'permission-denied', message: /access is disabled/}});
+    },
+  },
 };

@@ -152,3 +152,8 @@ export function runScenario(name, {referenceDay = DEFAULT_DATE, prefix = 'synthe
   scenario.run(run);
   return run.finish(name, scenario.description);
 }
+
+export function scenarioCatalog() {
+  return Object.entries(scenarios).map(([name, scenario]) => ({name, description: scenario.description}))
+    .sort((left, right) => left.name.localeCompare(right.name));
+}

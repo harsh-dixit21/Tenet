@@ -173,4 +173,11 @@ export const scenarios = {
         reject: {code: 'permission-denied', message: /access is disabled/}});
     },
   },
+  'future-issue': {
+    description: 'Attempt to save a deposit issued after the scenario reference date.',
+    run(s) {
+      s.create({fields: {issued: s.shift(1)},
+        reject: {code: 'invalid-argument', message: /on\/before today/}});
+    },
+  },
 };

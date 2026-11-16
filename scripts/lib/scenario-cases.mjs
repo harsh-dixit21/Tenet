@@ -21,4 +21,12 @@ export const scenarios = {
       s.assert.equal(record.docs.length, 3);
     },
   },
+  'correction': {
+    description: 'Return a submitted instrument with correction instructions.',
+    run(s) {
+      const record = s.correct(s.submitted());
+      s.assert.equal(record.status, 'Discrepancy');
+      s.assert.match(record.correction, /maturity date/);
+    },
+  },
 };

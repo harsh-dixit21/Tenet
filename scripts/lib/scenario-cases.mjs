@@ -13,4 +13,12 @@ export const scenarios = {
       s.assert.equal(s.submitted().status, 'Awaiting verification');
     },
   },
+  'verified': {
+    description: 'Upload the three required documents and verify a submitted deposit.',
+    run(s) {
+      const record = s.verified();
+      s.assert.equal(record.verifiedBy, s.reviewer.uid);
+      s.assert.equal(record.docs.length, 3);
+    },
+  },
 };

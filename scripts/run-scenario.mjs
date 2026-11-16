@@ -5,12 +5,14 @@ const options = {
   help: {type: 'boolean', short: 'h'},
   list: {type: 'boolean'},
   catalog: {type: 'boolean'},
+  date: {type: 'string'},
 };
 
 function main(args) {
   const {values, positionals} = parseArgs({args, options, allowPositionals: true});
   if (values.help || args.length === 0) {
     return 'Usage: npm run --silent scenario -- NAME [options]\n'
+      + 'Set --date YYYY-MM-DD to move the synthetic reference day.\n'
       + 'Use --list for descriptions or --catalog for JSON. This command runs locally on synthetic data.';
   }
 
@@ -25,7 +27,7 @@ function main(args) {
   }
 
   if (positionals.length !== 1) throw Error('Pass one scenario name. Use --list to see the available scenarios.');
-  return JSON.stringify(runScenario(positionals[0]), null, 2);
+  return JSON.stringify(runScenario(positionals[0], {referenceDay: values.date}), null, 2);
 }
 
 try {

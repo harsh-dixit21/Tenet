@@ -147,6 +147,9 @@ function createRun(prefix, referenceDay) {
 export function runScenario(name, {referenceDay = DEFAULT_DATE, prefix = 'synthetic-' + name} = {}) {
   if (!Object.hasOwn(scenarios, name)) throw Error('Unknown scenario: ' + name);
   date(referenceDay, 'Reference date');
+  if (referenceDay < '1900-04-01' || referenceDay > '2199-11-01') {
+    throw Error('Reference date must be between 1900-04-01 and 2199-11-01 to keep generated dates in range.');
+  }
   const scenario = scenarios[name];
   const run = createRun(prefix, referenceDay);
   scenario.run(run);

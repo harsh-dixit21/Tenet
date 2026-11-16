@@ -143,4 +143,11 @@ export const scenarios = {
       s.assert.notEqual(first.institutionId, second.institutionId);
     },
   },
+  'missing-evidence': {
+    description: 'Verify an incomplete submission and capture the missing-evidence rejection.',
+    run(s) {
+      const record = s.upload(s.submitted(), 'Bank letter');
+      s.verify(record, {reject: {code: 'failed-precondition', message: /declaration are required/}});
+    },
+  },
 };

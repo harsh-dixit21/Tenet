@@ -215,4 +215,12 @@ export const scenarios = {
       s.decide(request, 'Approved', {reject: {code: 'failed-precondition', message: /requires maturity/}});
     },
   },
+  'unconfirmed-decision': {
+    description: 'Try to approve closure without confirming applicable eligibility conditions.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: -1}));
+      s.decide(request, 'Approved', {confirm: false,
+        reject: {code: 'failed-precondition', message: /Confirm that applicable release conditions/}});
+    },
+  },
 };

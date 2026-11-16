@@ -248,4 +248,13 @@ export const scenarios = {
         reject: {code: 'failed-precondition', message: /already has a successor/}});
     },
   },
+  'stale-edit': {
+    description: 'Submit a draft edit using a revision token different from the current update time.',
+    run(s) {
+      const record = s.create();
+      s.execute(s.institution, {type: 'saveInstrument', id: record.id, status: 'Draft',
+        expectedUpdatedAt: '2000-01-01T00:00:00.000Z'},
+        {reject: {code: 'aborted', message: /changed in another session/}});
+    },
+  },
 };

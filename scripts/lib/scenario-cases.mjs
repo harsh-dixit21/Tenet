@@ -126,4 +126,13 @@ export const scenarios = {
       s.assert.equal(s.finish('', '').snapshot.records.find(record => record.id === parent.id).status, 'Renewed');
     },
   },
+  'replaced': {
+    description: 'Verify a replacement with the original maturity and close its predecessor as Replaced.',
+    run(s) {
+      const parent = s.verified();
+      const successor = s.submitted({suffix: 'replacement', parent: parent.id, relation: 'Replacement'});
+      s.verify(s.documentAll(successor));
+      s.assert.equal(s.finish('', '').snapshot.records.find(record => record.id === parent.id).status, 'Replaced');
+    },
+  },
 };

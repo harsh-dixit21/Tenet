@@ -194,4 +194,11 @@ export const scenarios = {
         reject: {code: 'invalid-argument', message: /at most two decimal places/}});
     },
   },
+  'duplicate-evidence': {
+    description: 'Upload identical content twice to the same evidence category.',
+    run(s) {
+      const record = s.upload(s.create(), 'Bank letter');
+      s.upload(record, 'Bank letter', {reject: {code: 'already-exists', message: /already attached/}});
+    },
+  },
 };

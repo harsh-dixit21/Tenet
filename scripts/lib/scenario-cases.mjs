@@ -101,4 +101,11 @@ export const scenarios = {
       s.assert.equal(s.decide(request).status, 'Discharged');
     },
   },
+  'rejected-decision': {
+    description: 'Reject a closure request and return its instrument to Verified.',
+    run(s) {
+      const request = s.closure(s.verified());
+      s.assert.equal(s.decide(request, 'Rejected').status, 'Verified');
+    },
+  },
 };

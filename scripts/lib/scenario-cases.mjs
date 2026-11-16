@@ -208,4 +208,11 @@ export const scenarios = {
       s.upload(record, 'Other', {reject: {code: 'failed-precondition', message: /locked after verification/}});
     },
   },
+  'premature-release': {
+    description: 'Try to approve release of an instrument that matures tomorrow.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: 1}));
+      s.decide(request, 'Approved', {reject: {code: 'failed-precondition', message: /requires maturity/}});
+    },
+  },
 };

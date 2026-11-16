@@ -38,4 +38,13 @@ export const scenarios = {
       s.assert.equal(result.status, 'Awaiting verification');
     },
   },
+  'evidence-versions': {
+    description: 'Upload two different bank letters and preserve their version numbers.',
+    run(s) {
+      const first = s.upload(s.create(), 'Bank letter');
+      const second = s.upload(first, 'Bank letter', {tag: 'revised'});
+      s.assert.deepEqual(second.docs.map(document => document.version), [1, 2]);
+      s.assert.notEqual(second.docs[0].sha256, second.docs[1].sha256);
+    },
+  },
 };

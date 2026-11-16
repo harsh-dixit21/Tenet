@@ -87,4 +87,11 @@ export const scenarios = {
       s.assert.equal(s.decide(request).status, 'Released');
     },
   },
+  'refunded': {
+    description: 'Approve a refund after maturity with decision notes in the audit step.',
+    run(s) {
+      const request = s.closure(s.verified({maturity: -1}), 'Refund');
+      s.assert.equal(s.decide(request).status, 'Refunded');
+    },
+  },
 };

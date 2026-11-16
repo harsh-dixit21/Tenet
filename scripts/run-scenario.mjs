@@ -7,6 +7,7 @@ const options = {
   catalog: {type: 'boolean'},
   date: {type: 'string'},
   repeat: {type: 'string'},
+  compact: {type: 'boolean'},
 };
 
 function main(args) {
@@ -30,7 +31,7 @@ function main(args) {
 
   if (positionals.length !== 1) throw Error('Pass one scenario name. Use --list to see the available scenarios.');
   const runs = scenarioBatch(positionals[0], values.repeat ?? '1', values.date);
-  return JSON.stringify(runs.length === 1 ? runs[0] : runs, null, 2);
+  return JSON.stringify(runs.length === 1 ? runs[0] : runs, null, values.compact ? 0 : 2);
 }
 
 try {

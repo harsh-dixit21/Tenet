@@ -4,6 +4,7 @@ export function parseCsv(input) {
   let cells = [], field = '', line = 1, start = 1, quoted = false, closed = false;
   function pushCell() {
     if (cells.length>=100) throw new Error('Too many columns on line '+start+'.');
+    if (field.length>65536) throw new Error('A field exceeds 65,536 characters on line '+start+'.');
     cells.push(field);
     field = '';
     closed = false;

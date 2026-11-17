@@ -33,10 +33,13 @@ const requiredColumns = {
   watchlist:['Watchlist','Instrument ID'],
 };
 
-export function inspectRows(profile, header, rows) {
+export function inspectRows(profile, header, rows, limit=100) {
   const issues = [];
+  let errorCount = 0, warningCount = 0;
   function add(line,column,message,severity='error') {
-    issues.push({line,column,severity,message});
+    if (severity==='error') errorCount++;
+    else warningCount++;
+    if (issues.length<limit) issues.push({line,column,severity,message});
   }
   const identity = identityColumns[profile];
   const seen = new Set();
@@ -79,5 +82,5 @@ export function inspectRows(profile, header, rows) {
       }
     }
   }
-  return issues;
+  return {issues,errorCount,warningCount,omitted:errorCount+warningCount-issues.length};
 }

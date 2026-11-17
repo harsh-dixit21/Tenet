@@ -23,7 +23,7 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
-const options = {json:{type:'boolean'}};
+const options = {json:{type:'boolean'}, 'max-issues':{type:'string'}};
 
 try {
   const {values,positionals:[file,...extra]} = parseArgs({options,allowPositionals:true});
@@ -36,13 +36,17 @@ try {
   const badRow=rows.find(row=>row.cells.length!==header.cells.length);
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
-  const issues=profile ? inspectRows(profile,header.cells,rows) : [];
-  if (values.json) console.log(JSON.stringify({profile,rows:rows.length,issues},null,2));
+  const issueLimit=Number(values['max-issues']??100);
+  if (!Number.isInteger(issueLimit)||issueLimit<1||issueLimit>10000) throw new Error('--max-issues must be between 1 and 10000.');
+  const result=inspectRows(profile,header.cells,rows,issueLimit);
+  const {issues,errorCount,omitted}=result;
+  if (values.json) console.log(JSON.stringify({profile,rows:rows.length,...result},null,2));
   else {
     console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
     for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
+    if (omitted) console.log(omitted+' additional findings omitted.');
   }
-  if (issues.some(issue=>issue.severity==='error')) process.exitCode=1;
+  if (errorCount) process.exitCode=1;
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

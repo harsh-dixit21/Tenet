@@ -9,6 +9,17 @@ function isDay(value) {
 }
 const amountColumns = new Set(['Amount INR','Active amount INR']);
 
+const states = ['Draft','Awaiting verification','Discrepancy','Verified','Release requested','Released','Refunded','Discharged','Renewed','Replaced'];
+const vocabularies = {
+  register:{Status:states},
+  portfolio:{Status:states},
+  'evidence-gaps':{Status:states},
+  requests:{Type:['Release','Refund','Discharge'],Status:['Pending','Approved','Rejected']},
+  audit:{Actor:['Institution','Reviewer','Approver','Admin']},
+  reminders:{Read:['Yes','No']},
+  tasks:{Completion:['Completed','Open']},
+};
+
 export function inspectRows(profile, header, rows) {
   const issues = [];
   function add(line,column,message,severity='error') {
@@ -27,6 +38,8 @@ export function inspectRows(profile, header, rows) {
       if (column==='SHA256' && value && !/^[a-f0-9]{64}$/i.test(value)) {
         add(row.line,column,'Expected a 64-character hexadecimal SHA-256 checksum.');
       }
+      const allowed = vocabularies[profile]?.[column];
+      if (allowed && !allowed.includes(value)) add(row.line,column,'Unexpected value for this export column.');
       if (amountColumns.has(column) &&
           (!amountPattern.test(value) || !Number.isSafeInteger(Math.round(Number(value)*100)))) {
         add(row.line,column,'Expected a nonnegative INR amount with at most two decimal places.');

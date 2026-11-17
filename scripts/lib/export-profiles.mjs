@@ -11,6 +11,7 @@ export const profiles = new Map([
   ['snapshot-changes','Instrument ID|Institution|Change group|Field|Baseline|Current'.split('|')],
   ['control-findings','Instrument ID|Related reference|Check|Category|Finding type|Description'.split('|')],
   ['control-summary','Check|Category|Finding type|Evaluation|Matching findings'.split('|')],
+  ['watchlist','Watchlist|Instrument ID'.split('|')],
 ]);
 export function detectProfile(header) {
   for (const [name,columns] of profiles) {

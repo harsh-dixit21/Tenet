@@ -24,6 +24,9 @@ export function inspectRows(profile, header, rows) {
       if (dateColumns.has(column) && !(value==='' && optionalDates.has(column)) && !isDay(value)) {
         add(row.line,column,'Expected a valid YYYY-MM-DD calendar date.');
       }
+      if (column==='SHA256' && value && !/^[a-f0-9]{64}$/i.test(value)) {
+        add(row.line,column,'Expected a 64-character hexadecimal SHA-256 checksum.');
+      }
       if (amountColumns.has(column) &&
           (!amountPattern.test(value) || !Number.isSafeInteger(Math.round(Number(value)*100)))) {
         add(row.line,column,'Expected a nonnegative INR amount with at most two decimal places.');

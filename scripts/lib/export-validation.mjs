@@ -50,6 +50,10 @@ export function inspectRows(profile, header, rows) {
     if (isDay(issued ?? '') && isDay(data.Maturity ?? '') && issued>=data.Maturity) {
       add(row.line,'Maturity','Maturity must be after the issue date.');
     }
+    if (profile==='institutions' && /^\d+$/.test(data.Active) && /^\d+$/.test(data.Instruments) &&
+        Number(data.Active)>Number(data.Instruments)) {
+      add(row.line,'Active','Active instruments exceed the total instrument count.');
+    }
     for (const column of header) {
       const value = data[column];
       if (integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {

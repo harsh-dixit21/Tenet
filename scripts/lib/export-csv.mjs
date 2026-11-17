@@ -3,6 +3,7 @@ export function parseCsv(input) {
   const records = [];
   let cells = [], field = '', line = 1, start = 1, quoted = false, closed = false;
   function pushCell() {
+    if (cells.length>=100) throw new Error('Too many columns on line '+start+'.');
     cells.push(field);
     field = '';
     closed = false;

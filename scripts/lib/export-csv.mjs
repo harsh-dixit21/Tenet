@@ -1,4 +1,5 @@
 export function parseCsv(input) {
+  if (input.startsWith('\uFEFF')) input = input.slice(1);
   const records = [];
   let cells = [], field = '', line = 1, start = 1, quoted = false, closed = false;
   function pushCell() {

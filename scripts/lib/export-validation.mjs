@@ -1,6 +1,12 @@
 const amountPattern = /^\d+(?:\.\d{1,2})?$/;
 const integerColumns = new Set(['Instruments','Active','Pending reviews','Missing evidence','Active banks','Matching findings','Bytes','Version']);
-const dateColumns = new Set();
+const dateColumns = new Set(['Issue date','Issued','Maturity','Requested','Next maturity','Due date','Date']);
+const optionalDates = new Set(['Due date','Next maturity']);
+function isDay(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const time = Date.parse(value+'T00:00:00Z');
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0,10)===value;
+}
 const amountColumns = new Set(['Amount INR','Active amount INR']);
 
 export function inspectRows(profile, header, rows) {
@@ -14,6 +20,9 @@ export function inspectRows(profile, header, rows) {
       const value = data[column];
       if (integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {
         add(row.line,column,'Expected a nonnegative safe integer.');
+      }
+      if (dateColumns.has(column) && !(value==='' && optionalDates.has(column)) && !isDay(value)) {
+        add(row.line,column,'Expected a valid YYYY-MM-DD calendar date.');
       }
       if (amountColumns.has(column) &&
           (!amountPattern.test(value) || !Number.isSafeInteger(Math.round(Number(value)*100)))) {

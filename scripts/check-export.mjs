@@ -1,7 +1,7 @@
 import {parseArgs} from 'node:util';
 import {openSync, closeSync, fstatSync, readSync} from 'node:fs';
 import {inspectRows} from './lib/export-validation.mjs';
-import {detectProfile} from './lib/export-profiles.mjs';
+import {profiles, detectProfile} from './lib/export-profiles.mjs';
 import {parseCsv} from './lib/export-csv.mjs';
 
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -23,10 +23,16 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
-const options = {json:{type:'boolean'}, 'max-issues':{type:'string'}};
+const options = {json:{type:'boolean'}, list:{type:'boolean'}, 'max-issues':{type:'string'}};
 
-try {
+function run() {
   const {values,positionals:[file,...extra]} = parseArgs({options,allowPositionals:true});
+  if (values.list) {
+    if (file) throw new Error('--list cannot be combined with input files.');
+    if (values.json) console.log(JSON.stringify(Object.fromEntries(profiles),null,2));
+    else for (const [name,header] of profiles) console.log(name+'  '+header.join(', '));
+    return;
+  }
   if (!file || extra.length) throw new Error('Usage: npm run --silent check:export -- FILE');
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
   if (!records.length) throw new Error('The CSV has no header.');
@@ -47,7 +53,10 @@ try {
     if (omitted) console.log(omitted+' additional findings omitted.');
   }
   if (errorCount) process.exitCode=1;
-} catch (error) {
+}
+
+try { run(); }
+catch (error) {
   console.error(error.message);
   process.exitCode = 1;
 }

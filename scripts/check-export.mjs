@@ -25,15 +25,7 @@ function readExport(file) {
 
 const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'max-issues':{type:'string'}};
 
-function run() {
-  const {values,positionals:[file,...extra]} = parseArgs({options,allowPositionals:true});
-  if (values.list) {
-    if (file) throw new Error('--list cannot be combined with input files.');
-    if (values.json) console.log(JSON.stringify(Object.fromEntries(profiles),null,2));
-    else for (const [name,header] of profiles) console.log(name+'  '+header.join(', '));
-    return;
-  }
-  if (!file || extra.length) throw new Error('Usage: npm run --silent check:export -- FILE');
+function inspect(file, expectedProfile, limit) {
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
   if (!records.length) throw new Error('The CSV has no header.');
   const [header,...rows] = records;
@@ -42,23 +34,38 @@ function run() {
   const badRow=rows.find(row=>row.cells.length!==header.cells.length);
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
-  if (values.profile && !profiles.has(values.profile)) throw new Error('Unknown profile. Use --list to inspect options.');
-  if (values.profile && profile!==values.profile) throw new Error('The CSV header does not match the requested '+values.profile+' profile.');
-  const issueLimit=Number(values['max-issues']??100);
-  if (!Number.isInteger(issueLimit)||issueLimit<1||issueLimit>10000) throw new Error('--max-issues must be between 1 and 10000.');
-  const result=inspectRows(profile,header.cells,rows,issueLimit);
-  const {issues,errorCount,omitted}=result;
-  if (values.json) console.log(JSON.stringify({profile,rows:rows.length,...result},null,2));
-  else {
-    console.log((profile ?? 'Unknown export')+': '+rows.length+' rows, '+errorCount+' errors, '+result.warningCount+' warnings.');
-    for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
-    if (omitted) console.log(omitted+' additional findings omitted.');
+  if (expectedProfile && profile!==expectedProfile) throw new Error('The CSV header does not match the requested '+expectedProfile+' profile.');
+  return {file,profile,rows:rows.length,...inspectRows(profile,header.cells,rows,limit)};
+}
+
+function run() {
+  const {values,positionals:files} = parseArgs({options,allowPositionals:true});
+  if (values.list) {
+    if (files.length) throw new Error('--list cannot be combined with input files.');
+    if (values.json) console.log(JSON.stringify(Object.fromEntries(profiles),null,2));
+    else for (const [name,header] of profiles) console.log(name+'  '+header.join(', '));
+    return;
   }
-  if (errorCount) process.exitCode=1;
+  if (!files.length) throw new Error('Usage: npm run --silent check:export -- FILE [FILE ...]');
+  if (values.profile && !profiles.has(values.profile)) throw new Error('Unknown profile. Use --list to inspect options.');
+  const limit=Number(values['max-issues']??100);
+  if (!Number.isInteger(limit)||limit<1||limit>10000) throw new Error('--max-issues must be between 1 and 10000.');
+  const results = files.map(file=>{
+    try { return inspect(file,values.profile,limit); }
+    catch (error) { return {file,failure:error.message}; }
+  });
+  if (values.json) console.log(JSON.stringify(results.length===1?results[0]:results,null,2));
+  else for (const result of results) {
+    if (result.failure) { console.log(result.file+': '+result.failure); continue; }
+    console.log(result.file+' ('+(result.profile??'unknown export')+'): '+result.rows+' rows, '+result.errorCount+' errors, '+result.warningCount+' warnings.');
+    for (const issue of result.issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
+    if (result.omitted) console.log(result.omitted+' additional findings omitted.');
+  }
+  if (results.some(result=>result.failure||result.errorCount)) process.exitCode=1;
 }
 
 try { run(); }
 catch (error) {
   console.error(error.message);
-  process.exitCode = 1;
+  process.exitCode=1;
 }

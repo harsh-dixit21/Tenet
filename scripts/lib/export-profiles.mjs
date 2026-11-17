@@ -2,6 +2,7 @@ export const profiles = new Map([
   ['register','Instrument|Institution|Bank|Instrument number|Amount INR|Issue date|Maturity|Status|Linked instrument'.split('|')],
   ['documents','Instrument|Institution|File|Category|Version|Date|Bytes|SHA256'.split('|')],
   ['requests','Request|Instrument|Institution|Type|Status|Requested|Reason|Decision'.split('|')],
+  ['institutions','Institution|Instruments|Active|Active amount INR|Pending reviews|Missing evidence|Active banks|Next maturity'.split('|')],
 ]);
 export function detectProfile(header) {
   for (const [name,columns] of profiles) {

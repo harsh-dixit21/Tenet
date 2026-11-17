@@ -1,4 +1,5 @@
 import {openSync, closeSync, fstatSync, readSync} from 'node:fs';
+import {detectProfile} from './lib/export-profiles.mjs';
 import {parseCsv} from './lib/export-csv.mjs';
 
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -30,7 +31,8 @@ try {
   if (new Set(header.cells).size!==header.cells.length) throw new Error('The CSV contains duplicate column names.');
   const badRow=rows.find(row=>row.cells.length!==header.cells.length);
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
-  console.log(rows.length+' data rows parsed.');
+  const profile=detectProfile(header.cells);
+  console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

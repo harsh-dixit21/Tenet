@@ -24,7 +24,8 @@
     "test:utils": "node --experimental-strip-types --test tests/workspace-utils.test.ts tests/saved-views.test.ts tests/register-links.test.ts tests/watchlists.test.ts tests/library-filters.test.ts",
     "fixtures": "node scripts/generate-fixtures.mjs",
     "scenario": "node scripts/run-scenario.mjs",
-    "release:manifest": "node scripts/release-manifest.mjs"
+    "release:manifest": "node scripts/release-manifest.mjs",
+    "check:export": "node scripts/check-export.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

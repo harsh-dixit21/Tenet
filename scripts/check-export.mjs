@@ -25,7 +25,9 @@ try {
   if (!file || extra.length) throw new Error('Usage: npm run --silent check:export -- FILE');
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
   if (!records.length) throw new Error('The CSV has no header.');
-  console.log((records.length-1)+' data rows parsed.');
+  const [header,...rows] = records;
+  if (header.cells.some(value=>!value.trim())) throw new Error('The CSV contains an empty column name.');
+  console.log(rows.length+' data rows parsed.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

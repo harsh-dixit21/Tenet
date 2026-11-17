@@ -12,6 +12,7 @@ export const profiles = new Map([
   ['control-findings','Instrument ID|Related reference|Check|Category|Finding type|Description'.split('|')],
   ['control-summary','Check|Category|Finding type|Evaluation|Matching findings'.split('|')],
   ['watchlist','Watchlist|Instrument ID'.split('|')],
+  ['portfolio','Instrument ID|Institution|Bank|Instrument number|Amount INR|Issued|Maturity|Status|Missing document categories'.split('|')],
 ]);
 export function detectProfile(header) {
   for (const [name,columns] of profiles) {

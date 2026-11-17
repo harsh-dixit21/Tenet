@@ -27,6 +27,7 @@ try {
   if (!records.length) throw new Error('The CSV has no header.');
   const [header,...rows] = records;
   if (header.cells.some(value=>!value.trim())) throw new Error('The CSV contains an empty column name.');
+  if (new Set(header.cells).size!==header.cells.length) throw new Error('The CSV contains duplicate column names.');
   console.log(rows.length+' data rows parsed.');
 } catch (error) {
   console.error(error.message);

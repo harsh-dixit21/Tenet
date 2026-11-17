@@ -23,7 +23,7 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
-const options = {json:{type:'boolean'}, list:{type:'boolean'}, 'max-issues':{type:'string'}};
+const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'max-issues':{type:'string'}};
 
 function run() {
   const {values,positionals:[file,...extra]} = parseArgs({options,allowPositionals:true});
@@ -42,6 +42,8 @@ function run() {
   const badRow=rows.find(row=>row.cells.length!==header.cells.length);
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
+  if (values.profile && !profiles.has(values.profile)) throw new Error('Unknown profile. Use --list to inspect options.');
+  if (values.profile && profile!==values.profile) throw new Error('The CSV header does not match the requested '+values.profile+' profile.');
   const issueLimit=Number(values['max-issues']??100);
   if (!Number.isInteger(issueLimit)||issueLimit<1||issueLimit>10000) throw new Error('--max-issues must be between 1 and 10000.');
   const result=inspectRows(profile,header.cells,rows,issueLimit);

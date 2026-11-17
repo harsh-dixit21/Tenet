@@ -35,6 +35,10 @@ export function inspectRows(profile, header, rows) {
       if (seen.has(data[identity])) add(row.line,identity,'Identifier appears more than once.');
       seen.add(data[identity]);
     }
+    const issued = data.Issued ?? data['Issue date'];
+    if (isDay(issued ?? '') && isDay(data.Maturity ?? '') && issued>=data.Maturity) {
+      add(row.line,'Maturity','Maturity must be after the issue date.');
+    }
     for (const column of header) {
       const value = data[column];
       if (integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {

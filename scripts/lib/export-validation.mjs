@@ -22,6 +22,17 @@ const vocabularies = {
 
 const identityColumns = {register:'Instrument',portfolio:'Instrument ID',requests:'Request',tasks:'Task ID'};
 
+const requiredColumns = {
+  register:['Instrument','Institution','Bank','Instrument number'],
+  portfolio:['Instrument ID','Institution','Bank','Instrument number'],
+  requests:['Request','Instrument','Reason'],
+  documents:['Instrument','File','Category'],
+  audit:['Timestamp','Actor','Instrument','Action'],
+  reminders:['Instrument','Reminder'],
+  tasks:['Task ID','Title'],
+  watchlist:['Watchlist','Instrument ID'],
+};
+
 export function inspectRows(profile, header, rows) {
   const issues = [];
   function add(line,column,message,severity='error') {
@@ -52,6 +63,9 @@ export function inspectRows(profile, header, rows) {
       }
       if (/^[\s\uFEFF]*[=+@-]/u.test(value) && !/^-\d+(?:\.\d+)?$/.test(value)) {
         add(row.line,column,'Cell may be interpreted as a spreadsheet formula.','warning');
+      }
+      if (requiredColumns[profile]?.includes(column) && !value.trim()) {
+        add(row.line,column,'Required value is empty.');
       }
       const allowed = vocabularies[profile]?.[column];
       if (allowed && !allowed.includes(value)) add(row.line,column,'Unexpected value for this export column.');

@@ -50,7 +50,7 @@ export function inspectRows(profile, header, rows, limit=100) {
       seen.add(data[identity]);
     }
     const issued = data.Issued ?? data['Issue date'];
-    if (isDay(issued ?? '') && isDay(data.Maturity ?? '') && issued>=data.Maturity) {
+    if (profile && isDay(issued ?? '') && isDay(data.Maturity ?? '') && issued>=data.Maturity) {
       add(row.line,'Maturity','Maturity must be after the issue date.');
     }
     if (profile==='institutions' && /^\d+$/.test(data.Active) && /^\d+$/.test(data.Instruments) &&
@@ -59,13 +59,13 @@ export function inspectRows(profile, header, rows, limit=100) {
     }
     for (const column of header) {
       const value = data[column];
-      if (integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {
+      if (profile && integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {
         add(row.line,column,'Expected a nonnegative safe integer.');
       }
-      if (dateColumns.has(column) && !(value==='' && optionalDates.has(column)) && !isDay(value)) {
+      if (profile && dateColumns.has(column) && !(value==='' && optionalDates.has(column)) && !isDay(value)) {
         add(row.line,column,'Expected a valid YYYY-MM-DD calendar date.');
       }
-      if (column==='SHA256' && value && !/^[a-f0-9]{64}$/i.test(value)) {
+      if (profile && column==='SHA256' && value && !/^[a-f0-9]{64}$/i.test(value)) {
         add(row.line,column,'Expected a 64-character hexadecimal SHA-256 checksum.');
       }
       if (/^[\s\uFEFF]*[=+@-]/u.test(value) && !/^-\d+(?:\.\d+)?$/.test(value)) {
@@ -76,7 +76,7 @@ export function inspectRows(profile, header, rows, limit=100) {
       }
       const allowed = vocabularies[profile]?.[column];
       if (allowed && !allowed.includes(value)) add(row.line,column,'Unexpected value for this export column.');
-      if (amountColumns.has(column) &&
+      if (profile && amountColumns.has(column) &&
           (!amountPattern.test(value) || !Number.isSafeInteger(Math.round(Number(value)*100)))) {
         add(row.line,column,'Expected a nonnegative INR amount with at most two decimal places.');
       }

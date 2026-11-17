@@ -23,9 +23,9 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
-const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'max-issues':{type:'string'}};
+const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'allow-unknown':{type:'boolean'}, 'max-issues':{type:'string'}};
 
-function inspect(file, expectedProfile, limit) {
+function inspect(file, expectedProfile, limit, allowUnknown) {
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
   if (!records.length) throw new Error('The CSV has no header.');
   const [header,...rows] = records;
@@ -35,6 +35,7 @@ function inspect(file, expectedProfile, limit) {
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
   if (expectedProfile && profile!==expectedProfile) throw new Error('The CSV header does not match the requested '+expectedProfile+' profile.');
+  if (!profile&&!allowUnknown) throw new Error('Unrecognized Tenet CSV header. Use --list to see supported profiles.');
   return {file,profile,rows:rows.length,...inspectRows(profile,header.cells,rows,limit)};
 }
 
@@ -51,7 +52,7 @@ function run() {
   const limit=Number(values['max-issues']??100);
   if (!Number.isInteger(limit)||limit<1||limit>10000) throw new Error('--max-issues must be between 1 and 10000.');
   const results = files.map(file=>{
-    try { return inspect(file,values.profile,limit); }
+    try { return inspect(file,values.profile,limit,values['allow-unknown']); }
     catch (error) { return {file,failure:error.message}; }
   });
   if (values.json) console.log(JSON.stringify(results.length===1?results[0]:results,null,2));

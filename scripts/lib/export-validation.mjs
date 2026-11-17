@@ -46,6 +46,9 @@ export function inspectRows(profile, header, rows) {
       if (column==='SHA256' && value && !/^[a-f0-9]{64}$/i.test(value)) {
         add(row.line,column,'Expected a 64-character hexadecimal SHA-256 checksum.');
       }
+      if (/^[\s\uFEFF]*[=+@-]/u.test(value) && !/^-\d+(?:\.\d+)?$/.test(value)) {
+        add(row.line,column,'Cell may be interpreted as a spreadsheet formula.','warning');
+      }
       const allowed = vocabularies[profile]?.[column];
       if (allowed && !allowed.includes(value)) add(row.line,column,'Unexpected value for this export column.');
       if (amountColumns.has(column) &&

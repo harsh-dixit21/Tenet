@@ -28,6 +28,8 @@ try {
   const [header,...rows] = records;
   if (header.cells.some(value=>!value.trim())) throw new Error('The CSV contains an empty column name.');
   if (new Set(header.cells).size!==header.cells.length) throw new Error('The CSV contains duplicate column names.');
+  const badRow=rows.find(row=>row.cells.length!==header.cells.length);
+  if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   console.log(rows.length+' data rows parsed.');
 } catch (error) {
   console.error(error.message);

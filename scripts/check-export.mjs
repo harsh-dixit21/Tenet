@@ -23,7 +23,7 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
-const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'allow-unknown':{type:'boolean'}, 'max-issues':{type:'string'}};
+const options = {json:{type:'boolean'}, list:{type:'boolean'}, profile:{type:'string'}, 'allow-unknown':{type:'boolean'}, strict:{type:'boolean'}, 'max-issues':{type:'string'}};
 
 function inspect(file, expectedProfile, limit, allowUnknown) {
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
@@ -62,7 +62,7 @@ function run() {
     for (const issue of result.issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
     if (result.omitted) console.log(result.omitted+' additional findings omitted.');
   }
-  if (results.some(result=>result.failure||result.errorCount)) process.exitCode=1;
+  if (results.some(result=>result.failure||result.errorCount||(values.strict&&result.warningCount))) process.exitCode=1;
 }
 
 try { run(); }

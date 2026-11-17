@@ -8,6 +8,7 @@ export const profiles = new Map([
   ['summary','Category|Instruments|Amount INR'.split('|')],
   ['evidence-gaps','Instrument|Institution|Status|Missing categories'.split('|')],
   ['tasks','Task ID|Instrument ID|Title|Due date|Priority|Category|Completion|Personal notes'.split('|')],
+  ['snapshot-changes','Instrument ID|Institution|Change group|Field|Baseline|Current'.split('|')],
 ]);
 export function detectProfile(header) {
   for (const [name,columns] of profiles) {

@@ -1,3 +1,4 @@
+import {parseArgs} from 'node:util';
 import {openSync, closeSync, fstatSync, readSync} from 'node:fs';
 import {inspectRows} from './lib/export-validation.mjs';
 import {detectProfile} from './lib/export-profiles.mjs';
@@ -22,8 +23,10 @@ function readExport(file) {
   } finally { closeSync(fd); }
 }
 
+const options = {json:{type:'boolean'}};
+
 try {
-  const [file,...extra] = process.argv.slice(2);
+  const {values,positionals:[file,...extra]} = parseArgs({options,allowPositionals:true});
   if (!file || extra.length) throw new Error('Usage: npm run --silent check:export -- FILE');
   const records = parseCsv(new TextDecoder('utf-8',{fatal:true}).decode(readExport(file)));
   if (!records.length) throw new Error('The CSV has no header.');
@@ -34,8 +37,11 @@ try {
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
   const issues=profile ? inspectRows(profile,header.cells,rows) : [];
-  console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
-  for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
+  if (values.json) console.log(JSON.stringify({profile,rows:rows.length,issues},null,2));
+  else {
+    console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
+    for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
+  }
   if (issues.some(issue=>issue.severity==='error')) process.exitCode=1;
 } catch (error) {
   console.error(error.message);

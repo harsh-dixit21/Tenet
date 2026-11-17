@@ -9,6 +9,7 @@ export function parseCsv(input) {
   }
   function pushRecord() {
     pushCell();
+    if (records.length>=100001) throw new Error('The export exceeds 100,000 data rows.');
     records.push({line:start,cells});
     cells = [];
   }

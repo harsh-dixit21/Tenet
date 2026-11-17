@@ -20,13 +20,21 @@ const vocabularies = {
   tasks:{Completion:['Completed','Open']},
 };
 
+const identityColumns = {register:'Instrument',portfolio:'Instrument ID',requests:'Request',tasks:'Task ID'};
+
 export function inspectRows(profile, header, rows) {
   const issues = [];
   function add(line,column,message,severity='error') {
     issues.push({line,column,severity,message});
   }
+  const identity = identityColumns[profile];
+  const seen = new Set();
   for (const row of rows) {
     const data = Object.fromEntries(header.map((column,index)=>[column,row.cells[index]]));
+    if (identity && data[identity]) {
+      if (seen.has(data[identity])) add(row.line,identity,'Identifier appears more than once.');
+      seen.add(data[identity]);
+    }
     for (const column of header) {
       const value = data[column];
       if (integerColumns.has(column) && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)))) {

@@ -1,4 +1,5 @@
 import {openSync, closeSync, fstatSync, readSync} from 'node:fs';
+import {inspectRows} from './lib/export-validation.mjs';
 import {detectProfile} from './lib/export-profiles.mjs';
 import {parseCsv} from './lib/export-csv.mjs';
 
@@ -32,7 +33,10 @@ try {
   const badRow=rows.find(row=>row.cells.length!==header.cells.length);
   if (badRow) throw new Error('Column count differs from the header on line '+badRow.line+'.');
   const profile=detectProfile(header.cells);
+  const issues=profile ? inspectRows(profile,header.cells,rows) : [];
   console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
+  for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
+  if (issues.some(issue=>issue.severity==='error')) process.exitCode=1;
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

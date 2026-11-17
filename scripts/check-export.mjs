@@ -42,7 +42,7 @@ try {
   const {issues,errorCount,omitted}=result;
   if (values.json) console.log(JSON.stringify({profile,rows:rows.length,...result},null,2));
   else {
-    console.log((profile ?? 'Unknown export')+': '+rows.length+' data rows parsed.');
+    console.log((profile ?? 'Unknown export')+': '+rows.length+' rows, '+errorCount+' errors, '+result.warningCount+' warnings.');
     for (const issue of issues) console.log(issue.severity+' on line '+issue.line+' ('+issue.column+'): '+issue.message);
     if (omitted) console.log(omitted+' additional findings omitted.');
   }
